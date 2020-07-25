@@ -8,6 +8,7 @@ export interface HTMLComponent {
 
 export interface BaseComponent extends HTMLComponent {
     model: any;
+    [key: string]: any;
     // observable: Observable;
 }
 

@@ -11,12 +11,12 @@ declare global {
 
 // export type TagNameRef = string | 'none' | CustomElementConstructor | TypeOf<HTMLElement> | Comment | DocumentFragment;
 
-export type JsxAttributes = { [key: string]: any } | null;
+export type JsxAttributes = { [key: string]: any };
 
 export interface JsxComponent {
-    tagName: string | DocumentFragment,
-    attributes: JsxAttributes,
-    children: JsxComponent[]
+    tagName: string,
+    attributes?: JsxAttributes,
+    children?: JsxComponent[]
 }
 
 // export type JsxType = HTMLElement | HTMLElement[] | Comment;
@@ -28,9 +28,9 @@ export interface JsxComponent {
 export const Fragment = 'fragment';
 
 export class JsxFactory {
-    static createElement(tagName: string, attributes: JsxAttributes, ...children: JsxComponent[]): JsxComponent {
+    static createElement(tagName: string, attributes: JsxAttributes | undefined, ...children: JsxComponent[]): JsxComponent {
         return {
-            tagName: Fragment === String(tagName).toLowerCase() ? document.createDocumentFragment() : tagName,
+            tagName: tagName,
             attributes,
             children
         }

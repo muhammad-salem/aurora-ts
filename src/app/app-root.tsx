@@ -1,4 +1,4 @@
-import { Component, Input } from '../core/decoratiors.js';
+import { Component, Input, HostListener } from '../core/decoratiors.js';
 import { JsxFactory, Fragment } from '../jsx/factory.js'
 
 
@@ -11,7 +11,7 @@ import { JsxFactory, Fragment } from '../jsx/factory.js'
 
             <div class="row">
                 <div class="col-4">
-                    <person-view name="nancy" age="34"></person-view>
+                    <person-view #person1 name="nancy" age="34"></person-view>
                 </div>
                 <div class="col-4">
                     <person-view name="jone" age="25"></person-view>
@@ -32,9 +32,15 @@ import { JsxFactory, Fragment } from '../jsx/factory.js'
 
                 </div>
             </div>
-        </Fragment>)
+        </Fragment>),
+    styles: ''
 })
 export class AppRoot {
     @Input()
     appVesion: string = '10.0.90';
+
+    @HostListener('person1:select')
+    onClose(data: any) {
+        console.log('AppRoot=> person1:select', data);
+    }
 }

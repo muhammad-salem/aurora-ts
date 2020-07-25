@@ -1,6 +1,6 @@
 import {
     ComponentOptions, TypeOf, ChildOptions,
-    PipeOptions, ServiceOptions, DirectiveOptions
+    PipeOptions, ServiceOptions, DirectiveOptions, Component
 } from '../core/decoratiors.js';
 import { findByTagName, Tag } from './tags.js';
 import {
@@ -10,6 +10,9 @@ import {
 } from '../core/lifecycle.js';
 import { BaseComponent } from './component.js';
 import { ComponentRender } from '../jsx/render.js';
+import { dependencyInjector } from '../providers/injector.js';
+import { ClassRegistry } from '../providers/provider.js';
+import { JsxComponent } from '../jsx/factory.js';
 
 export class PropertyRef {
     constructor(
@@ -32,103 +35,78 @@ export class ChildRef {
 }
 
 export class ListenerRef {
-    constructor(public eventName: string, args: string[], public modelCallbackName: string) { }
+    constructor(public eventName: string, public args: string[], public modelCallbackName: string) { }
 }
 
-export type ProviderType = 'component' | 'service' | 'directive' | 'pipe' | 'none';
+export class HostBindingRef {
+    constructor(public viewProperty: string, public hostPropertyName: string) { }
+}
 
-export class BootstropMatadata {
-    view: string;
-    viewClass: CustomElementConstructor;
-    inputs: PropertyRef[] = [];
-    outputs: PropertyRef[] = [];
-    viewChild: ChildRef[] = [];
-    ViewChildren: ChildRef[] = [];
-    hostListeners: ListenerRef[] = [];
+
+
+
+export interface BootstropMatadata {
+    [key: string]: any;
+}
+
+export interface ServiceRef extends ServiceOptions {
     descriptors: PropertyDescriptor[];
-    componentOptions: ComponentOptions;
-    pipeOptions: PipeOptions;
-    directiveOptions: DirectiveOptions;
-    serviceOptions: ServiceOptions;
 }
 
-export class ServiceRef {
-    serviceOptions: ServiceOptions;
+
+export interface PipeRef extends PipeOptions {
+    name: string;
+    pure: boolean;
     descriptors: PropertyDescriptor[];
-    constructor(meta: BootstropMatadata) {
-        this.serviceOptions = meta.serviceOptions;
-        this.descriptors = meta.descriptors || [];
-    }
 }
-
-
-export class PipeRef {
-    pipeOptions: PipeOptions;
-    descriptors: PropertyDescriptor[];
-    constructor(meta: BootstropMatadata) {
-        this.pipeOptions = meta.pipeOptions;
-        this.descriptors = meta.descriptors || [];
-    }
-}
-export class DirectiveRef {
+export interface DirectiveRef extends DirectiveOptions {
     inputs: PropertyRef[];
     outputs: PropertyRef[];
     view: string;
     viewChild: ChildRef[];
     ViewChildren: ChildRef[];
     hostListeners: ListenerRef[];
+    hostBindings: HostBindingRef[];
     directiveOptions: DirectiveOptions;
     descriptors: PropertyDescriptor[];
-    constructor(meta: BootstropMatadata) {
-        this.inputs = meta.inputs || [];
-        this.outputs = meta.outputs || [];
-        this.view = meta.view;
-        this.viewChild = meta.viewChild || [];
-        this.ViewChildren = meta.ViewChildren || [];
-        this.hostListeners = meta.hostListeners || [];
-        this.directiveOptions = meta.directiveOptions;
-        this.descriptors = meta.descriptors;
-    }
 }
 
-export class ComponentRef {
+export interface ComponentRef {
+    selector: string;
+    template: string | JsxComponent;
+    styles: string;
+    extend: Tag;
+
     viewClass: CustomElementConstructor;
     inputs: PropertyRef[];
     outputs: PropertyRef[];
     view: string;
     viewChild: ChildRef[];
     ViewChildren: ChildRef[];
+    hostBindings: HostBindingRef[];
     hostListeners: ListenerRef[];
-    componentOptions: ComponentOptions;
     descriptors: PropertyDescriptor[];
-    constructor(meta: BootstropMatadata) {
-        this.inputs = meta.inputs || [];
-        this.outputs = meta.outputs || [];
-        this.view = meta.view;
-        this.viewClass = meta.viewClass;
-        this.viewChild = meta.viewChild || [];
-        this.ViewChildren = meta.ViewChildren || [];
-        this.hostListeners = meta.hostListeners || [];
-        this.componentOptions = meta.componentOptions;
-        this.descriptors = meta.descriptors;
-    }
 }
 
 function findByModelClassOrCreat(modelProperty: Object): BootstropMatadata {
     var bootstrapMetadata: BootstropMatadata = Reflect.get(modelProperty, 'bootstrap');
     if (!bootstrapMetadata) {
-        bootstrapMetadata = new BootstropMatadata();
+        bootstrapMetadata = {};
         Object.defineProperty(modelProperty, 'bootstrap', { value: bootstrapMetadata });
     }
     return bootstrapMetadata;
 }
 
-function setBootstrapMatadata(modelProperty: Object, metadata: Object) {
-    Reflect.set(modelProperty, 'bootstrap', metadata);
+// export function setBootstrapMatadata(modelProperty: Object, metadata: Object) {
+//     Reflect.set(modelProperty, 'bootstrap', metadata);
+// }
+
+export function getBootstrapMatadata<T = any>(modelProperty: Object): T {
+    return Reflect.get(modelProperty, 'bootstrap');
 }
 
+export class ComponentElement {// export const injector: Injector = new Injector();
 
-export class ComponentElement {
 
     static addOptional(modelProperty: Object, propertyName: string, index: number) {
         var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelProperty);
@@ -136,11 +114,13 @@ export class ComponentElement {
 
     static addInput(modelProperty: Object, modelName: string, viewNanme: string, descriptor?: PropertyDescriptor) {
         var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelProperty);
+        bootstrap.inputs = bootstrap.inputs || [];
         bootstrap.inputs.push(new PropertyRef(modelName, viewNanme, descriptor));
     }
 
     static addOutput(modelProperty: Object, modelName: string, viewNanme: string) {
         var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelProperty);
+        bootstrap.outputs = bootstrap.outputs || [];
         bootstrap.outputs.push(new PropertyRef(modelName, viewNanme));
     }
 
@@ -151,64 +131,102 @@ export class ComponentElement {
 
     static addViewChild(modelProperty: Object, modelName: string, selector: string | typeof HTMLElement | CustomElementConstructor, childOptions?: ChildOptions) {
         var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelProperty);
+        bootstrap.viewChild = bootstrap.viewChild || [];
         bootstrap.viewChild.push(new ChildRef(modelName, selector, childOptions));
     }
 
     static addViewChildren(modelProperty: Object, modelName: string, selector: string | typeof HTMLElement | CustomElementConstructor) {
         var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelProperty);
+        bootstrap.ViewChildren = bootstrap.ViewChildren || [];
         bootstrap.ViewChildren.push(new ChildRef(modelName, selector));
     }
 
     static addHostListener(modelProperty: Object, propertyKey: string, eventName: string, args: string[]) {
         var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelProperty);
+        bootstrap.hostListeners = bootstrap.hostListeners || [];
         bootstrap.hostListeners.push(new ListenerRef(eventName, args, propertyKey));
+    }
+
+    static addHostBinding(modelProperty: Object, propertyKey: string, hostPropertyName: string) {
+        var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelProperty);
+        bootstrap.hostBinding = bootstrap.hostBinding || [];
+        bootstrap.hostBinding.push(new HostBindingRef(propertyKey, hostPropertyName));
     }
 
     static defineDirective(modelClass: Function, opts: DirectiveOptions) {
         var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelClass.prototype);
-        bootstrap.directiveOptions = opts;
-        setBootstrapMatadata(modelClass.prototype, new DirectiveRef(bootstrap));
+        for (const key in opts) {
+            bootstrap[key] = Reflect.get(opts, key);
+        }
+        dependencyInjector.getInstance(ClassRegistry).registerDirective(modelClass);
     }
     static definePipe(modelClass: Function, opts: PipeOptions) {
         var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelClass.prototype);
-        bootstrap.pipeOptions = opts;
-        setBootstrapMatadata(modelClass.prototype, new PipeRef(bootstrap));
+        for (const key in opts) {
+            bootstrap[key] = Reflect.get(opts, key);
+        }
+        dependencyInjector.getInstance(ClassRegistry).registerPipe(modelClass);
     }
     static defineService(modelClass: Function, opts: ServiceOptions) {
         var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelClass.prototype);
-        bootstrap.serviceOptions = opts;
-        setBootstrapMatadata(modelClass.prototype, new ServiceRef(bootstrap));
+        for (const key in opts) {
+            bootstrap[key] = Reflect.get(opts, key);
+        }
+        dependencyInjector.getInstance(ClassRegistry).registerService(modelClass);
     }
 
     static defineComponent(modelClass: Function, opts: ComponentOptions) {
         var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelClass.prototype);
-        bootstrap.componentOptions = opts;
-        var componentRef: ComponentRef = new ComponentRef(bootstrap);
-        setBootstrapMatadata(modelClass.prototype, componentRef);
-        if (!componentRef.componentOptions.extend) {
-            componentRef.componentOptions.extend = findByTagName('');
+        for (const key in opts) {
+            bootstrap[key] = Reflect.get(opts, key);
         }
+        bootstrap.extend = findByTagName(opts.extend);
+        var componentRef: ComponentRef = bootstrap as ComponentRef;
         componentRef.viewClass = initViewClass(modelClass as TypeOf<Function>, componentRef);
+
+        dependencyInjector.getInstance(ClassRegistry).registerComponent(modelClass);
+        dependencyInjector.getInstance(ClassRegistry).registerView(bootstrap.viewClass);
+        // setBootstrapMatadata(modelClass.prototype, componentRef);
+
         const options: ElementDefinitionOptions = {};
-        const parentTagName = componentRef.componentOptions.extend?.name;
+        const parentTagName = componentRef.extend?.name;
         if (parentTagName) {
             if (parentTagName !== '!' && parentTagName.indexOf('-') === -1) {
                 options.extends = parentTagName;
             }
         }
         customElements.define(
-            componentRef.componentOptions?.selector as string,
+            componentRef?.selector as string,
             componentRef.viewClass as CustomElementConstructor,
             options
         );
     }
+
+    // static bootstrapComponents() {
+    //     dependencyInjector.getInstance(ClassRegistry).componentSet.forEach(component => {
+    //         const options: ElementDefinitionOptions = {};
+    //         var componentRef: ComponentRef = getBootstrapMatadata(component.prototype);
+    //         const parentTagName = componentRef.extend.name;
+    //         if (parentTagName) {
+    //             if (parentTagName !== '!' && parentTagName.indexOf('-') === -1) {
+    //                 options.extends = parentTagName;
+    //             }
+    //         }
+    //         customElements.define(
+    //             componentRef.selector as string,
+    //             componentRef.viewClass as CustomElementConstructor,
+    //             options
+    //         );
+    //     });
+    // }
+
 }
 
 function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef): CustomElementConstructor {
     const viewClassName = `${modelClass.name}View`;
     const attributes: string[] = componentRef.inputs.map(input => input.viewAttribute);
-    const htmlParent = (componentRef.componentOptions.extend as Tag).classRef;
-    const viewElement = componentRef.componentOptions.template;
+    const htmlParent = (componentRef.extend as Tag).classRef;
+    const viewElement = componentRef.template;
 
     const clasBody: string = `(
              class ${viewClassName} extends ${htmlParent.name} {

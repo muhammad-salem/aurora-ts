@@ -140,7 +140,7 @@ export const NativeTags: Tag[] = [
     { name: 'virtual-scroller', classRef: HTMLElement }
 ];
 
-export function findByTagName(tagName: string): Tag {
+export function findByTagName(tagName: string | undefined): Tag {
     if (!tagName || tagName === '' || tagName === 'none' || tagName === 'child') {
         return DefaultTag;
     }
@@ -152,6 +152,15 @@ export function findByTagName(tagName: string): Tag {
     return DefaultTag;
 }
 
+
+export function isTagNameNative(tagName: string): boolean {
+    for (const tag of NativeTags) {
+        if (tag.name === tagName) {
+            return true;
+        }
+    }
+    return false;
+}
 
 export function getTagName(classRef: TagClassRef): string | null {
     for (const tag of NativeTags) {

@@ -7,7 +7,9 @@ import { LogService } from './person.js';
 
 @Component({
     selector: 'bootstrap-btn',
-    extend: findByTagName('button'),
+    extend: 'button',
+    template: '',
+    styles: ''
 })
 export class PrimaryButton implements OnInit, OnChanges, AfterViewInit {
 
@@ -38,8 +40,8 @@ export class PrimaryButton implements OnInit, OnChanges, AfterViewInit {
         this.logger.info('info: logger');
     }
 
-    @HostListener('click', [])
-    onClick() {
-        console.log('button clicked!', this);
+    @HostListener('click', ['$event'])
+    onClick(event: MouseEvent) {
+        console.log('button clicked!', event, this);
     }
 }

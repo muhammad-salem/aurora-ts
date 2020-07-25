@@ -1,5 +1,5 @@
 
-import { Service, Component, Input, Output, View, ViewChild, ViewChildren, Optional, HostListener, SelfSkip } from '../core/decoratiors.js';
+import { Service, Component, Input, Output, View, ViewChild, ViewChildren, Optional, HostListener, SelfSkip, HostBinding } from '../core/decoratiors.js';
 import { OnInit } from '../core/lifecycle.js';
 import { EventEmitter } from '../core/events.js';
 import { JsxFactory, Fragment } from '../jsx/factory.js';
@@ -26,13 +26,14 @@ export class LogService {
                  <p>Data</p>
             </div>
         </Fragment>
-    )
+    ),
+    styles: ''
 })
 export class Person implements OnInit {
     @Input() name: string;
     @Input('age') years: number;
     @Output() open: EventEmitter<any> = new EventEmitter();
-    @Output('close') _close: EventEmitter<any> = new EventEmitter();
+    @Output('select') _select: EventEmitter<any> = new EventEmitter();
 
     @View() view: HTMLElement;
 
@@ -49,7 +50,11 @@ export class Person implements OnInit {
         this.open.emit('init data');
     }
 
-    @HostListener('windows:load', ['$event'])
+
+    @HostBinding('class.valid') get valid() { return true; }
+    @HostBinding('class.invalid') get invalid() { return false; }
+
+    @HostListener('window:load', ['$event'])
     onLoad(e: Event) {
         console.log(this, e);
     }
@@ -62,6 +67,12 @@ export class Person implements OnInit {
     @HostListener('click', ['$event.target'])
     onClick(btn: Event) {
         console.log('button', btn, 'number of clicks:');
+        this._select.emit({ name: 'alex', age: 24 });
+    }
+
+    @HostListener('select')
+    onClose(data: any) {
+        console.log('select', data);
     }
 
     @Input()

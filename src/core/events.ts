@@ -32,13 +32,17 @@ export class EventEmitter<T> {
                 subscrip.next(value);
             } catch (error) {
                 try {
-                    subscrip.error(error);
+                    if (subscrip.error) {
+                        subscrip.error(error);
+                    }
                 } catch (error) {
                     console.error('error: handeling event');
                 }
             } finally {
                 try {
-                    subscrip.complete();
+                    if (subscrip.complete) {
+                        subscrip.complete();
+                    }
                 } catch (error) {
                     console.error('error: handeling event');
                 }
