@@ -11,11 +11,8 @@
     "build": "tsc",
     "buildw": "tsc -w"
   },
-  "dependencies": {
-    "tslib": "^2.0.0"
-  },
   "devDependencies": {
-    "@types/node": "^14.0.24",
+    "@types/node": "^14.0.26",
     "typescript": "^3.9.7"
   },
   "keywords": [

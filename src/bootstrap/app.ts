@@ -1,5 +1,3 @@
-
-
 // export type ProviderType = 'component' | 'service' | 'directive' | 'pipe' | 'none';
 
 // export type ClassModel = {
@@ -8,7 +6,6 @@
 //     providerType: ProviderType,
 //     options?: any
 // };
-
 
 // export class Application {
 
