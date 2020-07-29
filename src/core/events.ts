@@ -1,6 +1,6 @@
 export class Subscription<T> {
 	private othersSubscription: Subscription<any>[];
-	constructor(private eventEmitter: EventEmitter<T>) {}
+	constructor(private eventEmitter: EventEmitter<T>) { }
 	add(subscription: Subscription<any>) {
 		if (!this.othersSubscription) {
 			this.othersSubscription = [];
@@ -25,7 +25,7 @@ interface Subscrip {
 
 export class EventEmitter<T> {
 	private subscripers: Map<Subscription<T>, Subscrip> = new Map();
-	constructor(private isAsync?: boolean) {}
+	constructor() { }
 	emit(value?: T): void {
 		this.subscripers.forEach((subscrip) => {
 			try {

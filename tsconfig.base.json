@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    // "baseUrl": "./",
+    "outDir": "dist",
+    "sourceMap": true,
+    "declaration": true,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+    "moduleResolution": "Node",
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": [
+      "ES2020",
+      "dom"
+    ],
+		"strict": true,
+		"strictPropertyInitialization": false,
+		"removeComments": true,
+		"jsx": "react",
+		"jsxFactory": "JsxFactory.createElement",
+		// "jsxFragmentFactory": "JsxFactory.Fragment",
+		// "importHelpers": true,
+		// "composite": true
+  }
+}

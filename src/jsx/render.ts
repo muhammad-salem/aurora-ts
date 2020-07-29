@@ -6,6 +6,7 @@ import { ClassRegistry } from '../providers/provider.js';
 import { EventEmitter } from '../core/events.js';
 import { JSXTempletExpression, JSXBindingExpression, JSX2BindingExpression, JSXEventExpression } from './jsx-expression.js';
 import { HTMLTempletExpression, HTMLBindingExpression, HTML2BindingExpression, HTMLEventExpression } from './html-expression.js';
+import { getFromPath } from '../core/utils.js';
 
 export class HTMLParser {
 	constructor(public template: string) { }
@@ -101,12 +102,42 @@ const Rules: RuleInterface[] = [
 	},
 ];
 
+// export class BindingHandler {
+// 	static templateHadel(element: Object, elemProp: string): void {
+// 		const templateText: string = Reflect.get(element, elemProp);
+// 		const result = [...templateText.matchAll(/\{\{(\w*)\}\}/g)];
+// 		if (result.length === 0) {
+// 			return;
+// 		}
+// 		Reflect.set(element, 'templateText', templateText);
+// 		const renderText = {
+// 			set: (value: string) => {
+// 				Reflect.set(element, 'renderText', value);
+// 			},
+// 			get: (): string => {
+// 				return Reflect.get(element, 'renderText');
+// 			}
+// 		};
+// 		renderText.set(templateText);
+// 		// let renderText = node.textContent;
+// 		result.forEach(match => {
+// 			this.baiseView._observable.subscribe(match[1], () => {
+// 				let tempValue = this.baiseView._model[match[1]];
+// 				let text = renderText.get();
+// 				text = text.replace(match[0], tempValue);
+// 				if (!(/\{\{(\w*)\}\}/g).test(text)) {
+// 					node.textContent = text;
+// 					renderText.set(Reflect.get(node, 'templateText'));
+// 				} else {
+// 					renderText.set(text);
+// 				}
+// 			});
+// 		});
+// 	}
+// }
+
 export class SyntaxExpression {
-	constructor(
-		private template: string,
-		private element: HTMLElement,
-		private view: CustomElementConstructor
-	) { }
+	constructor(private template: string, private element: HTMLElement, private view: CustomElementConstructor) { }
 }
 
 export class ComponentRender {
@@ -122,6 +153,107 @@ export class ComponentRender {
 		} else {
 			throw new Error('Method not implemented.');
 		}
+	}
+
+	templateHadel(element: Object, elemProp: string, regex?: RegExp): void {
+		const templateText: string = Reflect.get(element, elemProp);
+		const result = [...templateText.matchAll(regex || (/\{\{(.+\w*)*\}\}/g))];
+		if (result.length === 0) {
+			return;
+		}
+		const handler = () => {
+			let renderText = templateText;
+			result.forEach(match => {
+				// let tempValue = this.baiseView._model[match[1]];
+				// if (typeof tempValue === 'function') {
+				// 	const call: Function = tempValue;
+				// 	tempValue = call.call(this.baiseView._model);
+				// }
+				let tempValue = getFromPath(this.baiseView._model, match[1]);
+				renderText = renderText.replace(match[0], tempValue);
+			});
+			Reflect.set(element, elemProp, renderText);
+		}
+		result.forEach(match => this.baiseView._observable.subscribe(match[1], handler));
+		this.baiseView._observable.emit(result[0][1])
+
+		// Reflect.set(element, 'templateText', templateText);
+		// const renderText = {
+		// 	set: (value: string) => {
+		// 		Reflect.set(element, 'renderText', value);
+		// 	},
+		// 	get: (): string => {
+		// 		return Reflect.get(element, 'renderText');
+		// 	}
+		// };
+		// renderText.set(templateText);
+		// let renderText = node.textContent;
+		// result.forEach(match => {
+		// this.baiseView._observable.subscribe(match[1], () => {
+		// let tempValue = this.baiseView._model[match[1]];
+		// if (typeof tempValue === 'function') {
+		// 	const call: Function = tempValue;
+		// 	tempValue = call.call(this.baiseView._model);
+		// }
+		// let text = renderText.get();
+		// text = text.replace(match[0], tempValue);
+		// if (!(regex || (/\{\{(\w*)\}\}/g)).test(text)) {
+		// 	Reflect.set(element, elemProp, text);
+		// 	renderText.set(Reflect.get(element, 'templateText'));
+		// } else {
+		// 	renderText.set(text);
+		// }
+		// });
+		// });
+		// result.forEach(match => this.baiseView._observable.emit(match[1]));
+	}
+
+	printNode(node: Node) {
+
+		if (node instanceof Text && node.textContent) {
+			this.templateHadel(node, 'textContent');
+		} else if (node instanceof Element) {
+			console.group(node.nodeName);
+			for (let i = 0; i < node.attributes.length; i++) {
+				const attr = node.attributes[i];
+
+				if (attr.name.match(/\[\((\w*)\)\]/g)) { // two way binding
+					// console.log(attr.name, '<=>', attr.value);
+					const result = [...attr.value.matchAll(/\[\((\w*)\)\]/g)];
+					result.forEach(match => {
+						console.log('two way', match);
+						// let tempValue = match[2] ? this.baiseView._model[match[1]]() : this.baiseView._model[match[1]];
+						// renderText = renderText.replace(match[0], tempValue);
+					});
+				} else if (attr.name.match(/\[(\w*)\]/g)) {  // one way binding
+					const result = [...attr.value.matchAll(/\[(\w*)\]/g)];
+					result.forEach(match => {
+						console.log('one way ', match);
+						// let tempValue = match[2] ? this.baiseView._model[match[1]]() : this.baiseView._model[match[1]];
+						// renderText = renderText.replace(match[0], tempValue);
+					});
+				} else if (attr.value.match(/\{\{(.+\w*)*\}\}/g)) {  // templet; -- one time write
+					const result = [...attr.value.matchAll(/\{\{(.+\w*)*\}\}/g)];
+					let renderText = attr.value;
+					result.forEach(match => {
+						let tempValue = this.baiseView._model[match[1]];
+						renderText = renderText.replace(match[0], tempValue);
+					});
+					attr.value = renderText;
+				}
+			}
+			node.childNodes.forEach(child => this.printNode(child));
+			console.groupEnd();
+		}
+	}
+
+	initViewFromString(): void {
+		var template = document.createElement('template');
+		template.innerHTML = this.componentRef.template as string;
+		template.content.childNodes.forEach(child => this.printNode(child));
+		console.log(template);
+		// this.baiseView.innerHTML = this.componentRef.template as string;
+		this.baiseView.appendChild(template.content);
 	}
 
 	initView(): void {
@@ -158,15 +290,10 @@ export class ComponentRender {
 			// } else if (isTagNameNative(tagName)) {
 			//     return document.createElement(tagName);
 		} else if (tagName.includes('-')) {
-			const registry: ClassRegistry = dependencyInjector.getInstance(
-				ClassRegistry
-			);
-			const componentRef: ComponentRef | undefined = registry.getComponentRef(
-				tagName
-			);
-			return componentRef
-				? new componentRef.viewClass()
-				: document.createElement(tagName);
+			const registry: ClassRegistry = dependencyInjector.getInstance(ClassRegistry);
+			const componentRef: ComponentRef | undefined = registry.getComponentRef(tagName);
+			return componentRef ?
+				new componentRef.viewClass() : document.createElement(tagName);
 		} else {
 			return document.createElement(tagName);
 		}
@@ -182,15 +309,23 @@ export class ComponentRender {
 			for (const value of child) {
 				this.appendChild(parent, value);
 			}
-		} else if (typeof child === 'string') {
-			parent.appendChild(document.createTextNode(child));
 		} else if (child instanceof Node) {
 			parent.appendChild(child);
 		} else if (typeof child === 'boolean') {
 			// <>{condition && <a>Display when condition is true</a>}</>
 			// if condition is false, the child is a boolean, but we don't want to display anything
 		} else {
-			parent.appendChild(document.createTextNode(String(child)));
+			var node = document.createTextNode(String(child));
+			parent.appendChild(node);
+			this.templateHadel(node, 'textContent', /\$(\w*)(\(\))?/g);
+			// let renderText = String(child);
+			// const result = [...renderText.matchAll(/\$(\w+)(\(\))?/g)];
+			// // console.log(result);
+			// result.forEach(match => {
+			// 	let tempValue = match[2] ? this.baiseView._model[match[1]]() : this.baiseView._model[match[1]];
+			// 	renderText = renderText.replace(match[0], tempValue);
+			// });
+			// parent.appendChild(document.createTextNode(renderText));
 		}
 	}
 
@@ -198,21 +333,17 @@ export class ComponentRender {
 		// console.log(key, value);
 
 		if (key.startsWith('#')) {
-			this.baiseView[key.substring(1)] = element;
-			// Reflect.set(this.baiseView, key.substring(1), element);
+			// this.baiseView[key.substring(1)] = element;
+			Reflect.set(this.baiseView, key.substring(1), element);
 		} else if (key.startsWith('$')) {
 			return;
-		} else if (
-			key in element &&
-			typeof value === 'string' &&
-			value.includes('{{') &&
-			value.includes('}}')
-		) {
+		} else if (typeof value === 'string' && value.includes('{{') && value.includes('}}')) {
 			let property = value as string;
-			property = property.substring(2, property.length - 3);
-			Reflect.set(element, key, this.baiseView[property]);
+			property = property.substring(2, property.length - 2);
+			// Reflect.set(element, key, this.baiseView._model[property]);
+			element.setAttribute(key, this.baiseView._model[property]);
 		} else {
-			Reflect.set(element, key, value);
+			// Reflect.set(element, key, value);
 			if (typeof value === 'boolean' && value) {
 				element.setAttribute(key, '');
 			} else {

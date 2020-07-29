@@ -1,24 +1,8 @@
 {
-	"compilerOptions": {
-		"target": "ES2020",
-		"outDir": "lib",
-		// "outFile": "dist/index.js",
-		// "module": "AMD",
-		"module": "ES2020",
-		"strict": true,
-		"strictPropertyInitialization": false,
-		"moduleResolution": "Node",
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		"removeComments": true,
-		"declaration": true,
-		// "importHelpers": true,
-		"jsx": "react",
-		"jsxFactory": "JsxFactory.createElement",
-		// "jsxFragmentFactory": "JsxFactory.Fragment",
-		"lib": ["ES2020", "DOM"],
-		"sourceMap": true
-	},
-	"include": ["src/**/*.ts", "src/**/*.tsx"],
-	"files": ["src/index.ts"]
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.aurora.json"
+    }
+  ]
 }

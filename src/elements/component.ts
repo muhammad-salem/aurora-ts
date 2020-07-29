@@ -1,3 +1,5 @@
+import { Observable } from '../core/observable.js';
+
 export interface HTMLComponent {
 	attributeChangedCallback(
 		name: string,
@@ -11,6 +13,6 @@ export interface HTMLComponent {
 
 export interface BaseComponent extends HTMLComponent {
 	_model: any;
-	[key: string]: any;
-	// observable: Observable;
+	_observable: Observable;
+	// [key: string]: any;
 }

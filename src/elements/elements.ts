@@ -13,24 +13,17 @@ import { ComponentRender } from '../jsx/render.js';
 import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
 import { JsxComponent } from '../jsx/factory.js';
+import { Observable } from '../core/observable.js';
 
 export class PropertyRef {
-	constructor(
-		public modelProperty: string,
-		private _viewNanme?: string,
-		descriptor?: PropertyDescriptor
-	) { }
+	constructor(public modelProperty: string, private _viewNanme?: string, descriptor?: PropertyDescriptor) { }
 	get viewAttribute(): string {
 		return this._viewNanme || this.modelProperty;
 	}
 }
 
 export class ChildRef {
-	constructor(
-		public modelName: string,
-		public selector: string | { new(): HTMLElement; prototype: HTMLElement } | CustomElementConstructor,
-		public childOptions?: ChildOptions
-	) { }
+	constructor(public modelName: string, public selector: string | { new(): HTMLElement; prototype: HTMLElement } | CustomElementConstructor, public childOptions?: ChildOptions) { }
 }
 
 export class ListenerRef {
@@ -106,7 +99,6 @@ export function getBootstrapMatadata<T = any>(modelProperty: Object): T {
 }
 
 export class ComponentElement {
-	// export const injector: Injector = new Injector();
 
 	static addOptional(modelProperty: Object, propertyName: string, index: number) {
 		var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelProperty);
@@ -162,6 +154,7 @@ export class ComponentElement {
 		}
 		dependencyInjector.getInstance(ClassRegistry).registerDirective(modelClass);
 	}
+
 	static definePipe(modelClass: Function, opts: PipeOptions) {
 		var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelClass.prototype);
 		for (const key in opts) {
@@ -169,6 +162,7 @@ export class ComponentElement {
 		}
 		dependencyInjector.getInstance(ClassRegistry).registerPipe(modelClass);
 	}
+
 	static defineService(modelClass: Function, opts: ServiceOptions) {
 		var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelClass.prototype);
 		for (const key in opts) {
@@ -232,7 +226,6 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 	const viewClassName = `${modelClass.name}View`;
 	const attributes: string[] = componentRef.inputs.map(input => input.viewAttribute);
 	const htmlParent = (componentRef.extend as Tag).classRef;
-	const viewElement = componentRef.template;
 	const clasBody: string = `
             (class ${viewClassName} extends ${htmlParent.name} {
                 constructor(...params) {
@@ -241,15 +234,37 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 			})`;
 	let className: { [key: string]: CustomElementConstructor } = {};
 	className[viewClassName] = eval(clasBody);
-	className[viewClassName] = class extends className[viewClassName]
-		implements BaseComponent {
+	className[viewClassName] = class extends className[viewClassName] implements BaseComponent {
 		_model: any;
-		render: ComponentRender;
+		_observable: Observable;
+		_render: ComponentRender;
+
+		nativeSetAttribute: Function;
+		nativeGetAttribute: Function;
 
 		constructor(...params: any[]) {
 			super(...params);
 			this._model = new modelClass();
-			this.render = new ComponentRender(this, componentRef);
+			this._observable = new Observable();
+			this._render = new ComponentRender(this, componentRef);
+
+			this.nativeSetAttribute = this.setAttribute;
+			this.nativeGetAttribute = this.getAttribute;
+
+			this.setAttribute = this.setAttributeModel;
+			this.getAttribute = this.getAttributeModel;
+
+			attributes.forEach(attr => this.setAttribute(attr, this._model[attr]));
+
+		}
+		setAttributeModel(qualifiedName: string, value: string): void {
+			Reflect.set(this._model, qualifiedName, value);
+			this.nativeSetAttribute(qualifiedName, value);
+			this._observable.emit(qualifiedName);
+		}
+
+		getAttributeModel(qualifiedName: string): string | null {
+			return Reflect.get(this._model, qualifiedName);
 		}
 
 		doBlockCallback = (): void => {
@@ -262,11 +277,12 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 			if (newValue === oldValue) {
 				return;
 			}
+			this._observable.emit(name);
 			if (isOnChanges(this._model)) {
 				this._model.onChanges();
 			}
 			this.doBlockCallback();
-			console.log('changed', name, oldValue, newValue);
+			// console.log('changed', name, oldValue, newValue);
 		}
 		connectedCallback() {
 			if (isOnChanges(this._model)) {
@@ -286,7 +302,12 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 			}
 
 			// setup ui view
-			this.render.initView();
+			if (typeof componentRef.template === 'string') {
+				this._render.initViewFromString();
+			} else {
+				this._render.initView();
+			}
+
 
 			if (componentRef.view) {
 				this._model[componentRef.view] = this;
@@ -322,12 +343,18 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 		}
 	};
 	attributes.forEach((prop) => {
+		if (className[viewClassName].prototype.hasOwnProperty(prop)) {
+			prop = prop + 'Attr';
+			console.log(prop);
+		}
 		Object.defineProperty(className[viewClassName].prototype, prop, {
 			get(): any {
 				return this._model[prop];
 			},
 			set(value: any) {
-				this._model[prop] = value;
+				// this._model[prop] = value;
+				// this._observable.emit(prop);
+				this.setAttribute(prop, value);
 			},
 		});
 	});

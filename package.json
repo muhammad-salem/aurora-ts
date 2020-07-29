@@ -4,9 +4,8 @@
   "description": "create and define a usable 'custom elements', that compatible with other frameworks, using Typescript",
   "homepage": "https://github.com/salemebo/aurora-ts",
   "author": "@Salem",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "typings": "lib/index.d.ts",
+  "main": "src/aurora.js",
+  "types": "src/aurora.d.ts",
   "scripts": {
     "build": "tsc",
     "buildw": "tsc -w"

@@ -19,6 +19,9 @@ pids
 lib-cov
 lib
 test-app
+/src/**/*.js
+/src/**/*.d.ts
+/src/**/*.map
 
 # Coverage directory used by tools like istanbul
 coverage

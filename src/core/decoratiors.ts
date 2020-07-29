@@ -24,8 +24,9 @@ export interface PipeOptions {
 
 export interface ComponentOptions {
 	selector: string;
-	template: string | JsxComponent;
-	styles: string;
+	template?: string | JsxComponent;
+	templateUrl?: Promise<string>;
+	styles?: string;
 	extend?: string;
 }
 
@@ -110,7 +111,15 @@ export function Directive(opt: DirectiveOptions): Function {
 
 export function Component(opt: ComponentOptions): Function {
 	return (target: Function) => {
-		ComponentElement.defineComponent(target, opt);
+		console.log('templateUrl', opt.templateUrl);
+		if (!opt.template && opt.templateUrl) {
+			opt.templateUrl.then(html => {
+				opt.template = html;
+				ComponentElement.defineComponent(target, opt);
+			});
+		} else {
+			ComponentElement.defineComponent(target, opt);
+		}
 		return target;
 	};
 }
