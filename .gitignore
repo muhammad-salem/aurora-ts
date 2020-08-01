@@ -105,8 +105,8 @@ dist
 
 ## project 
 
-lib
-test-app
+esm2015
+esm2020
 /src/**/*.js
 /src/**/*.d.ts
 /src/**/*.map
