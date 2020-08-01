@@ -12,9 +12,12 @@ export async function fetchHtml(moduleMeta: { url: string }, filename?: string):
 
 export async function htmlFullPath(fileFullPath: string): Promise<string> {
     if (fileFullPath.match(/^https?:\/\//g)) {
-        return fetch(fileFullPath).then(response => response.text());
+        let result: string = await fetch(fileFullPath).then(response => response.text());
+        return result;
+    } else {
+        let result = await fetch(window.location.href + fileFullPath).then(response => response.text());
+        return result;
     }
-    return fetch(window.location.href + fileFullPath).then(response => response.text());
 }
 
 let htmlAppDirectory = window.location.href + 'template';
