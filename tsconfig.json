@@ -1,8 +1,13 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.aurora.json"
-    }
-  ]
+	"extends": "./tsconfig.base.json",
+	// "compilerOptions": {
+	// 	"composite": true
+	// },
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx"
+	],
+	"files": [
+		"src/aurora.ts"
+	]
 }

@@ -225,31 +225,25 @@ export class ComponentElement {
 function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef): CustomElementConstructor {
 	const viewClassName = `${modelClass.name}View`;
 	const attributes: string[] = componentRef.inputs.map(input => input.viewAttribute);
-	const htmlParent = (componentRef.extend as Tag).classRef;
-	const clasBody: string = `
-            (class ${viewClassName} extends ${htmlParent.name} {
-                constructor(...params) {
-					super(...params);
-				}
-			})`;
+	const htmlParent = (componentRef.extend as Tag).classRef as TypeOf<HTMLElement>;
 	let className: { [key: string]: CustomElementConstructor } = {};
-	className[viewClassName] = eval(clasBody);
-	className[viewClassName] = class extends className[viewClassName] implements BaseComponent {
+	className[viewClassName] = class extends htmlParent implements BaseComponent {
+
 		_model: any;
 		_observable: Observable;
 		_render: ComponentRender;
 
-		nativeSetAttribute: Function;
-		nativeGetAttribute: Function;
+		_nativeSetAttribute: Function;
+		_nativeGetAttribute: Function;
 
-		constructor(...params: any[]) {
-			super(...params);
+		constructor() {
+			super();
 			this._model = new modelClass();
 			this._observable = new Observable();
 			this._render = new ComponentRender(this, componentRef);
 
-			this.nativeSetAttribute = this.setAttribute;
-			this.nativeGetAttribute = this.getAttribute;
+			this._nativeSetAttribute = this.setAttribute;
+			this._nativeGetAttribute = this.getAttribute;
 
 			this.setAttribute = this.setAttributeModel;
 			this.getAttribute = this.getAttributeModel;
@@ -259,7 +253,7 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 		}
 		setAttributeModel(qualifiedName: string, value: string): void {
 			Reflect.set(this._model, qualifiedName, value);
-			this.nativeSetAttribute(qualifiedName, value);
+			this._nativeSetAttribute(qualifiedName, value);
 			this._observable.emit(qualifiedName);
 		}
 
@@ -343,7 +337,7 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 			}
 		}
 	};
-	attributes.forEach((prop) => {
+	attributes.forEach(prop => {
 		if (className[viewClassName].prototype.hasOwnProperty(prop)) {
 			prop = prop + 'Attr';
 			console.log(prop);
@@ -367,5 +361,6 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 	Object.defineProperty(modelClass, viewClassName, {
 		value: className[viewClassName],
 	});
+	console.log(className[viewClassName].name);
 	return className[viewClassName];
 }
