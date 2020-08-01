@@ -1,4 +1,4 @@
-import { TypeOf } from '../core/decoratiors.js';
+import { TypeOf } from '../core/decorators.js';
 
 export type TagClassRef = TypeOf<HTMLElement> | TypeOf<Comment> | TypeOf<DocumentFragment> | CustomElementConstructor;
 

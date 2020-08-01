@@ -1,5 +1,5 @@
 import { OnInit, AfterViewInit } from '../core/lifecycle.js';
-import { Directive, View, Input } from '../core/decoratiors.js';
+import { Directive, View, Input } from '../core/decorators.js';
 
 @Directive({
 	selector: '[if]',

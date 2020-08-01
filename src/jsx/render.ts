@@ -6,7 +6,7 @@ import { ClassRegistry } from '../providers/provider.js';
 import { EventEmitter } from '../core/events.js';
 import { JSXTempletExpression, JSXBindingExpression, JSX2BindingExpression, JSXEventExpression } from './jsx-expression.js';
 import { HTMLTempletExpression, HTMLBindingExpression, HTML2BindingExpression, HTMLEventExpression } from './html-expression.js';
-import { getFromPath } from '../core/utils.js';
+import { getByPath as getByPath, setValueByPath } from '../core/utils.js';
 
 export class HTMLParser {
 	constructor(public template: string) { }
@@ -19,126 +19,92 @@ export class HTMLParser {
 	}
 }
 
-export interface Expression {
-	init(): void;
-}
-
-interface RuleInterface {
-	name: string;
-	rightHandRegx: RegExp;
-	leftHandRegx: { name: string; regExp: RegExp; handler: Function }[];
-}
-
-const Rules: RuleInterface[] = [
-	{
-		name: 'templet',
-		rightHandRegx: /\{\{+(\w)+\}\}/g,
-		leftHandRegx: [
-			{
-				name: 'html',
-				regExp: /\((\w*)\)/g,
-				handler: HTMLTempletExpression,
-			},
-			{
-				name: 'jsx',
-				regExp: /(?:\w*)/g,
-				handler: JSXTempletExpression,
-			},
-		],
-		//      {{propname}}        $propname     bind-propname
-		// rule: [/\{\{+(\w)+\}\}/g, /\$(\w*)/g, /bind-(\w*)/g]
-	},
-	{
-		name: 'binding',
-		rightHandRegx: /"(\w*)"/g,
-		leftHandRegx: [
-			{
-				name: 'html',
-				regExp: /\[+(\w)+\]/g,
-				handler: HTMLBindingExpression,
-			},
-			{
-				name: 'jsx',
-				regExp: /bind-(?:\w*)/g,
-				handler: JSXBindingExpression,
-			},
-		],
-		// rule: [/\[(\w*)\]/g, /\[(\w*)\]="(\w*)"/g, /$/g]
-	},
-	{
-		name: 'binding2way',
-		rightHandRegx: /(\w)/g,
-		leftHandRegx: [
-			{
-				name: 'html',
-				regExp: /\[\(+(\w)+\)\]/g,
-				handler: HTML2BindingExpression,
-			},
-			{
-				name: 'jsx',
-				regExp: /bindon-(?:\w*)/g,
-				handler: JSX2BindingExpression,
-			},
-		],
-		// rule: [/\[(\w*)\]/g, /\[(\w*)\]="(\w*)"/g, /$/g]
-	},
-	{
-		name: 'event',
-		// (click)="true & onClick($event,nama)"
-		// onclick="true & onClick($event,nama)"
-		rightHandRegx: /"(\w*) ?(&|\|) ?(\w*)\((,? ?\$?\w)*\)"/g,
-		leftHandRegx: [
-			{
-				name: 'html',
-				regExp: /\((\w*)\)/g,
-				handler: HTMLEventExpression,
-			},
-			{
-				name: 'jsx',
-				regExp: /on(?:\w*)/g,
-				handler: JSXEventExpression,
-			},
-		],
-	},
-];
-
-// export class BindingHandler {
-// 	static templateHadel(element: Object, elemProp: string): void {
-// 		const templateText: string = Reflect.get(element, elemProp);
-// 		const result = [...templateText.matchAll(/\{\{(\w*)\}\}/g)];
-// 		if (result.length === 0) {
-// 			return;
-// 		}
-// 		Reflect.set(element, 'templateText', templateText);
-// 		const renderText = {
-// 			set: (value: string) => {
-// 				Reflect.set(element, 'renderText', value);
-// 			},
-// 			get: (): string => {
-// 				return Reflect.get(element, 'renderText');
-// 			}
-// 		};
-// 		renderText.set(templateText);
-// 		// let renderText = node.textContent;
-// 		result.forEach(match => {
-// 			this.baiseView._observable.subscribe(match[1], () => {
-// 				let tempValue = this.baiseView._model[match[1]];
-// 				let text = renderText.get();
-// 				text = text.replace(match[0], tempValue);
-// 				if (!(/\{\{(\w*)\}\}/g).test(text)) {
-// 					node.textContent = text;
-// 					renderText.set(Reflect.get(node, 'templateText'));
-// 				} else {
-// 					renderText.set(text);
-// 				}
-// 			});
-// 		});
-// 	}
+// export interface Expression {
+// 	init(): void;
 // }
 
-export class SyntaxExpression {
-	constructor(private template: string, private element: HTMLElement, private view: CustomElementConstructor) { }
-}
+// interface RuleInterface {
+// 	name: string;
+// 	rightHandRegx: RegExp;
+// 	leftHandRegx: { name: string; regExp: RegExp; handler: Function }[];
+// }
+
+// const Rules: RuleInterface[] = [
+// 	{
+// 		name: 'templet',
+// 		rightHandRegx: /\{\{+(\w)+\}\}/g,
+// 		leftHandRegx: [
+// 			{
+// 				name: 'html',
+// 				regExp: /\((\w*)\)/g,
+// 				handler: HTMLTempletExpression,
+// 			},
+// 			{
+// 				name: 'jsx',
+// 				regExp: /(?:\w*)/g,
+// 				handler: JSXTempletExpression,
+// 			},
+// 		],
+// 		//      {{propname}}        $propname     bind-propname
+// 		// rule: [/\{\{+(\w)+\}\}/g, /\$(\w*)/g, /bind-(\w*)/g]
+// 	},
+// 	{
+// 		name: 'binding',
+// 		rightHandRegx: /"(\w*)"/g,
+// 		leftHandRegx: [
+// 			{
+// 				name: 'html',
+// 				regExp: /\[+(\w)+\]/g,
+// 				handler: HTMLBindingExpression,
+// 			},
+// 			{
+// 				name: 'jsx',
+// 				regExp: /bind-(?:\w*)/g,
+// 				handler: JSXBindingExpression,
+// 			},
+// 		],
+// 		// rule: [/\[(\w*)\]/g, /\[(\w*)\]="(\w*)"/g, /$/g]
+// 	},
+// 	{
+// 		name: 'binding2way',
+// 		rightHandRegx: /(\w)/g,
+// 		leftHandRegx: [
+// 			{
+// 				name: 'html',
+// 				regExp: /\[\(+(\w)+\)\]/g,
+// 				handler: HTML2BindingExpression,
+// 			},
+// 			{
+// 				name: 'jsx',
+// 				regExp: /bindon-(?:\w*)/g,
+// 				handler: JSX2BindingExpression,
+// 			},
+// 		],
+// 		// rule: [/\[(\w*)\]/g, /\[(\w*)\]="(\w*)"/g, /$/g]
+// 	},
+// 	{
+// 		name: 'event',
+// 		// (click)="true & onClick($event,nama)"
+// 		// onclick="true & onClick($event,nama)"
+// 		rightHandRegx: /"(\w*) ?(&|\|) ?(\w*)\((,? ?\$?\w)*\)"/g,
+// 		leftHandRegx: [
+// 			{
+// 				name: 'html',
+// 				regExp: /\((\w*)\)/g,
+// 				handler: HTMLEventExpression,
+// 			},
+// 			{
+// 				name: 'jsx',
+// 				regExp: /on(?:\w*)/g,
+// 				handler: JSXEventExpression,
+// 			},
+// 		],
+// 	},
+// ];
+
+// export class SyntaxExpression {
+// 	constructor(private template: string, private element: HTMLElement, private view: CustomElementConstructor) { }
+// }
 
 export class ComponentRender {
 	template: JsxComponent;
@@ -164,48 +130,13 @@ export class ComponentRender {
 		const handler = () => {
 			let renderText = templateText;
 			result.forEach(match => {
-				// let tempValue = this.baiseView._model[match[1]];
-				// if (typeof tempValue === 'function') {
-				// 	const call: Function = tempValue;
-				// 	tempValue = call.call(this.baiseView._model);
-				// }
-				let tempValue = getFromPath(this.baiseView._model, match[1]);
+				let tempValue = getByPath(this.baiseView._model, match[1]);
 				renderText = renderText.replace(match[0], tempValue);
 			});
 			Reflect.set(element, elemProp, renderText);
 		}
 		result.forEach(match => this.baiseView._observable.subscribe(match[1], handler));
-		this.baiseView._observable.emit(result[0][1])
-
-		// Reflect.set(element, 'templateText', templateText);
-		// const renderText = {
-		// 	set: (value: string) => {
-		// 		Reflect.set(element, 'renderText', value);
-		// 	},
-		// 	get: (): string => {
-		// 		return Reflect.get(element, 'renderText');
-		// 	}
-		// };
-		// renderText.set(templateText);
-		// let renderText = node.textContent;
-		// result.forEach(match => {
-		// this.baiseView._observable.subscribe(match[1], () => {
-		// let tempValue = this.baiseView._model[match[1]];
-		// if (typeof tempValue === 'function') {
-		// 	const call: Function = tempValue;
-		// 	tempValue = call.call(this.baiseView._model);
-		// }
-		// let text = renderText.get();
-		// text = text.replace(match[0], tempValue);
-		// if (!(regex || (/\{\{(\w*)\}\}/g)).test(text)) {
-		// 	Reflect.set(element, elemProp, text);
-		// 	renderText.set(Reflect.get(element, 'templateText'));
-		// } else {
-		// 	renderText.set(text);
-		// }
-		// });
-		// });
-		// result.forEach(match => this.baiseView._observable.emit(match[1]));
+		this.baiseView._observable.emit(result[0][1]);
 	}
 
 	printNode(node: Node) {
@@ -218,7 +149,6 @@ export class ComponentRender {
 				const attr = node.attributes[i];
 
 				if (attr.name.match(/\[\((\w*)\)\]/g)) { // two way binding
-					// console.log(attr.name, '<=>', attr.value);
 					const result = [...attr.value.matchAll(/\[\((\w*)\)\]/g)];
 					result.forEach(match => {
 						console.log('two way', match);
@@ -236,7 +166,8 @@ export class ComponentRender {
 					const result = [...attr.value.matchAll(/\{\{(.+\w*)*\}\}/g)];
 					let renderText = attr.value;
 					result.forEach(match => {
-						let tempValue = this.baiseView._model[match[1]];
+						let tempValue = getByPath(this.baiseView._model, match[1]);
+						setValueByPath(node, attr.name, tempValue);
 						renderText = renderText.replace(match[0], tempValue);
 					});
 					attr.value = renderText;

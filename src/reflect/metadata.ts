@@ -200,12 +200,7 @@ function getMetadataOrDefineMap(target: Object): Metadata {
 	return metadata;
 }
 
-export function defineMetadata(
-	metadataKey: MetadataKey,
-	metadataValue: any,
-	target: Object,
-	propertyKey: string
-): void {
+export function defineMetadata(metadataKey: MetadataKey, metadataValue: any, target: Object, propertyKey: string): void {
 	getMetadataOrDefineMap(target).setMetadata(
 		propertyKey,
 		metadataKey,
@@ -213,10 +208,7 @@ export function defineMetadata(
 	);
 }
 
-export function metadata(
-	metadataKey: MetadataKey,
-	metadataValue: any
-): Function {
+export function metadata(metadataKey: MetadataKey, metadataValue: any): Function {
 	function decorator(target: typeof Object, propertyKey?: string) {
 		getMetadataOrDefineMap(target).setMetadata(propertyKey || 'classMetadataRef', metadataKey, metadataValue);
 	}

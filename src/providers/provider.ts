@@ -1,8 +1,4 @@
-import {
-	getBootstrapMatadata,
-	ComponentRef,
-	PropertyRef,
-} from '../elements/elements.js';
+import { getBootstrapMatadata, ComponentRef, PropertyRef } from '../elements/elements.js';
 
 export type ProviderType = 'component' | 'service' | 'directive' | 'pipe' | 'self';
 

@@ -4,7 +4,7 @@ export * from './providers/provider.js';
 
 export * from './core/path.js';
 
-export * from './core/decoratiors.js';
+export * from './core/decorators.js';
 export * from './core/events.js';
 export * from './core/observable.js';
 export * from './core/lifecycle.js';
@@ -20,3 +20,5 @@ export * from './elements/elements.js';
 export * from './elements/tags.js';
 
 export * from './directives/if.js';
+
+// export * from './core/decorators.js';

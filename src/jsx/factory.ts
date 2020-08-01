@@ -6,6 +6,7 @@ declare global {
 	}
 }
 
+
 // export type TagNameRef = string | 'none' | CustomElementConstructor | TypeOf<HTMLElement> | Comment | DocumentFragment;
 
 export type JsxAttributes = { [key: string]: any };

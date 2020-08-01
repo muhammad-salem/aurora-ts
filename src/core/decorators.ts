@@ -1,3 +1,7 @@
+///<reference path="html-module.ts"/>
+/// <reference path="../reflect/metadata.ts" />
+
+
 import { ComponentElement } from '../elements/elements.js';
 import { JsxComponent } from '../jsx/factory.js';
 
@@ -25,8 +29,7 @@ export interface PipeOptions {
 export interface ComponentOptions {
 	selector: string;
 	template?: string | JsxComponent;
-	templateUrl?: Promise<string>;
-	styles?: string;
+	style?: string | { [key: string]: string }[];
 	extend?: string;
 }
 
@@ -111,15 +114,7 @@ export function Directive(opt: DirectiveOptions): Function {
 
 export function Component(opt: ComponentOptions): Function {
 	return (target: Function) => {
-		console.log('templateUrl', opt.templateUrl);
-		if (!opt.template && opt.templateUrl) {
-			opt.templateUrl.then(html => {
-				opt.template = html;
-				ComponentElement.defineComponent(target, opt);
-			});
-		} else {
-			ComponentElement.defineComponent(target, opt);
-		}
+		ComponentElement.defineComponent(target, opt);
 		return target;
 	};
 }

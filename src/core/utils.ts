@@ -1,3 +1,5 @@
+import { join } from 'path';
+
 export function isHTMLElement(object: any): object is HTMLElement {
 	return (
 		object.prototype instanceof HTMLElement ||
@@ -42,7 +44,7 @@ export function mapFunArgs(path: string): Args[] {
 	return callpaths;
 }
 
-export function getFromPath(parent: any, objectPath: string, skipFirst?: boolean, resolver?: { [key: string]: any }) {
+export function getByPath(parent: any, objectPath: string, skipFirst?: boolean, resolver?: { [key: string]: any }) {
 	const args = mapFunArgs(objectPath);
 	let ref = parent;
 	if (skipFirst) {
@@ -64,7 +66,7 @@ export function getFromPath(parent: any, objectPath: string, skipFirst?: boolean
 				const param = params[j];
 				let rkey;
 				if (resolver && (rkey = keyFor(resolverKeys, param))) {
-					keyParamters.push(getFromPath(resolver[<string>rkey], param, true));
+					keyParamters.push(getByPath(resolver[<string>rkey], param, true));
 				} else if (!Number.isNaN(+param)) {
 					// is number
 					keyParamters.push(+param);
@@ -78,6 +80,23 @@ export function getFromPath(parent: any, objectPath: string, skipFirst?: boolean
 	}
 	return ref;
 }
+
+
+
+export function setValueByPath(parent: any, objectPath: string, value: any) {
+	const args = mapFunArgs(objectPath);
+	let ref = parent;
+	let j;
+	for (j = 0; j < args[0].prop.length - 1; j++) {
+		ref = ref[args[0].prop[j]];
+		if (!ref) {
+			return;
+		}
+	}
+	ref[args[0].prop[j]] = value;
+}
+
+
 
 // export function getObjectRef(parent: any, objectPath: string, skipFirst: boolean, resolver?: { [key: string]: any }) {
 // 	const paths = splitByRegix(objectPath, /\.|\[|\]/g);

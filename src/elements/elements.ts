@@ -1,7 +1,7 @@
 import {
 	ComponentOptions, TypeOf, ChildOptions, PipeOptions,
 	ServiceOptions, DirectiveOptions
-} from '../core/decoratiors.js';
+} from '../core/decorators.js';
 import { findByTagName, Tag } from './tags.js';
 import {
 	isOnInit, isOnChanges, isDoCheck,
@@ -302,12 +302,13 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 			}
 
 			// setup ui view
-			if (typeof componentRef.template === 'string') {
-				this._render.initViewFromString();
-			} else {
-				this._render.initView();
+			if (componentRef.template) {
+				if (typeof componentRef.template === 'string') {
+					this._render.initViewFromString();
+				} else {
+					this._render.initView();
+				}
 			}
-
 
 			if (componentRef.view) {
 				this._model[componentRef.view] = this;
