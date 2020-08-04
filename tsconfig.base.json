@@ -2,16 +2,15 @@
   "compilerOptions": {
     // "baseUrl": "./",
     "outDir": "dist",
-    "rootDirs": [
-      "src"
-    ],
     "sourceMap": true,
     "declaration": true,
+    "declarationMap": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "moduleResolution": "Node",
     // "importHelpers": true,
+		"importHelpers": false,
     "target": "ES2020",
     "module": "ES2020",
     "lib": [

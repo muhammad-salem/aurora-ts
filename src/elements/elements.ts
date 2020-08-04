@@ -1,6 +1,6 @@
 import {
 	ComponentOptions, TypeOf, ChildOptions, PipeOptions,
-	ServiceOptions, DirectiveOptions
+	ServiceOptions, DirectiveOptions, JSXRender
 } from '../core/decorators.js';
 import { findByTagName, Tag } from './tags.js';
 import {
@@ -14,6 +14,7 @@ import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
 import { JsxComponent } from '../jsx/factory.js';
 import { Observable } from '../core/observable.js';
+import { findByModelClassOrCreat } from '../reflect/bootstrap-data.js';
 
 export class PropertyRef {
 	constructor(public modelProperty: string, private _viewNanme?: string, descriptor?: PropertyDescriptor) { }
@@ -59,9 +60,9 @@ export interface DirectiveRef extends DirectiveOptions {
 	descriptors: PropertyDescriptor[];
 }
 
-export interface ComponentRef {
+export interface ComponentRef<T> {
 	selector: string;
-	template: string | JsxComponent;
+	template: string | JSXRender<T>;
 	styles: string;
 	extend: Tag;
 
@@ -76,27 +77,6 @@ export interface ComponentRef {
 	descriptors: PropertyDescriptor[];
 }
 
-function findByModelClassOrCreat(modelProperty: Object): BootstropMatadata {
-	var bootstrapMetadata: BootstropMatadata = Reflect.get(
-		modelProperty,
-		'bootstrap'
-	);
-	if (!bootstrapMetadata) {
-		bootstrapMetadata = {};
-		Object.defineProperty(modelProperty, 'bootstrap', {
-			value: bootstrapMetadata,
-		});
-	}
-	return bootstrapMetadata;
-}
-
-// export function setBootstrapMatadata(modelProperty: Object, metadata: Object) {
-//     Reflect.set(modelProperty, 'bootstrap', metadata);
-// }
-
-export function getBootstrapMatadata<T = any>(modelProperty: Object): T {
-	return Reflect.get(modelProperty, 'bootstrap');
-}
 
 export class ComponentElement {
 
@@ -171,13 +151,13 @@ export class ComponentElement {
 		dependencyInjector.getInstance(ClassRegistry).registerService(modelClass);
 	}
 
-	static defineComponent(modelClass: Function, opts: ComponentOptions) {
+	static defineComponent<T>(modelClass: Function, opts: ComponentOptions<T>) {
 		var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelClass.prototype);
 		for (const key in opts) {
 			bootstrap[key] = Reflect.get(opts, key);
 		}
 		bootstrap.extend = findByTagName(opts.extend);
-		var componentRef: ComponentRef = bootstrap as ComponentRef;
+		var componentRef: ComponentRef<T> = bootstrap as ComponentRef<T>;
 		componentRef.viewClass = initViewClass(
 			modelClass as TypeOf<Function>,
 			componentRef
@@ -202,36 +182,18 @@ export class ComponentElement {
 			options
 		);
 	}
-
-	// static bootstrapComponents() {
-	//     dependencyInjector.getInstance(ClassRegistry).componentSet.forEach(component => {
-	//         const options: ElementDefinitionOptions = {};
-	//         var componentRef: ComponentRef = getBootstrapMatadata(component.prototype);
-	//         const parentTagName = componentRef.extend.name;
-	//         if (parentTagName) {
-	//             if (parentTagName !== '!' && parentTagName.indexOf('-') === -1) {
-	//                 options.extends = parentTagName;
-	//             }
-	//         }
-	//         customElements.define(
-	//             componentRef.selector as string,
-	//             componentRef.viewClass as CustomElementConstructor,
-	//             options
-	//         );
-	//     });
-	// }
 }
 
-function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef): CustomElementConstructor {
+function initViewClass<T>(modelClass: TypeOf<Function>, componentRef: ComponentRef<T>): CustomElementConstructor {
 	const viewClassName = `${modelClass.name}View`;
 	const attributes: string[] = componentRef.inputs.map(input => input.viewAttribute);
 	const htmlParent = (componentRef.extend as Tag).classRef as TypeOf<HTMLElement>;
-	let className: { [key: string]: CustomElementConstructor } = {};
-	className[viewClassName] = class extends htmlParent implements BaseComponent {
+	let viewClass: CustomElementConstructor;
+	viewClass = class extends htmlParent implements BaseComponent {
 
 		_model: any;
 		_observable: Observable;
-		_render: ComponentRender;
+		_render: ComponentRender<T>;
 
 		_nativeSetAttribute: Function;
 		_nativeGetAttribute: Function;
@@ -245,19 +207,19 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 			this._nativeSetAttribute = this.setAttribute;
 			this._nativeGetAttribute = this.getAttribute;
 
-			this.setAttribute = this.setAttributeModel;
-			this.getAttribute = this.getAttributeModel;
+			this.setAttribute = this._setAttributeModel;
+			this.getAttribute = this._getAttributeModel;
 
-			attributes.forEach(attr => this.setAttribute(attr, this._model[attr]));
+			attributes.forEach(attr => this._nativeSetAttribute(attr, this._model[attr]));
 
 		}
-		setAttributeModel(qualifiedName: string, value: string): void {
+		_setAttributeModel(qualifiedName: string, value: string): void {
 			Reflect.set(this._model, qualifiedName, value);
 			this._nativeSetAttribute(qualifiedName, value);
 			this._observable.emit(qualifiedName);
 		}
 
-		getAttributeModel(qualifiedName: string): string | null {
+		_getAttributeModel(qualifiedName: string): string | null {
 			return Reflect.get(this._model, qualifiedName);
 		}
 
@@ -276,7 +238,6 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 				this._model.onChanges();
 			}
 			this.doBlockCallback();
-			// console.log('changed', name, oldValue, newValue);
 		}
 		connectedCallback() {
 			if (isOnChanges(this._model)) {
@@ -297,11 +258,7 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 
 			// setup ui view
 			if (componentRef.template) {
-				if (typeof componentRef.template === 'string') {
-					this._render.initViewFromString();
-				} else {
-					this._render.initView();
-				}
+				this._render.initView();
 			}
 
 			if (componentRef.view) {
@@ -338,29 +295,23 @@ function initViewClass(modelClass: TypeOf<Function>, componentRef: ComponentRef)
 		}
 	};
 	attributes.forEach(prop => {
-		if (className[viewClassName].prototype.hasOwnProperty(prop)) {
-			prop = prop + 'Attr';
-			console.log(prop);
-		}
-		Object.defineProperty(className[viewClassName].prototype, prop, {
+		Object.defineProperty(viewClass.prototype, prop, {
 			get(): any {
 				return this._model[prop];
 			},
 			set(value: any) {
 				// this._model[prop] = value;
-				// this._observable.emit(prop);
 				this.setAttribute(prop, value);
 			},
+			enumerable: true
 		});
 	});
-	Object.defineProperty(className[viewClassName], 'observedAttributes', {
+	Object.defineProperty(viewClass, 'observedAttributes', {
 		get() {
 			return attributes;
-		},
+		}
 	});
-	Object.defineProperty(modelClass, viewClassName, {
-		value: className[viewClassName],
-	});
-	console.log(className[viewClassName].name);
-	return className[viewClassName];
+	Object.defineProperty(modelClass, viewClassName, { value: viewClass });
+	Object.defineProperty(viewClass, 'name', { value: viewClassName });
+	return viewClass;
 }

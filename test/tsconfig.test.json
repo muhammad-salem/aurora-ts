@@ -1,0 +1,16 @@
+{
+	"extends": "../tsconfig.base.json",
+	"references": [
+		{ "path": "../src/tsconfig.esm2020.json" }
+	],
+	"compilerOptions": {
+		"outDir": "../public/",
+		"importHelpers": false,
+		"rootDir": ".",
+		"typeRoots": ["../src/types", "../node_modules/@types"]
+	},
+	"include": [
+		"**/*.ts",
+		"**/*.tsx"
+	]
+}

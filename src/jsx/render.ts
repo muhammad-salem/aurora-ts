@@ -5,7 +5,7 @@ import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
 import { EventEmitter } from '../core/events.js';
 import { JSXTempletExpression, JSXBindingExpression, JSX2BindingExpression, JSXEventExpression } from './jsx-expression.js';
-import { HTMLTempletExpression, HTMLBindingExpression, HTML2BindingExpression, HTMLEventExpression } from './html-expression.js';
+import { HTMLTempletExpression, HTMLBindingExpression, HTML2BindingExpression, HTMLEventExpression, parseHtmlToJsxComponent, toJSXRender } from './html-expression.js';
 import { getByPath as getByPath, setValueByPath } from '../core/utils.js';
 
 export class HTMLParser {
@@ -106,14 +106,14 @@ export class HTMLParser {
 // 	constructor(private template: string, private element: HTMLElement, private view: CustomElementConstructor) { }
 // }
 
-export class ComponentRender {
+export class ComponentRender<T> {
 	template: JsxComponent;
 
-	constructor(public baiseView: BaseComponent & HTMLElement, public componentRef: ComponentRef) {
+	constructor(public baiseView: BaseComponent & HTMLElement, public componentRef: ComponentRef<T>) {
 		if (typeof componentRef.template === 'string') {
 			this.template = new HTMLParser(componentRef.template).parse();
-		} else if (componentRef.template) {
-			this.template = componentRef.template;
+			// } else if (componentRef.template) {
+			// this.template = componentRef.template(this.baiseView._model);
 		} else if (componentRef.extend) {
 			//
 		} else {
@@ -121,7 +121,7 @@ export class ComponentRender {
 		}
 	}
 
-	templateHadel(element: Object, elemProp: string, regex?: RegExp): void {
+	templateHandler(element: Object, elemProp: string, regex?: RegExp): void {
 		const templateText: string = Reflect.get(element, elemProp);
 		const result = [...templateText.matchAll(regex || (/\{\{(.+\w*)*\}\}/g))];
 		if (result.length === 0) {
@@ -142,23 +142,23 @@ export class ComponentRender {
 	printNode(node: Node) {
 
 		if (node instanceof Text && node.textContent) {
-			this.templateHadel(node, 'textContent');
+			this.templateHandler(node, 'textContent');
 		} else if (node instanceof Element) {
-			console.group(node.nodeName);
+			// console.group(node.nodeName);
 			for (let i = 0; i < node.attributes.length; i++) {
 				const attr = node.attributes[i];
 
 				if (attr.name.match(/\[\((\w*)\)\]/g)) { // two way binding
 					const result = [...attr.value.matchAll(/\[\((\w*)\)\]/g)];
 					result.forEach(match => {
-						console.log('two way', match);
+						// console.log('two way', match);
 						// let tempValue = match[2] ? this.baiseView._model[match[1]]() : this.baiseView._model[match[1]];
 						// renderText = renderText.replace(match[0], tempValue);
 					});
 				} else if (attr.name.match(/\[(\w*)\]/g)) {  // one way binding
 					const result = [...attr.value.matchAll(/\[(\w*)\]/g)];
 					result.forEach(match => {
-						console.log('one way ', match);
+						// console.log('one way ', match);
 						// let tempValue = match[2] ? this.baiseView._model[match[1]]() : this.baiseView._model[match[1]];
 						// renderText = renderText.replace(match[0], tempValue);
 					});
@@ -174,7 +174,7 @@ export class ComponentRender {
 				}
 			}
 			node.childNodes.forEach(child => this.printNode(child));
-			console.groupEnd();
+			// console.groupEnd();
 		}
 	}
 
@@ -182,16 +182,29 @@ export class ComponentRender {
 		var template = document.createElement('template');
 		template.innerHTML = this.componentRef.template as string;
 		template.content.childNodes.forEach(child => this.printNode(child));
-		console.log(template);
+		// console.log(template);
 		// this.baiseView.innerHTML = this.componentRef.template as string;
 		this.baiseView.appendChild(template.content);
 	}
 
 	initView(): void {
+		if (typeof this.componentRef.template === 'string') {
+			// this.initViewFromString();
+			// const component = parseHtmlToJsxComponent(this.componentRef.template);
+			// if (component) {
+			// 	this.template = component;
+			// }
+			this.template = parseHtmlToJsxComponent(this.componentRef.template) as JsxComponent;
+			// this.template = toJSXRender(this.componentRef.template)(this.baiseView._model);
+		} else {
+			this.template = this.componentRef.template(this.baiseView._model);
+		}
+
 		this.baiseView.appendChild(this.createElement(this.template));
 		this.componentRef.hostListeners?.forEach((listener) =>
 			this.handelHostListener(listener)
 		);
+
 	}
 
 	createElement(viewTemplate: JsxComponent): HTMLElement | DocumentFragment {
@@ -199,11 +212,7 @@ export class ComponentRender {
 
 		if (viewTemplate.attributes) {
 			for (const key in viewTemplate.attributes) {
-				this.handleAttributes(
-					<HTMLElement>element,
-					key,
-					viewTemplate.attributes[key]
-				);
+				this.handleAttributes(<HTMLElement>element, key, viewTemplate.attributes[key]);
 			}
 		}
 		if (viewTemplate.children) {
@@ -222,7 +231,7 @@ export class ComponentRender {
 			//     return document.createElement(tagName);
 		} else if (tagName.includes('-')) {
 			const registry: ClassRegistry = dependencyInjector.getInstance(ClassRegistry);
-			const componentRef: ComponentRef | undefined = registry.getComponentRef(tagName);
+			const componentRef: ComponentRef<T> | undefined = registry.getComponentRef(tagName);
 			return componentRef ?
 				new componentRef.viewClass() : document.createElement(tagName);
 		} else {
@@ -248,7 +257,7 @@ export class ComponentRender {
 		} else {
 			var node = document.createTextNode(String(child));
 			parent.appendChild(node);
-			this.templateHadel(node, 'textContent', /\$(\w*)(\(\))?/g);
+			this.templateHandler(node, 'textContent', /\$(\w*)(\(\))?/g);
 			// let renderText = String(child);
 			// const result = [...renderText.matchAll(/\$(\w+)(\(\))?/g)];
 			// // console.log(result);
@@ -267,6 +276,10 @@ export class ComponentRender {
 			// this.baiseView[key.substring(1)] = element;
 			Reflect.set(this.baiseView, key.substring(1), element);
 		} else if (key.startsWith('$')) {
+			return;
+		} else if (key.startsWith('[')) {
+			return;
+		} else if (key.startsWith('(')) {
 			return;
 		} else if (typeof value === 'string' && value.includes('{{') && value.includes('}}')) {
 			let property = value as string;

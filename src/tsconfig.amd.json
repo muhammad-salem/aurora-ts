@@ -1,0 +1,19 @@
+{
+	"extends": "../tsconfig.base.json",
+	"compilerOptions": {
+		"outDir": "../amd",
+		"outFile": "../amd/aurora.bundle.js",
+		"target": "ES2015",
+		"module": "AMD",
+		"composite": true,
+		"rootDir": ".",
+		"typeRoots": ["./types", "../node_modules/@types"]
+	},
+	"include": [
+		"**/*.ts",
+		"**/*.tsx"
+	],
+	"files": [
+		"aurora.ts"
+	]
+}

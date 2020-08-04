@@ -1,6 +1,5 @@
-///<reference path="html-module.ts"/>
+/// <reference path="../types/html.ts"/>
 /// <reference path="../reflect/metadata.ts" />
-
 
 import { ComponentElement } from '../elements/elements.js';
 import { JsxComponent } from '../jsx/factory.js';
@@ -26,10 +25,25 @@ export interface PipeOptions {
 	pure: boolean;
 }
 
-export interface ComponentOptions {
+export type JSXRender<T> = (model: T) => JsxComponent;
+export interface ComponentOptions<T> {
 	selector: string;
-	template?: string | JsxComponent;
-	style?: string | { [key: string]: string }[];
+	/**
+	 * template: typeof 'string' ==> html template,
+	 * 			 TypeOf 'JSXRender<T>' ==> JSX, create factory
+	 * 	if template === null || undefined ==> it had nothing to render, 
+	 * and may be inhert from an html element
+	 * 				
+	 */
+	template?: string | JSXRender<T>;
+	/**
+	 * style for this element
+	 */
+	styles?: string | { [key: string]: string }[];
+	/**
+	 * what baisc element should the new component inhert from,
+	 * the tag name to inhert from as 'a', 'div', 'table', 'td', 'th', 'tr', etc ...
+	 */
 	extend?: string;
 }
 
@@ -112,7 +126,7 @@ export function Directive(opt: DirectiveOptions): Function {
 	};
 }
 
-export function Component(opt: ComponentOptions): Function {
+export function Component<T>(opt: ComponentOptions<T>): Function {
 	return (target: Function) => {
 		ComponentElement.defineComponent(target, opt);
 		return target;

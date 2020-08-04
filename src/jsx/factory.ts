@@ -14,7 +14,7 @@ export type JsxAttributes = { [key: string]: any };
 export interface JsxComponent {
 	tagName: string;
 	attributes?: JsxAttributes;
-	children?: JsxComponent[];
+	children?: (string | JsxComponent)[];
 }
 
 // export type JsxType = HTMLElement | HTMLElement[] | Comment;

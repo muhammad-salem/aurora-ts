@@ -105,8 +105,10 @@ dist
 
 ## project 
 
+amd
 esm2015
 esm2020
+public
 /src/**/*.js
 /src/**/*.d.ts
 /src/**/*.map

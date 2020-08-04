@@ -1,4 +1,5 @@
-import { getBootstrapMatadata, ComponentRef, PropertyRef } from '../elements/elements.js';
+import { ComponentRef, PropertyRef } from '../elements/elements.js';
+import { getBootstrapMatadata } from '../reflect/bootstrap-data.js';
 
 export type ProviderType = 'component' | 'service' | 'directive' | 'pipe' | 'self';
 
@@ -33,9 +34,9 @@ export class /*ClassProvider implements*/ ClassRegistry {
 		this.pipeSet.add(classRef);
 	}
 
-	hasComponet(selector: string): boolean {
+	hasComponet<T>(selector: string): boolean {
 		for (const modelClass of this.componentSet) {
-			const componentRef: ComponentRef = getBootstrapMatadata(
+			const componentRef: ComponentRef<T> = getBootstrapMatadata(
 				modelClass.prototype
 			);
 			if (componentRef.selector === selector) {
@@ -44,9 +45,9 @@ export class /*ClassProvider implements*/ ClassRegistry {
 		}
 		return false;
 	}
-	getComponentRef(selector: string): ComponentRef | undefined {
+	getComponentRef<T>(selector: string): ComponentRef<T> | undefined {
 		for (const modelClass of this.componentSet) {
-			const componentRef: ComponentRef = getBootstrapMatadata(
+			const componentRef: ComponentRef<T> = getBootstrapMatadata(
 				modelClass.prototype
 			);
 			if (componentRef.selector === selector) {
@@ -55,10 +56,10 @@ export class /*ClassProvider implements*/ ClassRegistry {
 		}
 	}
 
-	getComponet(selector: string) {
+	getComponet<T>(selector: string) {
 		// this.componentSet.
 		for (const modelClass of this.componentSet) {
-			const componentRef: ComponentRef = getBootstrapMatadata(
+			const componentRef: ComponentRef<T> = getBootstrapMatadata(
 				modelClass.prototype
 			);
 			if (componentRef.selector === selector) {
@@ -71,9 +72,9 @@ export class /*ClassProvider implements*/ ClassRegistry {
 		return this.getComponentRef(selector)?.viewClass;
 	}
 
-	hasOutput(model: Object, eventName: string): PropertyRef | boolean {
+	hasOutput<T>(model: Object, eventName: string): PropertyRef | boolean {
 		if (Reflect.has(model, 'bootstrap')) {
-			const componentRef: ComponentRef = Reflect.get(model, 'bootstrap');
+			const componentRef: ComponentRef<T> = Reflect.get(model, 'bootstrap');
 			if (componentRef.outputs) {
 				for (const out of componentRef.outputs) {
 					if (out.viewAttribute === eventName) {
