@@ -167,7 +167,7 @@ function defineChild(htmlStatement: string): Child {
                 const temp = item.split(/="/);
                 key = temp[0];
                 value = temp[1];
-                while (true) {
+                while (i < list.length) {
                     i++;
                     let next = list[i];
                     if (/.*"/g.test(next)) {

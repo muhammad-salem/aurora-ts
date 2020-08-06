@@ -11,11 +11,12 @@ import { getByPath as getByPath, setValueByPath } from '../core/utils.js';
 export class HTMLParser {
 	constructor(public template: string) { }
 	parse(): JsxComponent {
-		return {
-			tagName: Fragment,
-			attributes: {},
-			children: [],
-		};
+		return parseHtmlToJsxComponent(this.template) as JsxComponent;
+		// return {
+		// 	tagName: Fragment,
+		// 	attributes: {},
+		// 	children: [],
+		// };
 	}
 }
 
@@ -110,20 +111,20 @@ export class ComponentRender<T> {
 	template: JsxComponent;
 
 	constructor(public baiseView: BaseComponent & HTMLElement, public componentRef: ComponentRef<T>) {
-		if (typeof componentRef.template === 'string') {
-			this.template = new HTMLParser(componentRef.template).parse();
-			// } else if (componentRef.template) {
-			// this.template = componentRef.template(this.baiseView._model);
-		} else if (componentRef.extend) {
-			//
-		} else {
-			throw new Error('Method not implemented.');
-		}
+		// if (typeof componentRef.template === 'string') {
+		// 	this.template = new HTMLParser(componentRef.template).parse();
+		// 	// } else if (componentRef.template) {
+		// 	// 	this.template = componentRef.template(this.baiseView._model);
+		// } else if (componentRef.extend) {
+		// 	//
+		// } else {
+		// 	throw new Error('Method not implemented.');
+		// }
 	}
 
 	templateHandler(element: Object, elemProp: string, regex?: RegExp): void {
 		const templateText: string = Reflect.get(element, elemProp);
-		const result = [...templateText.matchAll(regex || (/\{\{(.+\w*)*\}\}/g))];
+		const result = [...templateText.matchAll(regex || (/\{\{((\w|\.)*(\(\))?)\}\}/g))];
 		if (result.length === 0) {
 			return;
 		}
@@ -131,6 +132,9 @@ export class ComponentRender<T> {
 			let renderText = templateText;
 			result.forEach(match => {
 				let tempValue = getByPath(this.baiseView._model, match[1]);
+				if (typeof tempValue === 'function') {
+					tempValue = tempValue.call(this.baiseView._model);
+				}
 				renderText = renderText.replace(match[0], tempValue);
 			});
 			Reflect.set(element, elemProp, renderText);
@@ -139,67 +143,72 @@ export class ComponentRender<T> {
 		this.baiseView._observable.emit(result[0][1]);
 	}
 
-	printNode(node: Node) {
+	// printNode(node: Node) {
 
-		if (node instanceof Text && node.textContent) {
-			this.templateHandler(node, 'textContent');
-		} else if (node instanceof Element) {
-			// console.group(node.nodeName);
-			for (let i = 0; i < node.attributes.length; i++) {
-				const attr = node.attributes[i];
+	// 	if (node instanceof Text && node.textContent) {
+	// 		this.templateHandler(node, 'textContent');
+	// 	} else if (node instanceof Element) {
+	// 		// console.group(node.nodeName);
+	// 		for (let i = 0; i < node.attributes.length; i++) {
+	// 			const attr = node.attributes[i];
 
-				if (attr.name.match(/\[\((\w*)\)\]/g)) { // two way binding
-					const result = [...attr.value.matchAll(/\[\((\w*)\)\]/g)];
-					result.forEach(match => {
-						// console.log('two way', match);
-						// let tempValue = match[2] ? this.baiseView._model[match[1]]() : this.baiseView._model[match[1]];
-						// renderText = renderText.replace(match[0], tempValue);
-					});
-				} else if (attr.name.match(/\[(\w*)\]/g)) {  // one way binding
-					const result = [...attr.value.matchAll(/\[(\w*)\]/g)];
-					result.forEach(match => {
-						// console.log('one way ', match);
-						// let tempValue = match[2] ? this.baiseView._model[match[1]]() : this.baiseView._model[match[1]];
-						// renderText = renderText.replace(match[0], tempValue);
-					});
-				} else if (attr.value.match(/\{\{(.+\w*)*\}\}/g)) {  // templet; -- one time write
-					const result = [...attr.value.matchAll(/\{\{(.+\w*)*\}\}/g)];
-					let renderText = attr.value;
-					result.forEach(match => {
-						let tempValue = getByPath(this.baiseView._model, match[1]);
-						setValueByPath(node, attr.name, tempValue);
-						renderText = renderText.replace(match[0], tempValue);
-					});
-					attr.value = renderText;
-				}
-			}
-			node.childNodes.forEach(child => this.printNode(child));
-			// console.groupEnd();
-		}
-	}
+	// 			if (attr.name.match(/\[\((\w*)\)\]/g)) { // two way binding
+	// 				const result = [...attr.value.matchAll(/\[\((\w*)\)\]/g)];
+	// 				result.forEach(match => {
+	// 					// console.log('two way', match);
+	// 					// let tempValue = match[2] ? this.baiseView._model[match[1]]() : this.baiseView._model[match[1]];
+	// 					// renderText = renderText.replace(match[0], tempValue);
+	// 				});
+	// 			} else if (attr.name.match(/\[(\w*)\]/g)) {  // one way binding
+	// 				const result = [...attr.value.matchAll(/\[(\w*)\]/g)];
+	// 				result.forEach(match => {
+	// 					// console.log('one way ', match);
+	// 					// let tempValue = match[2] ? this.baiseView._model[match[1]]() : this.baiseView._model[match[1]];
+	// 					// renderText = renderText.replace(match[0], tempValue);
+	// 				});
+	// 			} else if (attr.value.match(/\{\{(.+\w*)*\}\}/g)) {  // templet; -- one time write
+	// 				const result = [...attr.value.matchAll(/\{\{(.+\w*)*\}\}/g)];
+	// 				let renderText = attr.value;
+	// 				result.forEach(match => {
+	// 					let tempValue = getByPath(this.baiseView._model, match[1]);
+	// 					setValueByPath(node, attr.name, tempValue);
+	// 					renderText = renderText.replace(match[0], tempValue);
+	// 				});
+	// 				attr.value = renderText;
+	// 			}
+	// 		}
+	// 		node.childNodes.forEach(child => this.printNode(child));
+	// 		// console.groupEnd();
+	// 	}
+	// }
 
-	initViewFromString(): void {
-		var template = document.createElement('template');
-		template.innerHTML = this.componentRef.template as string;
-		template.content.childNodes.forEach(child => this.printNode(child));
-		// console.log(template);
-		// this.baiseView.innerHTML = this.componentRef.template as string;
-		this.baiseView.appendChild(template.content);
-	}
+	// initViewFromString(): void {
+	// 	var template = document.createElement('template');
+	// 	template.innerHTML = this.componentRef.template as string;
+	// 	template.content.childNodes.forEach(child => this.printNode(child));
+	// 	// console.log(template);
+	// 	// this.baiseView.innerHTML = this.componentRef.template as string;
+	// 	this.baiseView.appendChild(template.content);
+	// }
 
 	initView(): void {
+		// if (typeof this.componentRef.template === 'string') {
+		// 	// this.initViewFromString();
+		// 	// const component = parseHtmlToJsxComponent(this.componentRef.template);
+		// 	// if (component) {
+		// 	// 	this.template = component;
+		// 	// }
+		// 	this.template = parseHtmlToJsxComponent(this.componentRef.template) as JsxComponent;
+		// 	// this.template = toJSXRender(this.componentRef.template)(this.baiseView._model);
+		// } else {
+		// 	this.template = this.componentRef.template(this.baiseView._model);
+		// }
+
 		if (typeof this.componentRef.template === 'string') {
-			// this.initViewFromString();
-			// const component = parseHtmlToJsxComponent(this.componentRef.template);
-			// if (component) {
-			// 	this.template = component;
-			// }
-			this.template = parseHtmlToJsxComponent(this.componentRef.template) as JsxComponent;
-			// this.template = toJSXRender(this.componentRef.template)(this.baiseView._model);
-		} else {
+			this.template = new HTMLParser(this.componentRef.template).parse();
+		} else if (this.componentRef.template) {
 			this.template = this.componentRef.template(this.baiseView._model);
 		}
-
 		this.baiseView.appendChild(this.createElement(this.template));
 		this.componentRef.hostListeners?.forEach((listener) =>
 			this.handelHostListener(listener)
@@ -208,7 +217,7 @@ export class ComponentRender<T> {
 	}
 
 	createElement(viewTemplate: JsxComponent): HTMLElement | DocumentFragment {
-		const element = this.setupElement(viewTemplate.tagName);
+		const element = this.createElementByTagName(viewTemplate.tagName);
 
 		if (viewTemplate.attributes) {
 			for (const key in viewTemplate.attributes) {
@@ -224,7 +233,7 @@ export class ComponentRender<T> {
 		return element;
 	}
 
-	setupElement(tagName: string): HTMLElement | DocumentFragment {
+	createElementByTagName(tagName: string): HTMLElement | DocumentFragment {
 		if (Fragment === tagName.toLowerCase()) {
 			return document.createDocumentFragment();
 			// } else if (isTagNameNative(tagName)) {
@@ -235,16 +244,18 @@ export class ComponentRender<T> {
 			return componentRef ?
 				new componentRef.viewClass() : document.createElement(tagName);
 		} else {
+			// native tags
 			return document.createElement(tagName);
 		}
 	}
 
 	appendChild(parent: Node, child: any) {
-		if (typeof child === 'undefined' || child === null) {
+		if (!child) {
 			return;
 		}
-		if ((child as JsxComponent).tagName) {
-			parent.appendChild(this.createElement(child));
+
+		if (typeof child === 'string') {
+			this.appendTextNode(parent, String(child));
 		} else if (Array.isArray(child)) {
 			for (const value of child) {
 				this.appendChild(parent, value);
@@ -254,18 +265,20 @@ export class ComponentRender<T> {
 		} else if (typeof child === 'boolean') {
 			// <>{condition && <a>Display when condition is true</a>}</>
 			// if condition is false, the child is a boolean, but we don't want to display anything
+		} else if (Reflect.has(child, 'tagName')) {
+			parent.appendChild(this.createElement(child));
 		} else {
-			var node = document.createTextNode(String(child));
-			parent.appendChild(node);
+			this.appendTextNode(parent, String(child));
+		}
+	}
+
+	appendTextNode(parent: Node, child: string) {
+		var node = document.createTextNode(child);
+		parent.appendChild(node);
+		if ((/\$(\w*)(\(\))?/g).test(child)) {
 			this.templateHandler(node, 'textContent', /\$(\w*)(\(\))?/g);
-			// let renderText = String(child);
-			// const result = [...renderText.matchAll(/\$(\w+)(\(\))?/g)];
-			// // console.log(result);
-			// result.forEach(match => {
-			// 	let tempValue = match[2] ? this.baiseView._model[match[1]]() : this.baiseView._model[match[1]];
-			// 	renderText = renderText.replace(match[0], tempValue);
-			// });
-			// parent.appendChild(document.createTextNode(renderText));
+		} else {
+			this.templateHandler(node, 'textContent');
 		}
 	}
 
@@ -281,13 +294,11 @@ export class ComponentRender<T> {
 			return;
 		} else if (key.startsWith('(')) {
 			return;
-		} else if (typeof value === 'string' && value.includes('{{') && value.includes('}}')) {
-			let property = value as string;
-			property = property.substring(2, property.length - 2);
-			// Reflect.set(element, key, this.baiseView._model[property]);
-			element.setAttribute(key, this.baiseView._model[property]);
+		} else if (typeof value === 'string' && (/\{\{(.+\w*)*\}\}/g).test(value)) {
+			let propertyName = value.substring(2, value.length - 2);
+			// this.templateHandler(element, key);
+			element.setAttribute(key, this.baiseView._model[propertyName]);
 		} else {
-			// Reflect.set(element, key, value);
 			if (typeof value === 'boolean' && value) {
 				element.setAttribute(key, '');
 			} else {

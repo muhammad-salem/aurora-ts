@@ -210,8 +210,9 @@ function initViewClass<T>(modelClass: TypeOf<Function>, componentRef: ComponentR
 			this.setAttribute = this._setAttributeModel;
 			this.getAttribute = this._getAttributeModel;
 
-			attributes.forEach(attr => this._nativeSetAttribute(attr, this._model[attr]));
-
+			componentRef.inputs.forEach(input => {
+				this._nativeSetAttribute(input.viewAttribute, this._model[input.modelProperty]);
+			});
 		}
 		_setAttributeModel(qualifiedName: string, value: string): void {
 			Reflect.set(this._model, qualifiedName, value);
@@ -294,14 +295,14 @@ function initViewClass<T>(modelClass: TypeOf<Function>, componentRef: ComponentR
 			}
 		}
 	};
-	attributes.forEach(prop => {
-		Object.defineProperty(viewClass.prototype, prop, {
+
+	componentRef.inputs.forEach(input => {
+		Object.defineProperty(viewClass.prototype, input.viewAttribute, {
 			get(): any {
-				return this._model[prop];
+				return this._model[input.modelProperty];
 			},
 			set(value: any) {
-				// this._model[prop] = value;
-				this.setAttribute(prop, value);
+				this.setAttribute(input.viewAttribute, value);
 			},
 			enumerable: true
 		});
