@@ -124,7 +124,7 @@ export class ComponentRender<T> {
 
 	templateHandler(element: Object, elemProp: string, regex?: RegExp): void {
 		const templateText: string = Reflect.get(element, elemProp);
-		const result = [...templateText.matchAll(regex || (/\{\{((\w|\.)*(\(\))?)\}\}/g))];
+		const result = [...templateText.matchAll(regex || (/\{\{((\w| |\.|\+|-|\*|\\)*(\(\))?)\}\}/g))];
 		if (result.length === 0) {
 			return;
 		}
