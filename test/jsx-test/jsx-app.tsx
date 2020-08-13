@@ -116,8 +116,8 @@ export class AppEdit {
     selector: 'ay-kalam',
     template: `
     <div>
-        <div [innerHTML]="_model"></div>
-        <div>{{_model}}</div>
+        <div [innerHTML]="model"></div>
+        <div>{{model}}</div>
         <button class="btn btn-primary" (click)="info()" >click</button>
     </div>`
 })
@@ -126,8 +126,12 @@ class AyKalam {
     _model: string;
 
     @Input()
-    set model(model: AppModel) {
+    set model(model: any) {
         this._model = JSON.stringify(model);
+    }
+
+    get model(): any {
+        return this._model;
     }
 
     info() {
@@ -141,9 +145,9 @@ class AyKalam {
     template: (jsxApp: JsxApp) => {
         return (
             <div class="row">
-                {/* <div class="col-12" >
+                <div class="col-12" >
                     <ay-kalam $model="appModel" />
-                </div> */}
+                </div>
                 <div class="col-6">
                     {/* <div class="row">
                         <div class="col-6">
