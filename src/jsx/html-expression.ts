@@ -1,37 +1,117 @@
 import { JsxComponent, Fragment } from '../jsx/factory.js';
 import { JSXRender } from '../core/decorators.js';
+import { ComponentRender } from './render.js';
+import { BaseComponent, isBaseComponent } from '../elements/component.js';
+import { ComponentRef } from '../elements/elements.js';
+import { setValueByPath, updateAttribute, updateValue } from '../core/utils.js';
 
-/**
- * angulr way: response to '{{expression}}'
- * react way: bind-"sourecPropertyName"="modelPropertName"
- *
- * "$class": "className"
- *
- */
-export class HTMLTempletExpression { }
+export class HTMLComponentRender<T> extends ComponentRender<T> {
+    constructor(baiseView: BaseComponent<T> & HTMLElement, componentRef: ComponentRef<T>) {
+        super(baiseView, componentRef);
+        this.templateRegExp = (/\{\{((\w| |\.|\+|-|\*|\\)*(\(\))?)\}\}/g);
+    }
 
-/**
- * response to [sourecPropertyName]="('view/model')PropertName"
- *
- * "$class": "className"
- */
-export class HTMLBindingExpression { }
+    initAttribute(element: HTMLElement, elementAttr: string, viewProperty: string): void {
 
-/**
- * response to [(sourecPropertyName)]="('view/model')PropertName"
- *
- * "$class": "className"
- */
-export class HTML2BindingExpression { }
+        if (elementAttr.startsWith('#')) {
+            // this.baiseView[elementAttr.substring(1)] = element;
+            Reflect.set(this.baiseView, elementAttr.substring(1), element);
+        }
+        else if (elementAttr.startsWith('[(')) {
+            // [(elementAttr)]="modelProperty"
+            elementAttr = elementAttr.substring(2, elementAttr.length - 2);
+            this.updateElementData(element, elementAttr, viewProperty);
+            this.addViewPropertyBinding(element, elementAttr, viewProperty);
+            this.addElementPropertyBinding(element, elementAttr, viewProperty);
+        }
+        else if (elementAttr.startsWith('[')) {
+            // [elementAttr]="modelProperty"
+            elementAttr = elementAttr.substring(1, elementAttr.length - 1);
+            this.updateElementData(element, elementAttr, viewProperty);
+            this.addViewPropertyBinding(element, elementAttr, viewProperty);
+        }
+        else if (elementAttr.startsWith('(')) {
+            // (elementAttr)="modelProperty()"
+            elementAttr = elementAttr.substring(1, elementAttr.length - 1);
+            this.handleEvent(element, elementAttr, viewProperty);
+        }
+        else if (elementAttr.startsWith('on')) {
+            // onelementAttr="modelProperty()"
+            this.handleEvent(element, elementAttr.substring(2), viewProperty);
+        }
+        else {
+            if (typeof viewProperty === 'boolean' && !viewProperty) {
+                element.removeAttribute(elementAttr);
+            } else {
+                element.setAttribute(elementAttr, viewProperty);
+            }
+        }
+    }
 
-/**
- * response to (eventName)="modelCallbackFun()"
- */
-export class HTMLEventExpression { }
+    private handleEvent(element: HTMLElement, elementAttr: string, modelProperty: string) {
+        modelProperty = modelProperty.endsWith('()') ?
+            modelProperty.substring(0, modelProperty.length - 2) : modelProperty;
+        let callback: Function = this.baiseView._model[modelProperty];
+        element.addEventListener(elementAttr, event => {
+            callback.call(this.baiseView._model);
+        });
+    }
+
+    // handleAttributes(element: HTMLElement, propertyKey: string, propertyValue: any) {
+    //     // console.log(key, value);
+
+    //     if (propertyKey.startsWith('#')) {
+    //         // this.baiseView[key.substring(1)] = element;
+    //         Reflect.set(this.baiseView, propertyKey.substring(1), element);
+    //     } else if (propertyKey.startsWith('[')) {
+    //         return;
+    //     } else if (propertyKey.startsWith('(')) {
+    //         return;
+    //     } else if (typeof propertyValue === 'string' && (/\{\{(.+\w*)*\}\}/g).test(propertyValue)) {
+    //         let propertyName = propertyValue.substring(2, propertyValue.length - 2);
+    //         // this.templateHandler(element, key);
+    //         element.setAttribute(propertyKey, this.baiseView._model[propertyName]);
+    //         console.log(propertyName);
+    //         if ('_observable' in element) {
+    //             // (<BaseComponent>element)._observable.emit(propertyValue);
+    //             (<BaseComponent<T>>element)._observable.subscribe(propertyKey, () => {
+    //                 this.baiseView._setModelProp(propertyName, (element as HTMLElement).getAttribute(propertyKey));
+    //                 // this.baiseView._model[propertyName] = (element as HTMLElement).getAttribute(propertyKey);
+    //                 console.log(propertyName, event);
+    //             });
+    //         } else {
+    //             // addListener(propertyKey, () => {
+    //             //     this.baiseView._setModelProp(propertyName, element.getAttribute(propertyKey));
+    //             // });
+    //             // element.addEventListener(propertyKey, (event) => {
+    //             //     this.baiseView._setModelProp(propertyName, element.getAttribute(propertyKey));
+    //             //     // this.baiseView._model[propertyName] = element.getAttribute(propertyKey);
+    //             //     console.log(propertyName, event);
+    //             // });
+    //         }
+
+    //     } else if (propertyKey.startsWith('on')) {
+    //         element.addEventListener(propertyKey.substring(2), (event) => {
+    //             if (typeof propertyValue === 'function') {
+    //                 propertyValue.call(this.baiseView._model);
+    //             } else if (typeof propertyValue === 'string') {
+    //                 propertyValue = propertyValue.substring(0, propertyValue.length - 2);
+    //                 this.baiseView._model[propertyValue]();
+    //             }
+    //         });
+    //     } else {
+    //         if (typeof propertyValue === 'boolean' && propertyValue) {
+    //             element.setAttribute(propertyKey, '');
+    //         } else {
+    //             element.setAttribute(propertyKey, propertyValue);
+    //         }
+    //     }
+    // }
+
+}
 
 export function toJSXRender<T>(html: string): JSXRender<T> {
     // should render her all the variables and resolve binding
-
     return (model: T) => parseHtmlToJsxComponent(html) as JsxComponent;
 }
 
@@ -151,7 +231,7 @@ function defineChild(htmlStatement: string): Child {
     const fisrtSpace = htmlStatement.indexOf(' ');
 
     if (fisrtSpace > 0) {
-        const attrs = htmlStatement.substring(+ 1);
+        const attrs = htmlStatement.substring(fisrtSpace + 1);
         currentElement.attrs = {};
         let key: string | null = null, value: string | null = null;
         const list = attrs.split(/\s/);
@@ -193,7 +273,7 @@ function defineChild(htmlStatement: string): Child {
 
 // let html = `
 //     Text 1
-//     <div [(model)]="data" $data="$ffff" (click)="onClick()">
+//     <div [(model)]="data" $foo="$bar" (click)="onClick()">
 //         child text data
 //     </div>
 //     Text 2

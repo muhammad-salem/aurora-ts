@@ -1,5 +1,3 @@
-import { join } from 'path';
-
 export function isHTMLElement(object: any): object is HTMLElement {
 	return (
 		object.prototype instanceof HTMLElement ||
@@ -44,7 +42,7 @@ export function mapFunArgs(path: string): Args[] {
 	return callpaths;
 }
 
-export function getByPath(parent: any, objectPath: string, skipFirst?: boolean, resolver?: { [key: string]: any }) {
+export function getValueByPath(parent: any, objectPath: string, skipFirst?: boolean, resolver?: { [key: string]: any }) {
 	const args = mapFunArgs(objectPath);
 	let ref = parent;
 	if (skipFirst) {
@@ -66,7 +64,7 @@ export function getByPath(parent: any, objectPath: string, skipFirst?: boolean, 
 				const param = params[j];
 				let rkey;
 				if (resolver && (rkey = keyFor(resolverKeys, param))) {
-					keyParamters.push(getByPath(resolver[<string>rkey], param, true));
+					keyParamters.push(getValueByPath(resolver[<string>rkey], param, true));
 				} else if (!Number.isNaN(+param)) {
 					// is number
 					keyParamters.push(+param);
@@ -84,18 +82,25 @@ export function getByPath(parent: any, objectPath: string, skipFirst?: boolean, 
 
 
 export function setValueByPath(parent: any, objectPath: string, value: any) {
-	const args = mapFunArgs(objectPath);
+	const argument = mapFunArgs(objectPath)[0];
 	let ref = parent;
-	let j;
-	for (j = 0; j < args[0].prop.length - 1; j++) {
-		ref = ref[args[0].prop[j]];
+	let index;
+	for (index = 0; index < argument.prop.length - 1; index++) {
+		ref = ref[argument.prop[index]];
 		if (!ref) {
 			return;
 		}
 	}
-	ref[args[0].prop[j]] = value;
+	ref[argument.prop[index]] = value;
 }
 
+export function updateValue(from: Object, fromPath: string, to: Object, toPath: string): void {
+	setValueByPath(to, toPath, getValueByPath(from, fromPath));
+}
+
+export function updateAttribute(to: HTMLElement, toPath: string, from: Object, fromPath: string): void {
+	to.setAttribute(toPath, getValueByPath(from, fromPath));
+}
 
 
 // export function getObjectRef(parent: any, objectPath: string, skipFirst: boolean, resolver?: { [key: string]: any }) {

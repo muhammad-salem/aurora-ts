@@ -1,9 +1,9 @@
-declare module '*.htm' {
+declare module '*.html' {
     const content: string;
     export default content;
 }
 
-declare module '*.htm.js' {
+declare module '*.html.js' {
     const content: string;
     export default content;
 }

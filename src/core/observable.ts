@@ -55,6 +55,17 @@ export class Observable {
                 });
             });
     }
+
+    emitValue(propertyPath: string, value?: any): void {
+        this.subscripers.get(propertyPath)?.forEach(callback => {
+            try {
+                callback(value);
+            } catch (error) {
+                console.error("error at call ", callback.name);
+            }
+        });
+    }
+
     subscribe(attrName: string, callback: Function): void {
         const callbacks = this.subscripers.get(attrName);
         if (callbacks) {
@@ -66,5 +77,9 @@ export class Observable {
 
     destroy() {
         this.subscripers.clear();
+    }
+
+    has(attrName: string): boolean {
+        return this.subscripers.has(attrName);
     }
 }

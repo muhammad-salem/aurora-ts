@@ -1,12 +1,12 @@
-import { Component, Input, HostListener } from '../../esm2020/aurora.js';
+import { Component, Input, HostListener, View } from '../../esm2020/aurora.js';
 import { Person } from './person.js';
 // import personHTML from './app-root.html';
 
 
 @Component({
-	selector: 'app-root',
-	template:
-		`
+    selector: 'app-root',
+    template:
+        `
 <div [name]="name" [(id)]="id" (click)="onClick()">
     {{appVersion}}
     {{appName}}
@@ -17,22 +17,22 @@ import { Person } from './person.js';
 <h3>data1 'data2' data3</h3>
 <h4>data1 {JSON.stringify(data)} data3</h4>
 
-<person-edit person="{{person1}}"></person-edit>
+<person-edit #personEdit person="{{person1}}" (save)="printPerson($event)"></person-edit>
 
 
 <progress-bar value="40" min="0" max="100"></progress-bar>
 <div class="row">
     <div class="col-3">
-        <person-view #person1 person="{{person1}}" name="dddddddd" age="34" allowed></person-view>
+        <person-view #pm1 person="{{person1}}" name="dddddddd" age="34" allowed></person-view>
     </div>
     <div class="col-3">
-        <person-view #person2 person="{{person2}}" name="{{name}}" bind-age="years"></person-view>
+        <person-view #pm2 person="{{person2}}" name="{{name}}" bind-age="years"></person-view>
     </div>
     <div class="col-3">
-        <person-view name="jone" age="25" person="{{person3}}"></person-view>
+        <person-view #pm3 name="jone" age="25" person="{{person3}}"></person-view>
     </div>
     <div class="col-3">
-        <person-view name="alex" age="29" person="{{person4}}"></person-view>
+        <person-view #pm4 name="alex" age="29" person="{{person4}}"></person-view>
     </div>
 </div>
 
@@ -74,22 +74,35 @@ import { Person } from './person.js';
 `
 })
 export class AppRoot {
-	@Input()
-	appVersion: string = '20.7.29';
+    @Input()
+    appVersion: string = '20.7.29';
 
-	@Input()
-	appName = 'Alex';
+    @Input()
+    appName = 'Alex';
 
-	@Input()
-	name = 'Jone Alex';
+    @Input()
+    name = 'Jone Alex';
 
-	person1: Person = { name: 'jone', age: 39 };
-	person2: Person = { name: 'alex', age: 46 };
-	person3: Person = { name: 'delilya', age: 25 };
-	person4: Person = { name: 'kelwa', age: 14 };
+    @View()
+    view: HTMLElement;
 
-	@HostListener('person1:select')
-	onClose(data: any) {
-		console.log('AppRoot => person1:select', data);
-	}
+    person1: Person = { name: 'jone', age: 39 };
+    person2: Person = { name: 'alex', age: 46 };
+    person3: Person = { name: 'delilya', age: 25 };
+    person4: Person = { name: 'kelwa', age: 14 };
+
+    @HostListener('person1:select')
+    onClose(data: any) {
+        console.log('AppRoot => person1:select', data);
+    }
+
+    @HostListener('personEdit:input')
+    onPersonEdit(data: any) {
+        console.log('personEdit:input', data, this.view);
+    }
+
+    @HostListener('personEdit:person.age')
+    onPersonAge(data: any) {
+        console.log('personEdit:person.age', data, this.view);
+    }
 }

@@ -1,5 +1,5 @@
-/// <reference path="../types/html.ts"/>
-/// <reference path="../reflect/metadata.ts" />
+/// <reference path='../types/html.ts'/>
+/// <reference path='../reflect/metadata.ts' />
 
 import { ComponentElement } from '../elements/elements.js';
 import { JsxComponent } from '../jsx/factory.js';
@@ -26,7 +26,7 @@ export interface PipeOptions {
 }
 
 export type JSXRender<T> = (model: T) => JsxComponent;
-export interface ComponentOptions<T> {
+export interface ComponentOptions<T = Function> {
 	selector: string;
 	/**
 	 * template: typeof 'string' ==> html template,
@@ -126,8 +126,8 @@ export function Directive(opt: DirectiveOptions): Function {
 	};
 }
 
-export function Component<T>(opt: ComponentOptions<T>): Function {
-	return (target: Function) => {
+export function Component<T extends Object>(opt: ComponentOptions<T>): Function {
+	return (target: TypeOf<T>) => {
 		ComponentElement.defineComponent(target, opt);
 		return target;
 	};

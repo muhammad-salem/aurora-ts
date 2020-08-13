@@ -31,7 +31,7 @@ export interface Person {
 		{{person.name}}
 		{{person.age}}
 	</div>
-	<p id="p-name" #nameArea class="{{className}}" onclick="resize()">
+	<p id="p-name" #nameArea class="{{className}}" onclick="onResize()">
 		Your name is {{name}}
 	</p>
 	<p id="p-age" #ageArea>youur age is: {{years}}, born in Year of {{yearOfBirth()}}</p>
@@ -42,16 +42,18 @@ export interface Person {
 	`
 })
 export class PersonModel implements OnInit {
+
 	@Input() name: string;
 	@Input('age') years: number = 87;
-	@Output() open: EventEmitter<any> = new EventEmitter();
-	@Output('select') _select: EventEmitter<any> = new EventEmitter();
-
 	@Input()
 	person: Person = {
 		name: 'Delila',
 		age: 24
 	};
+
+	@Output() open: EventEmitter<any> = new EventEmitter();
+	@Output('select') _select: EventEmitter<any> = new EventEmitter();
+
 
 	className: string = 'p1 m1';
 
@@ -59,14 +61,23 @@ export class PersonModel implements OnInit {
 
 	@ViewChild(HTMLParagraphElement, { id: 'p-name' })
 	childName!: HTMLParagraphElement;
+
 	@ViewChild(HTMLParagraphElement, { id: 'p-age' })
 	childAge!: HTMLParagraphElement;
 
 	@ViewChildren(HTMLParagraphElement) children: HTMLParagraphElement[];
 
+
+	@HostBinding('class.valid')
+	valid: boolean;
+
+	@HostBinding('class.invalid')
+	invalid: boolean;
+
 	constructor(@Optional() private service: LogService) {
 		this.name = 'ahmed';
 	}
+
 	onInit(): void {
 		console.log('onInit', this);
 		this.open.emit('init data');
@@ -76,12 +87,6 @@ export class PersonModel implements OnInit {
 		return 2020 - this.years;
 	}
 
-	@HostBinding('class.valid') get valid() {
-		return true;
-	}
-	@HostBinding('class.invalid') get invalid() {
-		return false;
-	}
 
 	@HostListener('window:load', ['$event'])
 	onLoad(e: Event) {
@@ -96,7 +101,7 @@ export class PersonModel implements OnInit {
 	@HostListener('click', ['$event.target'])
 	onClick(btn: Event) {
 		console.log('button', btn, 'number of clicks:');
-		this._select.emit({ name: 'alex', age: 24 });
+		this._select.emit(this.person);
 	}
 
 	@HostListener('select')
@@ -118,13 +123,13 @@ export class PersonModel implements OnInit {
 
 @Component({
 	selector: 'person-edit',
-	template: ({ person, save }: PersonEdit) => {
+	template: ({ person, printPerson }: PersonEdit) => {
 		return (
-			<form>
-				<input type="text" value={person.name} ></input>
-				<input type="text" value={person.age} ></input>
-				<input type="submit" onclick={save}></input>
-			</form>
+			<form #form >
+				<input if="show" type="text" $value="person.name" />
+				<input type="number" $value="person.age" />
+				<input type="button" onclick={printPerson} value="Save" />
+			</form >
 		);
 	}
 })
@@ -132,13 +137,16 @@ class PersonEdit {
 	@Input()
 	person: Person;
 
-
 	@Input()
-	data: Person;
-
+	show = true;
 
 	@Output()
 	save = new EventEmitter<Person>();
+
+	printPerson() {
+		console.log(this.person);
+		this.save.emit(this.person);
+	}
 }
 
 

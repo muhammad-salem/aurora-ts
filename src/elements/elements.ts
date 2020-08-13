@@ -15,6 +15,9 @@ import { ClassRegistry } from '../providers/provider.js';
 import { JsxComponent } from '../jsx/factory.js';
 import { Observable } from '../core/observable.js';
 import { findByModelClassOrCreat } from '../reflect/bootstrap-data.js';
+import { toJSXRender, HTMLComponentRender } from '../jsx/html-expression.js';
+import { JSXComponentRender } from '../jsx/jsx-expression.js';
+import { EventEmitter } from '../core/events.js';
 
 export class PropertyRef {
 	constructor(public modelProperty: string, private _viewNanme?: string, descriptor?: PropertyDescriptor) { }
@@ -62,7 +65,7 @@ export interface DirectiveRef extends DirectiveOptions {
 
 export interface ComponentRef<T> {
 	selector: string;
-	template: string | JSXRender<T>;
+	template: JSXRender<T>;
 	styles: string;
 	extend: Tag;
 
@@ -75,6 +78,8 @@ export interface ComponentRef<T> {
 	hostBindings: HostBindingRef[];
 	hostListeners: ListenerRef[];
 	descriptors: PropertyDescriptor[];
+
+	renderType: 'html' | 'jsx' | 'tsx';
 }
 
 
@@ -151,17 +156,30 @@ export class ComponentElement {
 		dependencyInjector.getInstance(ClassRegistry).registerService(modelClass);
 	}
 
-	static defineComponent<T>(modelClass: Function, opts: ComponentOptions<T>) {
+	static defineComponent<T extends Object>(modelClass: TypeOf<T>, opts: ComponentOptions<T>) {
 		var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelClass.prototype);
 		for (const key in opts) {
 			bootstrap[key] = Reflect.get(opts, key);
 		}
 		bootstrap.extend = findByTagName(opts.extend);
 		var componentRef: ComponentRef<T> = bootstrap as ComponentRef<T>;
-		componentRef.viewClass = initViewClass(
-			modelClass as TypeOf<Function>,
-			componentRef
-		);
+		if (!componentRef.template) {
+			componentRef.renderType = 'html';
+		} else if (typeof componentRef.template === 'string') {
+			componentRef.template = toJSXRender(componentRef.template);
+			componentRef.renderType = 'html';
+		} else {
+			componentRef.renderType = 'jsx';
+		}
+		componentRef.inputs = componentRef.inputs || [];
+		componentRef.outputs = componentRef.outputs || [];
+		componentRef.viewChild = componentRef.viewChild || [];
+		componentRef.ViewChildren = componentRef.ViewChildren || [];
+		componentRef.hostBindings = componentRef.hostBindings || [];
+		componentRef.hostListeners = componentRef.hostListeners || [];
+		componentRef.descriptors = componentRef.descriptors || [];
+
+		componentRef.viewClass = initViewClass(modelClass, componentRef);
 
 		dependencyInjector.getInstance(ClassRegistry).registerComponent(modelClass);
 		dependencyInjector
@@ -184,45 +202,112 @@ export class ComponentElement {
 	}
 }
 
-function initViewClass<T>(modelClass: TypeOf<Function>, componentRef: ComponentRef<T>): CustomElementConstructor {
+function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: ComponentRef<T>): CustomElementConstructor {
 	const viewClassName = `${modelClass.name}View`;
-	const attributes: string[] = componentRef.inputs.map(input => input.viewAttribute);
 	const htmlParent = (componentRef.extend as Tag).classRef as TypeOf<HTMLElement>;
 	let viewClass: CustomElementConstructor;
-	viewClass = class extends htmlParent implements BaseComponent {
+	viewClass = class extends htmlParent implements BaseComponent<T> {
+		// [key: string]: any;
 
-		_model: any;
-		_observable: Observable;
+		_model: T & { [key: string]: any };
+		_changeObservable: Observable;
 		_render: ComponentRender<T>;
+		_parentComponent: BaseComponent<any>;
+		_bindMap: Map<string, Array<string>>;
 
-		_nativeSetAttribute: Function;
-		_nativeGetAttribute: Function;
+		_setAttributeNative: Function;
+		_addEventListenerNative: Function;
 
 		constructor() {
 			super();
 			this._model = new modelClass();
-			this._observable = new Observable();
-			this._render = new ComponentRender(this, componentRef);
+			this._changeObservable = new Observable();
+			this._bindMap = new Map();
+			this._render = componentRef.renderType === "html" ?
+				new HTMLComponentRender(this, componentRef) :
+				new JSXComponentRender(this, componentRef);
 
-			this._nativeSetAttribute = this.setAttribute;
-			this._nativeGetAttribute = this.getAttribute;
+			this._setAttributeNative = this.setAttribute;
+			this._addEventListenerNative = this.addEventListener;
 
-			this.setAttribute = this._setAttributeModel;
-			this.getAttribute = this._getAttributeModel;
+			this.setAttribute = this._setAttribute;
+			// this.getAttribute = this._getAttribute;
+			this.addEventListener = this._addEventListener;
 
 			componentRef.inputs.forEach(input => {
-				this._nativeSetAttribute(input.viewAttribute, this._model[input.modelProperty]);
+				const inputDefaultValue = this._model[input.modelProperty];
+				if (inputDefaultValue) {
+					this._setAttribute(input.viewAttribute, inputDefaultValue);
+				}
 			});
 		}
-		_setAttributeModel(qualifiedName: string, value: string): void {
-			Reflect.set(this._model, qualifiedName, value);
-			this._nativeSetAttribute(qualifiedName, value);
-			this._observable.emit(qualifiedName);
+
+		hasInput(viewProp: string): boolean {
+			return componentRef.inputs.some(input => input.viewAttribute === viewProp);
 		}
 
-		_getAttributeModel(qualifiedName: string): string | null {
-			return Reflect.get(this._model, qualifiedName);
+		getInput(viewProp: string): PropertyRef | undefined {
+			return componentRef.inputs.find(input => input.viewAttribute === viewProp);
 		}
+
+		getInputValue(viewProp: string): any {
+			const inputRef = this.getInput(viewProp);
+			if (inputRef) {
+				return this._model[inputRef.modelProperty];
+			}
+		}
+
+		setInputValue(viewProp: string, value: any): void {
+			const inputRef = this.getInput(viewProp);
+			if (inputRef) {
+				// console.log('about to change input', inputRef.modelProperty, value);
+				Reflect.set(this._model, inputRef.modelProperty, value);
+				this._changeObservable.emit(viewProp);
+			}
+		}
+
+		hasOutput(viewProp: string): boolean {
+			return componentRef.outputs.some(output => output.viewAttribute === viewProp);
+		}
+
+		getOutput(viewProp: string): PropertyRef | undefined {
+			return componentRef.outputs.find(output => output.viewAttribute === viewProp);
+		}
+
+		getEventEmitter<V>(viewProp: string): EventEmitter<V> | undefined {
+			const outputRef = this.getOutput(viewProp);
+			if (outputRef) {
+				return this._model[outputRef.modelProperty] as EventEmitter<V>;
+			}
+		}
+
+		hasProp(propName: string): boolean {
+			return Reflect.has(this._model, propName);
+		}
+
+		_setAttributeHelper(attrViewName: string, value: any): void {
+			if (value === null || value === undefined) {
+				return;
+			}
+			if (typeof value === 'boolean') {
+				if (value) {
+					this._setAttributeNative(attrViewName, '');
+				} else {
+					this.removeAttribute(attrViewName);
+				}
+			} else {
+				this._setAttributeNative(attrViewName, String(value));
+			}
+		}
+
+		_setAttribute(attrViewName: string, value: any): void {
+			this.setInputValue(attrViewName, value);
+			this._setAttributeHelper(attrViewName, value);
+		}
+
+		// _getAttribute(attrViewName: string): string | null {
+		// 	return this.getInputValue(attrViewName);
+		// }
 
 		doBlockCallback = (): void => {
 			if (isDoCheck(this._model)) {
@@ -231,15 +316,17 @@ function initViewClass<T>(modelClass: TypeOf<Function>, componentRef: ComponentR
 		};
 
 		attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+			// console.log('attributeChangedCallback', name, oldValue, newValue);
 			if (newValue === oldValue) {
 				return;
 			}
-			this._observable.emit(name);
+			this._changeObservable.emit(name);
 			if (isOnChanges(this._model)) {
 				this._model.onChanges();
 			}
 			this.doBlockCallback();
 		}
+
 		connectedCallback() {
 			if (isOnChanges(this._model)) {
 				this._model.onChanges();
@@ -258,12 +345,11 @@ function initViewClass<T>(modelClass: TypeOf<Function>, componentRef: ComponentR
 			}
 
 			// setup ui view
-			if (componentRef.template) {
-				this._render.initView();
-			}
+			this._render.initView();
 
 			if (componentRef.view) {
-				this._model[componentRef.view] = this;
+				// this._model[componentRef.view] = this;
+				Reflect.set(this._model, componentRef.view, this);
 			}
 
 			if (isAfterViewInit(this._model)) {
@@ -287,11 +373,83 @@ function initViewClass<T>(modelClass: TypeOf<Function>, componentRef: ComponentR
 
 		adoptedCallback() {
 			// restart the process
+			this.innerHTML = '';
 			this.connectedCallback();
 		}
+
 		disconnectedCallback() {
 			if (isOnDestroy(this._model)) {
 				this._model.onDestroy();
+			}
+			this._changeObservable.emit('destroy');
+		}
+
+		// events api
+		_addEventListener(eventType: string, listener: EventListenerOrEventListenerObject | null, options?: boolean | AddEventListenerOptions): void {
+			// console.log('tag', this.tagName.toLowerCase(), 'eventType', eventType);
+			if ('on' + eventType in this) {
+				// this._nativeAddEventListener(eventType, listener, options);
+				this._addEventListenerNative(eventType, (event: Event) => {
+					console.log('tag', this.tagName, 'call eventType', eventType, 'event', event);
+					(listener as Function)(event);
+				}, options);
+				return;
+			}
+			const modelEvent = this.getEventEmitter<any>(eventType);
+			if (modelEvent) {
+				// modelEvent.subscribe(listener);
+				modelEvent.subscribe((data: any) => {
+					console.log('tag', this.tagName, 'call eventType', eventType, 'data', data, 'modelEvent', modelEvent);
+					(listener as Function)(data);
+				});
+			}
+			else {
+				this._changeObservable.subscribe(eventType, (listener as EventListener));
+			}
+		}
+
+		triggerEvent(eventName: string, value?: any): void {
+			// console.log('tag', this.tagName.toLowerCase(), 'triggerEvent', event);
+			const modelEvent = this.getEventEmitter<any>(eventName);
+			if (modelEvent) {
+				modelEvent.emit(value);
+				return;
+			}
+			if (this._changeObservable.has(eventName)) {
+				if (value) {
+					this._changeObservable.emitValue(eventName, value);
+				} else {
+					this._changeObservable.emit(eventName);
+				}
+				return;
+			}
+		}
+
+		bindAttr(view: string, elementAttr: string): void {
+			let viewAttr = this._bindMap.get(view);
+			if (viewAttr) {
+				viewAttr.push(view);
+			} else {
+				this._bindMap.set(view, [elementAttr]);
+			}
+		}
+
+		getBindAttr(view: string): string[] {
+			return this._bindMap.get(view) || [];
+		}
+		searchBindAttr(elementAttr: string): string[] {
+			return [...this._bindMap.entries()]
+				.filter(entry => entry[1].some(item => elementAttr.startsWith(item)))
+				.map(entry => entry[0]);
+		}
+
+		notifyParentComponent(eventName: string): void {
+			if (this._parentComponent) {
+				let parent = this._parentComponent;
+				let attrs = parent.searchBindAttr(eventName);
+				attrs.forEach(attr => {
+					parent.triggerEvent(attr);
+				});
 			}
 		}
 	};
@@ -302,14 +460,23 @@ function initViewClass<T>(modelClass: TypeOf<Function>, componentRef: ComponentR
 				return this._model[input.modelProperty];
 			},
 			set(value: any) {
-				this.setAttribute(input.viewAttribute, value);
+				this._model[input.modelProperty] = value;
+			},
+			enumerable: true
+		});
+	});
+
+	componentRef.outputs.forEach(output => {
+		Object.defineProperty(viewClass.prototype, output.viewAttribute, {
+			get(): EventEmitter<any> {
+				return this._model[output.modelProperty];
 			},
 			enumerable: true
 		});
 	});
 	Object.defineProperty(viewClass, 'observedAttributes', {
 		get() {
-			return attributes;
+			return componentRef.inputs.map(input => input.viewAttribute);
 		}
 	});
 	Object.defineProperty(modelClass, viewClassName, { value: viewClass });

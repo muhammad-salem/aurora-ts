@@ -23,6 +23,10 @@ function isMedia(name: string) {
 }
 
 export const DefaultTag: Tag = { name: null, classRef: HTMLElement };
+
+/**
+ * see https://html.spec.whatwg.org/multipage/indices.html#element-interfaces
+ */
 export const NativeTags: Tag[] = [
 	{ name: 'a', classRef: HTMLAnchorElement },
 	{ name: 'abbr', classRef: HTMLElement },
