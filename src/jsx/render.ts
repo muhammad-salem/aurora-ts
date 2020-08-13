@@ -39,6 +39,7 @@ export abstract class ComponentRender<T> {
 				updateValue(this.baiseView._model, viewProperty, element, elementAttr);
 			}
 		} else {
+			updateAttribute(element, elementAttr, this.baiseView._model, viewProperty);
 			updateValue(this.baiseView._model, viewProperty, element, elementAttr);
 		}
 	}
@@ -54,10 +55,17 @@ export abstract class ComponentRender<T> {
 
 
 	addElementPropertyBinding(element: HTMLElement, elementAttr: string, viewProperty: string) {
-		this.baiseView.bindAttr(viewProperty, element, elementAttr);
+		this.baiseView.bindAttr(viewProperty, elementAttr);
 		const eventListener = () => {
 			this.updateViewData(element, elementAttr, viewProperty);
-			this.baiseView.notifyParentComponent(viewProperty, this.baiseView);
+			console.log(viewProperty, this.baiseView._parentComponentBindMap, this.baiseView._parentComponent?._parentComponentBindMap);
+			this.baiseView.triggerParentEvent(viewProperty);
+			// this.baiseView.notifyParentComponent(viewProperty);
+			// let parentEventName = this.baiseView._parentComponentBindMap.get(viewProperty);
+			// if (parentEventName) {
+			// 	// this.baiseView.notifyParentComponent(parentEventName);
+			// 	this.baiseView._parentComponent.triggerEvent(parentEventName);
+			// }
 		};
 		element.addEventListener(getChangeEventName(element, elementAttr), eventListener);
 	}
@@ -103,8 +111,12 @@ export abstract class ComponentRender<T> {
 	createElement(viewTemplate: JsxComponent): HTMLElement | DocumentFragment {
 		const element = this.createElementByTagName(viewTemplate.tagName);
 		if (viewTemplate.attributes) {
+			const bindMap: Map<string, string> = new Map();
 			for (const key in viewTemplate.attributes) {
-				this.initAttribute(<HTMLElement>element, key, viewTemplate.attributes[key]);
+				this.initAttribute(<HTMLElement>element, key, viewTemplate.attributes[key], bindMap);
+			}
+			if (isBaseComponent(element)) {
+				element._parentComponentBindMap = bindMap;
 			}
 		}
 		if (viewTemplate.children && viewTemplate.children.length > 0) {
@@ -115,7 +127,7 @@ export abstract class ComponentRender<T> {
 		return element;
 	}
 
-	abstract initAttribute(element: HTMLElement, propertyKey: string, propertyValue: any): void;
+	abstract initAttribute(element: HTMLElement, propertyKey: string, propertyValue: any, bindMap: Map<string, string>): void;
 
 	createElementByTagName(tagName: string): HTMLElement | DocumentFragment {
 		if (Fragment === tagName.toLowerCase()) {

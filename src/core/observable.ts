@@ -43,7 +43,9 @@ export class Observable {
     constructor() { }
     emit(propertyPath: string): void {
         [...this.subscripers.keys()]
-            .filter(key => key?.startsWith(propertyPath))
+            .filter(key => key?.startsWith(propertyPath) || propertyPath.startsWith(key))
+            // .filter(key => propertyPath.startsWith(key))
+            // .filter(key => key === propertyPath)
             .map(key => this.subscripers.get(key))
             .forEach(callbacks => {
                 callbacks?.forEach(callback => {

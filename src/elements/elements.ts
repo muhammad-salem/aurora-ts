@@ -8,7 +8,7 @@ import {
 	isAfterContentInit, isAfterContentChecked,
 	isAfterViewInit, isAfterViewChecked, isOnDestroy,
 } from '../core/lifecycle.js';
-import { BaseComponent, BindKey } from './component.js';
+import { BaseComponent } from './component.js';
 import { ComponentRender } from '../jsx/render.js';
 import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
@@ -211,8 +211,9 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 		_model: T & { [key: string]: any };
 		_changeObservable: Observable;
 		_render: ComponentRender<T>;
+		_childBindMap: Map<string, Array<string>>;
 		_parentComponent: BaseComponent<any>;
-		_bindMap: Map<string, Array<BindKey>>;
+		_parentComponentBindMap: Map<string, string>;
 
 		_setAttributeNative: Function;
 		_addEventListenerNative: Function;
@@ -221,7 +222,7 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 			super();
 			this._model = new modelClass();
 			this._changeObservable = new Observable();
-			this._bindMap = new Map();
+			this._childBindMap = new Map();
 			this._render = componentRef.renderType === "html" ?
 				new HTMLComponentRender(this, componentRef) :
 				new JSXComponentRender(this, componentRef);
@@ -424,32 +425,56 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 			}
 		}
 
-		bindAttr(view: string, element: HTMLElement, elementAttr: string): void {
-			let viewAttr = this._bindMap.get(view);
+		bindAttr(view: string, elementAttr: string): void {
+			let viewAttr = this._childBindMap.get(view);
 			if (viewAttr) {
-				viewAttr.push({ view, element, elementAttr });
+				viewAttr.push(elementAttr);
 			} else {
-				this._bindMap.set(view, [{ view, element, elementAttr }]);
+				this._childBindMap.set(view, [elementAttr]);
 			}
 		}
 
-		getBindAttr(view: string): BindKey[] {
-			return this._bindMap.get(view) || [];
+		getBindAttr(view: string): string[] {
+			return this._childBindMap.get(view) || [];
 		}
-		searchBindAttr(element: HTMLElement, elementAttr: string): BindKey[] {
-			return [...this._bindMap.entries()]
-				.filter(entry => entry[1].some(item => element !== item.element
-					&& elementAttr.startsWith(item.elementAttr)))
-				.flatMap(entry => entry[1]);
+		searchBindAttr(elementAttr: string): string[] {
+			return [...this._childBindMap.entries()]
+				.filter(entry =>
+					entry[1]
+						.some(item => elementAttr.startsWith(item))
+				)
+				.flatMap(entry => entry[0]);
 		}
 
-		notifyParentComponent(eventName: string, element: HTMLElement): void {
+
+		notifyParentComponent(eventName: string): void {
 			if (this._parentComponent) {
-				let parent = this._parentComponent;
-				let attrs = parent.searchBindAttr(element, eventName);
-				attrs.forEach(attr => {
-					parent.triggerEvent(attr.view);
+				let attrs = this._parentComponent.searchBindAttr(eventName);
+				attrs.forEach(view => {
+					this._parentComponent.triggerEvent(view);
 				});
+			}
+		}
+
+		searchParentBindAttr(elementAttr: string): [string, string] | undefined {
+			if (this._parentComponentBindMap) {
+				return [...this._parentComponentBindMap.entries()]
+					.find(row => elementAttr.startsWith(row[0]));
+			}
+		}
+
+		matchParentEvent(elementAttr: string): string | undefined {
+			let data = this.searchParentBindAttr(elementAttr);
+			if (data) {
+				elementAttr = elementAttr.replace(data[0], data[1]);
+				return elementAttr;
+			}
+		}
+
+		triggerParentEvent(elementAttr: string): void {
+			let parnetEventName = this.matchParentEvent(elementAttr);
+			if (parnetEventName && this._parentComponent) {
+				this._parentComponent._changeObservable.emit(parnetEventName);
 			}
 		}
 	};

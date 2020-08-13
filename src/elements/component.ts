@@ -13,18 +13,18 @@ export interface HTMLComponent {
 	adoptedCallback(): void;
 }
 
-export type BindKey = {
-	element: HTMLElement,
-	elementAttr: string,
-	view: string;
-};
+// export type BindKey = {
+// 	element: HTMLElement,
+// 	elementAttr: string,
+// 	view: string;
+// };
 
 export interface BaseComponent<T extends Object> extends HTMLComponent {
 	_model: T & { [key: string]: any };
 	_changeObservable: Observable;
+	_childBindMap: Map<string, Array<string>>;
 	_parentComponent: BaseComponent<any>;
-	_bindMap: Map<string, Array<BindKey>>;
-	// [key: string]: any;
+	_parentComponentBindMap: Map<string, string>;
 
 	hasInput(viewProp: string): boolean;
 	getInput(viewProp: string): PropertyRef | undefined;
@@ -36,15 +36,24 @@ export interface BaseComponent<T extends Object> extends HTMLComponent {
 	triggerEvent(eventName: string, value?: any): void;
 	hasProp(propName: string): boolean;
 
-	bindAttr(view: string, element: HTMLElement, elementAttr: string): void;
-	getBindAttr(view: string): BindKey[];
-	searchBindAttr(element: HTMLElement, elementAttr: string): BindKey[];
-	notifyParentComponent(eventName: string, element: HTMLElement): void;
+	bindAttr(view: string, elementAttr: string): void;
+	getBindAttr(view: string): string[];
+	searchBindAttr(elementAttr: string): string[];
+	searchParentBindAttr(elementAttr: string): [string, string] | undefined;
+	notifyParentComponent(eventName: string): void;
+	matchParentEvent(elementAttr: string): string | undefined;
+	triggerParentEvent(elementAttr: string): void;
 }
 
 export function isBaseComponent(object: Object): object is BaseComponent<any> {
 	return Reflect.has(object, '_model')
 		&& Reflect.has(object, '_changeObservable')
 		&& Reflect.has(object, '_parentComponent')
-		&& Reflect.has(object, '_bindMap');
+		&& Reflect.has(object, '_childBindMap')
+		&& object instanceof Node;
 }
+
+export function isNativeElement(element: HTMLElement): element is HTMLElement {
+	return element && element instanceof HTMLElement && !element.tagName?.includes('-');
+}
+

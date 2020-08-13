@@ -10,7 +10,7 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
         this.templateRegExp = (/\{\{((\w| |\.|\+|-|\*|\\)*(\(\))?)\}\}/g);
     }
 
-    initAttribute(element: HTMLElement, elementAttr: string, viewProperty: string): void {
+    initAttribute(element: HTMLElement, elementAttr: string, viewProperty: string, bindMap: Map<string, string>): void {
 
         if (elementAttr.startsWith('#')) {
             // this.baiseView[elementAttr.substring(1)] = element;
@@ -22,6 +22,7 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
             this.updateElementData(element, elementAttr, viewProperty);
             this.addViewPropertyBinding(element, elementAttr, viewProperty);
             this.addElementPropertyBinding(element, elementAttr, viewProperty);
+            bindMap.set(elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('[')) {
             // [elementAttr]="modelProperty"

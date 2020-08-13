@@ -7,10 +7,10 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
     constructor(baiseView: BaseComponent<T> & HTMLElement, componentRef: ComponentRef<T>) {
         super(baiseView, componentRef);
         // this.templateRegExp = (/\$(\w*)(\(\))?/g);
-        this.templateRegExp = (/\$\#\$(\w*)?/g);
+        this.templateRegExp = (/0\$\#\$(\w*)?/g);
     }
 
-    initAttribute(element: HTMLElement, elementAttr: string, viewProperty: any): void {
+    initAttribute(element: HTMLElement, elementAttr: string, viewProperty: any, bindMap: Map<string, string>): void {
 
         if (elementAttr.startsWith('#')) {
             // this.baiseView[elementAttr.substring(1)] = element;
@@ -23,6 +23,7 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             this.updateElementData(element, elementAttr, viewProperty);
             this.addViewPropertyBinding(element, elementAttr, viewProperty);
             this.addElementPropertyBinding(element, elementAttr, viewProperty);
+            bindMap.set(elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('$') && typeof viewProperty === 'string') {
             // $elementAttr="viewProperty" 

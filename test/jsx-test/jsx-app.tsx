@@ -223,43 +223,13 @@ class AyKalam {
                             One Way Binding
                             <br />
                             <code>
-                                {`<app-edit $editData="modelC"/>`}
+                                {`<app-edit $editData="modelD"/>`}
                             </code>
                             <br />
-                            <app-edit $editData="modelC" />
+                            <app-edit $editData="modelD" />
                         </div>
                         <div class="col-4" >
                             Two Way Binding
-                            <br />
-                            <code>
-                                {`<app-edit $editData="$modelC"/>`}
-                            </code>
-                            <br />
-                            <app-edit $editData="$modelC" />
-                        </div>
-                        <div class="col-4" >
-                            One Way Binding
-                            <br />
-                            <code>
-                                {`<app-view $viewData="modelC" />`}
-                            </code>
-                            <br />
-                            <app-view $viewData="modelC" />
-                        </div>
-                    </div>
-                    <div class="p-3 my-2 bg-success text-white"></div>
-                    <div class="row">
-                        <div class="col-4" >
-                            two Way Binding
-                            <br />
-                            <code>
-                                {`<app-edit $editData="$modelD"/>`}
-                            </code>
-                            <br />
-                            <app-edit $editData="$modelD" />
-                        </div>
-                        <div class="col-4" >
-                            two Way Binding
                             <br />
                             <code>
                                 {`<app-edit $editData="$modelD"/>`}
@@ -277,6 +247,37 @@ class AyKalam {
                             <app-view $viewData="modelD" />
                         </div>
                     </div>
+                    <div class="p-3 my-2 bg-success text-white"></div>
+                    <div class="row">
+                        <div class="col-4" >
+                            two Way Binding
+                            <br />
+                            <code>
+                                {`<app-edit $editData="$modelE"/>`}
+                            </code>
+                            <br />
+                            <app-edit $editData="$modelE" />
+                        </div>
+                        <div class="col-4" >
+                            two Way Binding
+                            <br />
+                            <code>
+                                {`<app-edit $editData="$modelE"/>`}
+                            </code>
+                            <br />
+                            <app-edit $editData="$modelE" />
+                        </div>
+                        <div class="col-4" >
+                            One Way Binding
+                            <br />
+                            <code>
+                                {`<app-view $viewData="modelE" />`}
+                            </code>
+                            <br />
+                            <app-view $viewData="modelE" />
+                        </div>
+                    </div>
+                    <div class="p-3 my-2 bg-success text-white"></div>
                 </div>
             </div>
         );
@@ -298,12 +299,14 @@ export class JsxApp implements OnInit {
     modelB: AppModel;
     modelC: AppModel;
     modelD: AppModel;
+    modelE: AppModel;
 
     onInit(): void {
         this.modelA = this.getModel();
         this.modelB = this.getModel();
         this.modelC = this.getModel();
         this.modelD = this.getModel();
+        this.modelE = this.getModel();
     }
 
     saveAction(data: any) {
