@@ -95,7 +95,17 @@ export function setValueByPath(parent: any, objectPath: string, value: any) {
 }
 
 export function updateValue(from: Object, fromPath: string, to: Object, toPath: string): void {
-	setValueByPath(to, toPath, getValueByPath(from, fromPath));
+	const value = getValueByPath(from, fromPath);
+	console.log(value);
+	if (value) {
+		setValueByPath(to, toPath, value);
+	} else {
+		if (from instanceof HTMLElement || to instanceof HTMLElement) {
+			setValueByPath(to, toPath, '');
+		} else {
+			setValueByPath(to, toPath, value);
+		}
+	}
 }
 
 export function updateAttribute(to: HTMLElement, toPath: string, from: Object, fromPath: string): void {
