@@ -1,9 +1,8 @@
 import { JsxComponent, Fragment } from '../jsx/factory.js';
 import { JSXRender } from '../core/decorators.js';
 import { ComponentRender } from './render.js';
-import { BaseComponent, isBaseComponent } from '../elements/component.js';
+import { BaseComponent } from '../elements/component.js';
 import { ComponentRef } from '../elements/elements.js';
-import { setValueByPath, updateAttribute, updateValue } from '../core/utils.js';
 
 export class HTMLComponentRender<T> extends ComponentRender<T> {
     constructor(baiseView: BaseComponent<T> & HTMLElement, componentRef: ComponentRef<T>) {

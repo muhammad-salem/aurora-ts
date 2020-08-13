@@ -96,7 +96,6 @@ export function setValueByPath(parent: any, objectPath: string, value: any) {
 
 export function updateValue(from: Object, fromPath: string, to: Object, toPath: string): void {
 	const value = getValueByPath(from, fromPath);
-	console.log(value);
 	if (value) {
 		setValueByPath(to, toPath, value);
 	} else {
@@ -111,46 +110,3 @@ export function updateValue(from: Object, fromPath: string, to: Object, toPath: 
 export function updateAttribute(to: HTMLElement, toPath: string, from: Object, fromPath: string): void {
 	to.setAttribute(toPath, getValueByPath(from, fromPath));
 }
-
-
-// export function getObjectRef(parent: any, objectPath: string, skipFirst: boolean, resolver?: { [key: string]: any }) {
-// 	const paths = splitByRegix(objectPath, /\.|\[|\]/g);
-// 	if (skipFirst) {
-// 		paths.splice(0, 1);
-// 	}
-// 	console.log(paths);
-
-// 	let ref = parent;
-// 	const resolverKeys = Object.keys(resolver || {});
-// 	for (let i = 0; i < paths.length; i++) {
-// 		const props = splitByRegix(paths[i], /\(|\)|,/g);
-// 		ref = ref[props[0]];
-// 		if (typeof ref === 'function') {
-// 			let keyParamters: any[] = [];
-// 			for (let j = 1; j < props.length; j++) {
-// 				const param = props[j];
-// 				let rkey;
-// 				if (resolver && (rkey = keyFor(resolverKeys, param))) {
-// 					keyParamters.push(getObjectRef(resolver[<string>rkey], param, true));
-// 				} else if (!Number.isNaN(+param)) {
-// 					// is number
-// 					keyParamters.push(+param);
-// 				} else {
-// 					// is string
-// 					keyParamters.push(param);
-// 				}
-// 			}
-// 			ref = ref(...keyParamters);
-// 		}
-// 	}
-// 	return ref;
-// }
-
-// window['getObjectRef'] = getObjectRef;
-
-// Reflect.set(window, 'getObjectRef', getObjectRef);
-// Reflect.set(window, 'mapFunArgs', mapFunArgs);
-// Reflect.set(window, 'getFromPath', getFromPath);
-
-
-

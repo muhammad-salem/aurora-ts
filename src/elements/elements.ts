@@ -8,11 +8,10 @@ import {
 	isAfterContentInit, isAfterContentChecked,
 	isAfterViewInit, isAfterViewChecked, isOnDestroy,
 } from '../core/lifecycle.js';
-import { BaseComponent } from './component.js';
+import { BaseComponent, BindKey } from './component.js';
 import { ComponentRender } from '../jsx/render.js';
 import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
-import { JsxComponent } from '../jsx/factory.js';
 import { Observable } from '../core/observable.js';
 import { findByModelClassOrCreat } from '../reflect/bootstrap-data.js';
 import { toJSXRender, HTMLComponentRender } from '../jsx/html-expression.js';
@@ -213,7 +212,7 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 		_changeObservable: Observable;
 		_render: ComponentRender<T>;
 		_parentComponent: BaseComponent<any>;
-		_bindMap: Map<string, Array<string>>;
+		_bindMap: Map<string, Array<BindKey>>;
 
 		_setAttributeNative: Function;
 		_addEventListenerNative: Function;
@@ -425,30 +424,31 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 			}
 		}
 
-		bindAttr(view: string, elementAttr: string): void {
+		bindAttr(view: string, element: HTMLElement, elementAttr: string): void {
 			let viewAttr = this._bindMap.get(view);
 			if (viewAttr) {
-				viewAttr.push(view);
+				viewAttr.push({ view, element, elementAttr });
 			} else {
-				this._bindMap.set(view, [elementAttr]);
+				this._bindMap.set(view, [{ view, element, elementAttr }]);
 			}
 		}
 
-		getBindAttr(view: string): string[] {
+		getBindAttr(view: string): BindKey[] {
 			return this._bindMap.get(view) || [];
 		}
-		searchBindAttr(elementAttr: string): string[] {
+		searchBindAttr(element: HTMLElement, elementAttr: string): BindKey[] {
 			return [...this._bindMap.entries()]
-				.filter(entry => entry[1].some(item => elementAttr.startsWith(item)))
-				.map(entry => entry[0]);
+				.filter(entry => entry[1].some(item => element !== item.element
+					&& elementAttr.startsWith(item.elementAttr)))
+				.flatMap(entry => entry[1]);
 		}
 
-		notifyParentComponent(eventName: string): void {
+		notifyParentComponent(eventName: string, element: HTMLElement): void {
 			if (this._parentComponent) {
 				let parent = this._parentComponent;
-				let attrs = parent.searchBindAttr(eventName);
+				let attrs = parent.searchBindAttr(element, eventName);
 				attrs.forEach(attr => {
-					parent.triggerEvent(attr);
+					parent.triggerEvent(attr.view);
 				});
 			}
 		}

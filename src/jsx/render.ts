@@ -7,149 +7,6 @@ import { EventEmitter } from '../core/events.js';
 import { getValueByPath, setValueByPath, updateAttribute, updateValue } from '../core/utils.js';
 import { findByModelClassOrCreat } from '../reflect/bootstrap-data.js';
 
-// export interface Expression {
-// 	init(): void;
-// }
-
-// interface RuleInterface {
-// 	name: string;
-// 	rightHandRegx: RegExp;
-// 	leftHandRegx: { name: string; regExp: RegExp; handler: Function }[];
-// }
-
-// const Rules: RuleInterface[] = [
-// 	{
-// 		name: 'templet',
-// 		rightHandRegx: /\{\{+(\w)+\}\}/g,
-// 		leftHandRegx: [
-// 			{
-// 				name: 'html',
-// 				regExp: /\((\w*)\)/g,
-// 				handler: HTMLTempletExpression,
-// 			},
-// 			{
-// 				name: 'jsx',
-// 				regExp: /(?:\w*)/g,
-// 				handler: JSXTempletExpression,
-// 			},
-// 		],
-// 		//      {{propname}}        $propname     bind-propname
-// 		// rule: [/\{\{+(\w)+\}\}/g, /\$(\w*)/g, /bind-(\w*)/g]
-// 	},
-// 	{
-// 		name: 'binding',
-// 		rightHandRegx: /"(\w*)"/g,
-// 		leftHandRegx: [
-// 			{
-// 				name: 'html',
-// 				regExp: /\[+(\w)+\]/g,
-// 				handler: HTMLBindingExpression,
-// 			},
-// 			{
-// 				name: 'jsx',
-// 				regExp: /bind-(?:\w*)/g,
-// 				handler: JSXBindingExpression,
-// 			},
-// 		],
-// 		// rule: [/\[(\w*)\]/g, /\[(\w*)\]="(\w*)"/g, /$/g]
-// 	},
-// 	{
-// 		name: 'binding2way',
-// 		rightHandRegx: /(\w)/g,
-// 		leftHandRegx: [
-// 			{
-// 				name: 'html',
-// 				regExp: /\[\(+(\w)+\)\]/g,
-// 				handler: HTML2BindingExpression,
-// 			},
-// 			{
-// 				name: 'jsx',
-// 				regExp: /bindon-(?:\w*)/g,
-// 				handler: JSX2BindingExpression,
-// 			},
-// 		],
-// 		// rule: [/\[(\w*)\]/g, /\[(\w*)\]="(\w*)"/g, /$/g]
-// 	},
-// 	{
-// 		name: 'event',
-// 		// (click)="true & onClick($event,nama)"
-// 		// onclick="true & onClick($event,nama)"
-// 		rightHandRegx: /"(\w*) ?(&|\|) ?(\w*)\((,? ?\$?\w)*\)"/g,
-// 		leftHandRegx: [
-// 			{
-// 				name: 'html',
-// 				regExp: /\((\w*)\)/g,
-// 				handler: HTMLEventExpression,
-// 			},
-// 			{
-// 				name: 'jsx',
-// 				regExp: /on(?:\w*)/g,
-// 				handler: JSXEventExpression,
-// 			},
-// 		],
-// 	},
-// ];
-
-////////////////////////////<BINDING>///////////////////////////////////////////////
-
-// interface BindMap {
-// 	[key: string]: string
-// }
-
-// interface Binding {
-// 	view: HTMLElement;
-// 	element: HTMLElement;
-// 	model: BindMap;
-// 	bindingOneWay: BindMap;
-// 	bindingTwoWay: BindMap;
-// }
-
-// let elements: Binding[] = [];
-
-
-// const registerBinding = (item: Binding) => {
-// 	elements.push(item);
-// };
-
-// const removeBinding = (view: HTMLElement) => {
-// 	elements = elements.filter(item => item.view !== view);
-// };
-
-// function bindOneWay(item: Binding, elementAttr: string, modelProperty: string): void {
-// 	const modelValue = getValueByPath(item.model, modelProperty);
-// 	const elementValue = getValueByPath(item.element, elementAttr);
-// 	if (modelValue !== elementValue) {
-// 		setValueByPath(item.element, elementAttr, modelValue);
-// 	}
-// }
-
-// function bindTwoWay(item: Binding, elementAttr: string, modelProperty: string): void {
-// 	const modelValue = getValueByPath(item.model, modelProperty);
-// 	const elementValue = getValueByPath(item.element, elementAttr);
-// 	const elementOldValue = getValueByPath(item.element, 'old' + elementAttr);
-// 	if (elementValue !== elementOldValue) {
-// 		if (elementValue !== modelValue) {
-// 			setValueByPath(item.model, modelProperty, elementValue);
-// 		}
-// 		setValueByPath(item.element, 'old' + elementAttr, elementValue);
-// 	}
-
-// }
-
-// setInterval(function () {
-// 	if (elements.length === 0) { return; }
-// 	elements.forEach(item => {
-// 		Object.keys(item.bindingOneWay).forEach(key => {
-// 			bindOneWay(item, key, item.bindingOneWay[key]);
-// 		});
-// 		Object.keys(item.bindingTwoWay).forEach(key => {
-// 			bindTwoWay(item, key, item.bindingTwoWay[key]);
-// 		});
-// 	});
-// }, 100);
-
-////////////////////////////<BINDING>///////////////////////////////////////////////
-
 function getChangeEventName(element: HTMLElement, elementAttr: string) {
 	if (elementAttr === 'value') {
 		if (element instanceof HTMLInputElement) {
@@ -197,11 +54,10 @@ export abstract class ComponentRender<T> {
 
 
 	addElementPropertyBinding(element: HTMLElement, elementAttr: string, viewProperty: string) {
-		this.baiseView.bindAttr(viewProperty, elementAttr);
+		this.baiseView.bindAttr(viewProperty, element, elementAttr);
 		const eventListener = () => {
 			this.updateViewData(element, elementAttr, viewProperty);
-			// console.log(element.tagName.toLowerCase(), elementAttr, viewProperty, this.baiseView._bindMap);
-			this.baiseView.notifyParentComponent(viewProperty);
+			this.baiseView.notifyParentComponent(viewProperty, this.baiseView);
 		};
 		element.addEventListener(getChangeEventName(element, elementAttr), eventListener);
 	}
@@ -210,9 +66,6 @@ export abstract class ComponentRender<T> {
 		this.baiseView.addEventListener(getChangeEventName(this.baiseView, viewProperty), () => {
 			this.updateElementData(element, elementAttr, viewProperty);
 		});
-		// let bind: any[] = Reflect.get(element, '_bind') || [];
-		// bind.push({ elementAttr, viewProperty });
-		// Reflect.set(element, '_bind', bind);
 	}
 
 
@@ -254,7 +107,7 @@ export abstract class ComponentRender<T> {
 				this.initAttribute(<HTMLElement>element, key, viewTemplate.attributes[key]);
 			}
 		}
-		if (viewTemplate.children) {
+		if (viewTemplate.children && viewTemplate.children.length > 0) {
 			for (const child of viewTemplate.children) {
 				this.appendChild(element, child);
 			}
@@ -264,68 +117,9 @@ export abstract class ComponentRender<T> {
 
 	abstract initAttribute(element: HTMLElement, propertyKey: string, propertyValue: any): void;
 
-	addOnChangeEventListener(element: HTMLElement, elementAttr: string, viewProperty: string): void {
-		// this.bindOneWayAttribute(element, elementAttr, modelProperty);
-		element.addEventListener(getChangeEventName(element, elementAttr), () => {
-			const value = getValueByPath(element, elementAttr);
-			console.log(elementAttr, viewProperty, value);
-			setValueByPath(this.baiseView._model, viewProperty, value);
-			// let dotIndex = viewProperty.indexOf('.');
-			// let fireEventName = dotIndex > 0 ? viewProperty.substring(0, dotIndex) : viewProperty;
-			// let eventValue = this.baiseView[fireEventName];
-			// fireEventName += 'Change';
-			// this.componentRef.outputs
-			// 	.filter(out => out.viewAttribute === fireEventName)
-			// 	.map(out => this.baiseView._model[out.modelProperty] as EventEmitter<any>)
-			// 	.forEach(outEvent =>
-			// 		outEvent.emit(eventValue)
-			// 	);
-
-			// updateAttribute(this.baiseView, viewProperty, element, elementAttr);
-			// this.baiseView._observable.emit(modelProperty);
-			// let outs = this.componentRef.outputs.filter(out => out.modelProperty === modelProperty);
-			// if (outs?.length === 1) {
-
-			// }
-		});
-		// this.baiseView.addEventListener(getChangeEventName(this.baiseView, viewProperty), () => {
-		// const eventValue = getValueByPath(this.baiseView, viewProperty);
-		// // setValueByPath(element, elementAttr, value);
-		// viewProperty += 'Change';
-		// this.componentRef.outputs
-		// 	.filter(out => out.viewAttribute === viewProperty)
-		// 	.map(out => this.baiseView._model[out.modelProperty] as EventEmitter<any>)
-		// 	.forEach(outEvent => outEvent.emit(eventValue));
-		// });
-		let bind: any[] = Reflect.get(element, '_bind') || [];
-		bind.push({ elementAttr, viewProperty });
-		Reflect.set(element, '_bind', bind);
-	}
-
-	elementRender(element: any) {
-		if (element instanceof HTMLElement) {
-			let bind: { elementAttr: string, viewProperty: string }[] = Reflect.get(element, '_bind');
-			bind?.forEach(args => {
-				this.updateElementData(element, args.elementAttr, args.viewProperty);
-			});
-			element.childNodes.forEach(child => {
-				this.elementRender(child);
-			});
-		}
-	}
-
-
-	updateViewHTML() {
-		this.baiseView.childNodes.forEach(child => {
-			this.elementRender(child);
-		});
-	}
-
 	createElementByTagName(tagName: string): HTMLElement | DocumentFragment {
 		if (Fragment === tagName.toLowerCase()) {
 			return document.createDocumentFragment();
-			// 	// } else if (isTagNameNative(tagName)) {
-			// 	//     return document.createElement(tagName);
 			// } else if (tagName.includes('-')) {
 			// 	const registry: ClassRegistry = dependencyInjector.getInstance(ClassRegistry);
 			// 	const componentRef: ComponentRef<T> | undefined = registry.getComponentRef(tagName);

@@ -1,4 +1,4 @@
-import { Input, Component, JsxFactory, Fragment, Output, EventEmitter, View, BaseComponent } from '../../esm2020/aurora.js';
+import { Input, Component, JsxFactory, Fragment, Output, EventEmitter, View, BaseComponent, OnInit } from '../../esm2020/aurora.js';
 
 
 
@@ -145,29 +145,146 @@ class AyKalam {
     template: (jsxApp: JsxApp) => {
         return (
             <div class="row">
-                <div class="col-12" >
-                    <ay-kalam $model="appModel" />
-                </div>
-                <div class="col-6">
-                    {/* <div class="row">
-                        <div class="col-6">
-                            <app-edit editData={jsxApp.appModel} />
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-6" >
+                            No binding just pass data
+                            <br />
+                            <code>
+                                {`<app-edit editData={jsxApp.modelA} />`}
+                            </code>
+                            <br />
+                            <app-edit editData={jsxApp.modelA} />
                         </div>
-                        <div class="col-6">
-                            <app-edit $editData="$appModel" />
+                        <div class="col-6" >
+                            One Way Binding
+                            <br />
+                            <code>
+                                {`<app-view $viewData="modelA" />`}
+                            </code>
+                            <br />
+                            <app-view $viewData="modelA" />
                         </div>
-                    </div> */}
-                    <app-edit $editData="$appModel" onsave="saveAction()" />
-                </div>
-                <div class="col-6">
-                    <app-view $viewData="appModel" />
+                    </div>
+                    <div class="p-3 my-2 bg-success text-white"></div>
+                    <div class="row">
+                        <div class="col-6" >
+                            No binding just pass data
+                            <br />
+                            <code>
+                                {`<app-edit editData="$modelB" />`}
+                            </code>
+                            <br />
+                            <app-edit editData="$modelB" />
+                        </div>
+                        <div class="col-6" >
+                            One Way Binding
+                            <br />
+                            <code>
+                                {`<app-view $viewData="modelB" />`}
+                            </code>
+                            <br />
+                            <app-view $viewData="modelB" />
+                        </div>
+                    </div>
+                    <div class="p-3 my-2 bg-success text-white"></div>
+                    <div class="row">
+                        <div class="col-4" >
+                            One Way Binding
+                            <br />
+                            <code>
+                                {`<app-edit $editData="modelC"/>`}
+                            </code>
+                            <br />
+                            <app-edit $editData="modelC" />
+                        </div>
+                        <div class="col-4" >
+                            One Way Binding
+                            <br />
+                            <code>
+                                {`<app-edit $editData="modelC"/>`}
+                            </code>
+                            <br />
+                            <app-edit $editData="modelC" />
+                        </div>
+                        <div class="col-4" >
+                            One Way Binding
+                            <br />
+                            <code>
+                                {`<app-view $viewData="modelC" />`}
+                            </code>
+                            <br />
+                            <app-view $viewData="modelC" />
+                        </div>
+                    </div>
+                    <div class="p-3 my-2 bg-success text-white"></div>
+                    <div class="row">
+                        <div class="col-4" >
+                            One Way Binding
+                            <br />
+                            <code>
+                                {`<app-edit $editData="modelC"/>`}
+                            </code>
+                            <br />
+                            <app-edit $editData="modelC" />
+                        </div>
+                        <div class="col-4" >
+                            Two Way Binding
+                            <br />
+                            <code>
+                                {`<app-edit $editData="$modelC"/>`}
+                            </code>
+                            <br />
+                            <app-edit $editData="$modelC" />
+                        </div>
+                        <div class="col-4" >
+                            One Way Binding
+                            <br />
+                            <code>
+                                {`<app-view $viewData="modelC" />`}
+                            </code>
+                            <br />
+                            <app-view $viewData="modelC" />
+                        </div>
+                    </div>
+                    <div class="p-3 my-2 bg-success text-white"></div>
+                    <div class="row">
+                        <div class="col-4" >
+                            two Way Binding
+                            <br />
+                            <code>
+                                {`<app-edit $editData="$modelD"/>`}
+                            </code>
+                            <br />
+                            <app-edit $editData="$modelD" />
+                        </div>
+                        <div class="col-4" >
+                            two Way Binding
+                            <br />
+                            <code>
+                                {`<app-edit $editData="$modelD"/>`}
+                            </code>
+                            <br />
+                            <app-edit $editData="$modelD" />
+                        </div>
+                        <div class="col-4" >
+                            One Way Binding
+                            <br />
+                            <code>
+                                {`<app-view $viewData="modelD" />`}
+                            </code>
+                            <br />
+                            <app-view $viewData="modelD" />
+                        </div>
+                    </div>
                 </div>
             </div>
         );
     }
 })
-export class JsxApp {
-    appModel: AppModel = {
+export class JsxApp implements OnInit {
+
+    _appModel: AppModel = {
         name: 'Aurora',
         version: 2,
         description: {
@@ -177,8 +294,24 @@ export class JsxApp {
         }
     };
 
+    modelA: AppModel;
+    modelB: AppModel;
+    modelC: AppModel;
+    modelD: AppModel;
+
+    onInit(): void {
+        this.modelA = this.getModel();
+        this.modelB = this.getModel();
+        this.modelC = this.getModel();
+        this.modelD = this.getModel();
+    }
+
     saveAction(data: any) {
         console.log('tage: JsxApp', data);
+    }
+
+    getModel(): AppModel {
+        return JSON.parse(JSON.stringify(this._appModel));
     }
 
 }
