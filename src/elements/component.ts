@@ -83,5 +83,8 @@ export interface BaseComponent<T extends Object> extends HTMLComponent {
 }
 
 export function isBaseComponent(object: Object): object is BaseComponent<any> {
-	return Reflect.has(object, '_model') /*&& Reflect.has(object, '_observable')*/;
+	return Reflect.has(object, '_model')
+		&& Reflect.has(object, '_changeObservable')
+		&& Reflect.has(object, '_parentComponent')
+		&& Reflect.has(object, '_bindMap');
 }
