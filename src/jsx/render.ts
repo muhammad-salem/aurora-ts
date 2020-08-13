@@ -233,8 +233,8 @@ export abstract class ComponentRender<T> {
 			});
 			Reflect.set(element, elemProp, renderText);
 		}
-		// result.forEach(match => this.baiseView._observable.subscribe(match[1], handler));
-		// this.baiseView._observable.emit(result[0][1]);
+		result.forEach(match => this.baiseView._changeObservable.subscribe(match[1], handler));
+		this.baiseView._changeObservable.emit(result[0][1]);
 	}
 
 	initView(): void {
