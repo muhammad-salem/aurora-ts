@@ -140,7 +140,7 @@ export const NativeTags: Tag[] = [
 	{ name: 'var', classRef: HTMLElement },
 	{ name: 'video', classRef: HTMLVideoElement },
 	{ name: 'wbr', classRef: HTMLElement },
-	{ name: 'virtual-scroller', classRef: HTMLElement },
+	{ name: 'virtual-scroller', classRef: HTMLElement }
 ];
 
 export function findByTagName(tagName: string | undefined): Tag {

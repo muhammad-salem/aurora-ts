@@ -20,7 +20,7 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             // $elementAttr="$viewProperty" 
             elementAttr = elementAttr.substring(1);
             viewProperty = viewProperty.substring(1);
-            this.updateElementData(element, elementAttr, viewProperty);
+            this.initElementData(element, elementAttr, viewProperty);
             this.addViewPropertyBinding(element, elementAttr, viewProperty);
             this.addElementPropertyBinding(element, elementAttr, viewProperty);
             bindMap.set(elementAttr, viewProperty);
@@ -28,7 +28,7 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
         else if (elementAttr.startsWith('$') && typeof viewProperty === 'string') {
             // $elementAttr="viewProperty" 
             elementAttr = elementAttr.substring(1);
-            this.updateElementData(element, elementAttr, viewProperty);
+            this.initElementData(element, elementAttr, viewProperty);
             this.addViewPropertyBinding(element, elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('$') && typeof viewProperty === 'object') {
@@ -63,7 +63,7 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             // bad practice
             // elementAttr="$viewProperty" // as an object
             viewProperty = viewProperty.substring(1);
-            this.updateElementData(element, elementAttr, viewProperty);
+            this.initElementData(element, elementAttr, viewProperty);
         }
         else {
             if (typeof viewProperty === 'boolean' && !viewProperty) {

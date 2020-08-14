@@ -6,6 +6,7 @@ import { ClassRegistry } from '../providers/provider.js';
 import { EventEmitter } from '../core/events.js';
 import { getValueByPath, setValueByPath, updateAttribute, updateValue } from '../core/utils.js';
 import { findByModelClassOrCreat } from '../reflect/bootstrap-data.js';
+import { hasAttr } from '../elements/attributes.js';
 
 function getChangeEventName(element: HTMLElement, elementAttr: string) {
 	if (elementAttr === 'value') {
@@ -28,20 +29,19 @@ export abstract class ComponentRender<T> {
 		public componentRef: ComponentRef<T>) {
 	}
 
-	updateElementData(element: HTMLElement, elementAttr: string, viewProperty: string) {
-		if (isBaseComponent(element)) {
-			let prototype = element._model.constructor.prototype
-			var bootstrap: ComponentRef<any> = findByModelClassOrCreat(prototype);
-			let input = bootstrap.inputs.find(input => input.viewAttribute === elementAttr);
-			if (input) {
-				updateAttribute(element, elementAttr, this.baiseView._model, viewProperty);
-			} else {
-				updateValue(this.baiseView._model, viewProperty, element, elementAttr);
-			}
-		} else {
+	initElementData(element: HTMLElement, elementAttr: string, viewProperty: string) {
+		if (hasAttr(element, elementAttr)) {
 			updateAttribute(element, elementAttr, this.baiseView._model, viewProperty);
+		} else {
 			updateValue(this.baiseView._model, viewProperty, element, elementAttr);
 		}
+	}
+
+	updateElementData(element: HTMLElement, elementAttr: string, viewProperty: string) {
+		if (hasAttr(element, elementAttr)) {
+			updateAttribute(element, elementAttr, this.baiseView._model, viewProperty);
+		}
+		updateValue(this.baiseView._model, viewProperty, element, elementAttr);
 	}
 
 	updateViewData(element: HTMLElement, elementAttr: string, viewProperty: string) {
@@ -58,14 +58,7 @@ export abstract class ComponentRender<T> {
 		this.baiseView.bindAttr(viewProperty, elementAttr);
 		const eventListener = () => {
 			this.updateViewData(element, elementAttr, viewProperty);
-			console.log(viewProperty, this.baiseView._parentComponentBindMap, this.baiseView._parentComponent?._parentComponentBindMap);
 			this.baiseView.triggerParentEvent(viewProperty);
-			// this.baiseView.notifyParentComponent(viewProperty);
-			// let parentEventName = this.baiseView._parentComponentBindMap.get(viewProperty);
-			// if (parentEventName) {
-			// 	// this.baiseView.notifyParentComponent(parentEventName);
-			// 	this.baiseView._parentComponent.triggerEvent(parentEventName);
-			// }
 		};
 		element.addEventListener(getChangeEventName(element, elementAttr), eventListener);
 	}

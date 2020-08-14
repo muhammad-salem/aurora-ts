@@ -216,6 +216,7 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 		_parentComponentBindMap: Map<string, string>;
 
 		_setAttributeNative: Function;
+		_getAttributeNative: Function;
 		_addEventListenerNative: Function;
 
 		constructor() {
@@ -228,10 +229,11 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 				new JSXComponentRender(this, componentRef);
 
 			this._setAttributeNative = this.setAttribute;
+			this._getAttributeNative = this.getAttribute;
 			this._addEventListenerNative = this.addEventListener;
 
 			this.setAttribute = this._setAttribute;
-			// this.getAttribute = this._getAttribute;
+			this.getAttribute = this._getAttribute;
 			this.addEventListener = this._addEventListener;
 
 			componentRef.inputs.forEach(input => {
@@ -305,9 +307,9 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 			this._setAttributeHelper(attrViewName, value);
 		}
 
-		// _getAttribute(attrViewName: string): string | null {
-		// 	return this.getInputValue(attrViewName);
-		// }
+		_getAttribute(attrViewName: string): string | null {
+			return this.getInputValue(attrViewName);
+		}
 
 		doBlockCallback = (): void => {
 			if (isDoCheck(this._model)) {

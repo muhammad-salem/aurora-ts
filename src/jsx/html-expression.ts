@@ -19,7 +19,7 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
         else if (elementAttr.startsWith('[(')) {
             // [(elementAttr)]="modelProperty"
             elementAttr = elementAttr.substring(2, elementAttr.length - 2);
-            this.updateElementData(element, elementAttr, viewProperty);
+            this.initElementData(element, elementAttr, viewProperty);
             this.addViewPropertyBinding(element, elementAttr, viewProperty);
             this.addElementPropertyBinding(element, elementAttr, viewProperty);
             bindMap.set(elementAttr, viewProperty);
@@ -27,7 +27,7 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
         else if (elementAttr.startsWith('[')) {
             // [elementAttr]="modelProperty"
             elementAttr = elementAttr.substring(1, elementAttr.length - 1);
-            this.updateElementData(element, elementAttr, viewProperty);
+            this.initElementData(element, elementAttr, viewProperty);
             this.addViewPropertyBinding(element, elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('(')) {
