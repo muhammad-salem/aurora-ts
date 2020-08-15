@@ -1,6 +1,6 @@
 import { Observable } from '../core/observable.js';
 import { EventEmitter } from '../core/events.js';
-import { PropertyRef } from './elements.js';
+import { PropertyRef, ComponentRef } from './elements.js';
 
 export interface HTMLComponent {
 	attributeChangedCallback(
@@ -25,6 +25,8 @@ export interface BaseComponent<T extends Object> extends HTMLComponent {
 	_childBindMap: Map<string, Array<string>>;
 	_parentComponent: BaseComponent<any>;
 	_parentComponentBindMap: Map<string, string>;
+
+	getComponentRef(): ComponentRef<T>;
 
 	hasInput(viewProp: string): boolean;
 	getInput(viewProp: string): PropertyRef | undefined;

@@ -3,6 +3,7 @@ import { JSXRender } from '../core/decorators.js';
 import { ComponentRender } from './render.js';
 import { BaseComponent } from '../elements/component.js';
 import { ComponentRef } from '../elements/elements.js';
+import { hasAttr } from '../elements/attributes.js';
 
 export class HTMLComponentRender<T> extends ComponentRender<T> {
     constructor(baiseView: BaseComponent<T> & HTMLElement, componentRef: ComponentRef<T>) {
@@ -19,16 +20,18 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
         else if (elementAttr.startsWith('[(')) {
             // [(elementAttr)]="modelProperty"
             elementAttr = elementAttr.substring(2, elementAttr.length - 2);
-            this.initElementData(element, elementAttr, viewProperty);
-            this.addViewPropertyBinding(element, elementAttr, viewProperty);
+            const isAttr = hasAttr(element, elementAttr);
+            this.initElementData(element, elementAttr, viewProperty, isAttr);
+            this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
             this.addElementPropertyBinding(element, elementAttr, viewProperty);
             bindMap.set(elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('[')) {
             // [elementAttr]="modelProperty"
             elementAttr = elementAttr.substring(1, elementAttr.length - 1);
-            this.initElementData(element, elementAttr, viewProperty);
-            this.addViewPropertyBinding(element, elementAttr, viewProperty);
+            const isAttr = hasAttr(element, elementAttr);
+            this.initElementData(element, elementAttr, viewProperty, isAttr);
+            this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
         }
         else if (elementAttr.startsWith('(')) {
             // (elementAttr)="modelProperty()"
@@ -38,6 +41,10 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
         else if (elementAttr.startsWith('on')) {
             // onelementAttr="modelProperty()"
             this.handleEvent(element, elementAttr.substring(2), viewProperty);
+        }
+        else if (viewProperty.includes('{{') && viewProperty.includes('}}')) {
+            // elementAttr="{{viewProperty}}" // just pass data
+            this.attrTemplateHandler(element, elementAttr, viewProperty);
         }
         else {
             if (typeof viewProperty === 'boolean' && !viewProperty) {

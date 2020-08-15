@@ -29,16 +29,16 @@ export abstract class ComponentRender<T> {
 		public componentRef: ComponentRef<T>) {
 	}
 
-	initElementData(element: HTMLElement, elementAttr: string, viewProperty: string) {
-		if (hasAttr(element, elementAttr)) {
+	initElementData(element: HTMLElement, elementAttr: string, viewProperty: string, isAttr: boolean) {
+		if (isAttr) {
 			updateAttribute(element, elementAttr, this.baiseView._model, viewProperty);
 		} else {
 			updateValue(this.baiseView._model, viewProperty, element, elementAttr);
 		}
 	}
 
-	updateElementData(element: HTMLElement, elementAttr: string, viewProperty: string) {
-		if (hasAttr(element, elementAttr)) {
+	updateElementData(element: HTMLElement | Text, elementAttr: string, viewProperty: string, isAttr: boolean) {
+		if (isAttr && element instanceof HTMLElement) {
 			updateAttribute(element, elementAttr, this.baiseView._model, viewProperty);
 		}
 		updateValue(this.baiseView._model, viewProperty, element, elementAttr);
@@ -63,21 +63,40 @@ export abstract class ComponentRender<T> {
 		element.addEventListener(getChangeEventName(element, elementAttr), eventListener);
 	}
 
-	addViewPropertyBinding(element: HTMLElement, elementAttr: string, viewProperty: string) {
+	addViewPropertyBinding(element: HTMLElement, elementAttr: string, viewProperty: string, isAttr: boolean) {
 		this.baiseView.addEventListener(getChangeEventName(this.baiseView, viewProperty), () => {
-			this.updateElementData(element, elementAttr, viewProperty);
+			this.updateElementData(element, elementAttr, viewProperty, isAttr);
 		});
 	}
 
+	// textChildTemplateHandler(element: Object, elemProp: string): void {
+	// 	const templateText: string = Reflect.get(element, elemProp);
+	// 	const result = [...templateText.matchAll(this.templateRegExp)];
+	// 	if (result.length === 0) {
+	// 		return;
+	// 	}
+	// 	const handler = () => {
+	// 		let renderText = templateText;
+	// 		result.forEach(match => {
+	// 			let tempValue = getValueByPath(this.baiseView._model, match[1]);
+	// 			if (typeof tempValue === 'function') {
+	// 				tempValue = tempValue.call(this.baiseView._model);
+	// 			}
+	// 			renderText = renderText.replace(match[0], tempValue);
+	// 		});
+	// 		Reflect.set(element, elemProp, renderText);
+	// 	}
+	// 	result.forEach(match => this.baiseView._changeObservable.subscribe(match[1], handler));
+	// 	this.baiseView._changeObservable.emit(result[0][1]);
+	// }
 
-	templateHandler(element: Object, elemProp: string): void {
-		const templateText: string = Reflect.get(element, elemProp);
-		const result = [...templateText.matchAll(this.templateRegExp)];
+	attrTemplateHandler(element: HTMLElement | Text, elementAttr: string, viewProperty: string, isAttr: boolean) {
+		const result = [...viewProperty.matchAll(this.templateRegExp)];
 		if (result.length === 0) {
 			return;
 		}
 		const handler = () => {
-			let renderText = templateText;
+			let renderText = viewProperty;
 			result.forEach(match => {
 				let tempValue = getValueByPath(this.baiseView._model, match[1]);
 				if (typeof tempValue === 'function') {
@@ -85,7 +104,8 @@ export abstract class ComponentRender<T> {
 				}
 				renderText = renderText.replace(match[0], tempValue);
 			});
-			Reflect.set(element, elemProp, renderText);
+			// Reflect.set(element, elementAttr, renderText);
+			this.updateElementData(element, elementAttr, renderText, isAttr);
 		}
 		result.forEach(match => this.baiseView._changeObservable.subscribe(match[1], handler));
 		this.baiseView._changeObservable.emit(result[0][1]);
@@ -166,7 +186,8 @@ export abstract class ComponentRender<T> {
 	appendTextNode(parent: Node, child: string) {
 		var node = document.createTextNode(child);
 		parent.appendChild(node);
-		this.templateHandler(node, 'textContent');
+		// this.textChildTemplateHandler(node, 'textContent');
+		this.attrTemplateHandler(node, 'textContent', child, false);
 	}
 
 	handelHostListener(listener: ListenerRef) {

@@ -4,6 +4,6 @@ declare module '*.html' {
 }
 
 declare module '*.html.js' {
-    const content: string;
-    export default content;
+    const contentJS: string;
+    export default contentJS;
 }

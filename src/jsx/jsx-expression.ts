@@ -2,6 +2,7 @@ import { ComponentRender } from './render.js';
 import { BaseComponent } from '../elements/component.js';
 import { ComponentRef } from '../elements/elements.js';
 import { setValueByPath } from '../core/utils.js';
+import { hasAttr } from '../elements/attributes.js';
 
 export class JSXComponentRender<T> extends ComponentRender<T> {
     constructor(baiseView: BaseComponent<T> & HTMLElement, componentRef: ComponentRef<T>) {
@@ -20,16 +21,18 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             // $elementAttr="$viewProperty" 
             elementAttr = elementAttr.substring(1);
             viewProperty = viewProperty.substring(1);
-            this.initElementData(element, elementAttr, viewProperty);
-            this.addViewPropertyBinding(element, elementAttr, viewProperty);
+            const isAttr = hasAttr(element, elementAttr);
+            this.initElementData(element, elementAttr, viewProperty, isAttr);
+            this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
             this.addElementPropertyBinding(element, elementAttr, viewProperty);
             bindMap.set(elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('$') && typeof viewProperty === 'string') {
             // $elementAttr="viewProperty" 
             elementAttr = elementAttr.substring(1);
-            this.initElementData(element, elementAttr, viewProperty);
-            this.addViewPropertyBinding(element, elementAttr, viewProperty);
+            const isAttr = hasAttr(element, elementAttr);
+            this.initElementData(element, elementAttr, viewProperty, isAttr);
+            this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
         }
         else if (elementAttr.startsWith('$') && typeof viewProperty === 'object') {
             // $elementAttr={viewProperty} // as an object
@@ -63,7 +66,8 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             // bad practice
             // elementAttr="$viewProperty" // as an object
             viewProperty = viewProperty.substring(1);
-            this.initElementData(element, elementAttr, viewProperty);
+            const isAttr = hasAttr(element, elementAttr);
+            this.initElementData(element, elementAttr, viewProperty, isAttr);
         }
         else {
             if (typeof viewProperty === 'boolean' && !viewProperty) {

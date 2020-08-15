@@ -244,6 +244,10 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 			});
 		}
 
+		getComponentRef(): ComponentRef<T> {
+			return componentRef;
+		}
+
 		hasInput(viewProp: string): boolean {
 			return componentRef.inputs.some(input => input.viewAttribute === viewProp);
 		}

@@ -146,6 +146,9 @@ class AyKalam {
         return (
             <div class="row">
                 <div class="col-12">
+                    <div class="p-3 my-2 bg-success text-white">
+                        No binding just pass data, first way
+                    </div>
                     <div class="row">
                         <div class="col-6" >
                             No binding just pass data
@@ -166,7 +169,9 @@ class AyKalam {
                             <app-view $viewData="modelA" />
                         </div>
                     </div>
-                    <div class="p-3 my-2 bg-success text-white"></div>
+                    <div class="p-3 my-2 bg-success text-white">
+                        No binding just pass data, 2nd way
+                    </div>
                     <div class="row">
                         <div class="col-6" >
                             No binding just pass data
@@ -187,7 +192,9 @@ class AyKalam {
                             <app-view $viewData="modelB" />
                         </div>
                     </div>
-                    <div class="p-3 my-2 bg-success text-white"></div>
+                    <div class="p-3 my-2 bg-success text-white">
+                        One Way Binding
+                    </div>
                     <div class="row">
                         <div class="col-4" >
                             One Way Binding
@@ -217,7 +224,9 @@ class AyKalam {
                             <app-view $viewData="modelC" />
                         </div>
                     </div>
-                    <div class="p-3 my-2 bg-success text-white"></div>
+                    <div class="p-3 my-2 bg-success text-white">
+                        One Way Binding & Two Way Binding
+                    </div>
                     <div class="row">
                         <div class="col-4" >
                             One Way Binding
@@ -247,10 +256,12 @@ class AyKalam {
                             <app-view $viewData="modelD" />
                         </div>
                     </div>
-                    <div class="p-3 my-2 bg-success text-white"></div>
+                    <div class="p-3 my-2 bg-success text-white">
+                        Two Way Binding
+                    </div>
                     <div class="row">
                         <div class="col-4" >
-                            two Way Binding
+                            Two Way Binding
                             <br />
                             <code>
                                 {`<app-edit $editData="$modelE"/>`}
@@ -259,7 +270,7 @@ class AyKalam {
                             <app-edit $editData="$modelE" />
                         </div>
                         <div class="col-4" >
-                            two Way Binding
+                            Two Way Binding
                             <br />
                             <code>
                                 {`<app-edit $editData="$modelE"/>`}

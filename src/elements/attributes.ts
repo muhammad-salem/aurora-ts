@@ -164,10 +164,8 @@ export function hasNativeAttr(element: string | HTMLElement, attr: string): bool
 
 export function hasComponentAttr(element: HTMLElement, attr: string): boolean {
     if (isBaseComponent(element)) {
-        // element._model.constructor
-        let prototype = element._model.constructor.prototype
-        var bootstrap: ComponentRef<any> = findByModelClassOrCreat(prototype);
-        return bootstrap.inputs.some(input => input.viewAttribute === attr);
+        var componentRef: ComponentRef<any> = element.getComponentRef();
+        return componentRef.inputs.some(input => input.viewAttribute === attr);
     }
     return false;
 }
