@@ -1,3 +1,5 @@
+import { BaseComponent, HTMLComponent } from "../elements/component";
+
 export function isHTMLElement(object: any): object is HTMLElement {
 	return (
 		object.prototype instanceof HTMLElement ||
@@ -109,4 +111,12 @@ export function updateValue(from: Object, fromPath: string, to: Object, toPath: 
 
 export function updateAttribute(to: HTMLElement, toPath: string, from: Object, fromPath: string): void {
 	to.setAttribute(toPath, getValueByPath(from, fromPath));
+}
+
+// export function setAttributeByPath(element: HTMLElement, elementAttr: string, value: any): void {
+// 	to.setAttribute(toPath, getValueByPath(from, fromPath));
+// }
+
+export function setComponentAttributeByPath<T>(element: HTMLComponent<T>, elementAttrPath: string, value: any): void {
+	element.setAttribute(elementAttrPath, value);
 }
