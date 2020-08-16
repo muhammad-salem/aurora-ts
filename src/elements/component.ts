@@ -2,29 +2,19 @@ import { Observable } from '../core/observable.js';
 import { EventEmitter } from '../core/events.js';
 import { PropertyRef, ComponentRef } from './elements.js';
 
-export interface HTMLComponent {
-	attributeChangedCallback(
-		name: string,
-		oldValue: string,
-		newValue: string
-	): void;
+export interface CustomElement {
+	attributeChangedCallback(name: string, oldValue: string, newValue: string): void;
 	connectedCallback(): void;
 	disconnectedCallback(): void;
 	adoptedCallback(): void;
 }
 
-// export type BindKey = {
-// 	element: HTMLElement,
-// 	elementAttr: string,
-// 	view: string;
-// };
-
-export interface BaseComponent<T extends Object> extends HTMLComponent {
+export interface BaseComponent<T extends Object> extends CustomElement {
 	_model: T & { [key: string]: any };
 	_changeObservable: Observable;
 	_childBindMap: Map<string, Array<string>>;
-	_parentComponent: BaseComponent<any>;
-	_parentComponentBindMap: Map<string, string>;
+	_parentComponent?: BaseComponent<any>;
+	_parentComponentBindMap?: Map<string, string>;
 
 	getComponentRef(): ComponentRef<T>;
 
@@ -47,15 +37,15 @@ export interface BaseComponent<T extends Object> extends HTMLComponent {
 	triggerParentEvent(elementAttr: string): void;
 }
 
-export function isBaseComponent(object: Object): object is BaseComponent<any> {
+export interface HTMLComponent<T> extends BaseComponent<T>, HTMLElement { }
+
+export function isHTMLComponent(object: Object): object is HTMLComponent<any> {
 	return Reflect.has(object, '_model')
 		&& Reflect.has(object, '_changeObservable')
-		&& Reflect.has(object, '_parentComponent')
 		&& Reflect.has(object, '_childBindMap')
-		&& object instanceof Node;
+		&& object instanceof HTMLElement;
 }
 
 export function isNativeElement(element: HTMLElement): element is HTMLElement {
 	return element && element instanceof HTMLElement && !element.tagName?.includes('-');
 }
-

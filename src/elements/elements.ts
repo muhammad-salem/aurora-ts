@@ -8,7 +8,7 @@ import {
 	isAfterContentInit, isAfterContentChecked,
 	isAfterViewInit, isAfterViewChecked, isOnDestroy,
 } from '../core/lifecycle.js';
-import { BaseComponent } from './component.js';
+import { BaseComponent, HTMLComponent } from './component.js';
 import { ComponentRender } from '../jsx/render.js';
 import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
@@ -68,7 +68,7 @@ export interface ComponentRef<T> {
 	styles: string;
 	extend: Tag;
 
-	viewClass: CustomElementConstructor;
+	viewClass: TypeOf<HTMLComponent<T>>; //CustomElementConstructor;
 	inputs: PropertyRef[];
 	outputs: PropertyRef[];
 	view: string;
@@ -201,10 +201,10 @@ export class ComponentElement {
 	}
 }
 
-function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: ComponentRef<T>): CustomElementConstructor {
+function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: ComponentRef<T>): TypeOf<HTMLComponent<T>> {
 	const viewClassName = `${modelClass.name}View`;
 	const htmlParent = (componentRef.extend as Tag).classRef as TypeOf<HTMLElement>;
-	let viewClass: CustomElementConstructor;
+	let viewClass: TypeOf<HTMLComponent<T>>;
 	viewClass = class extends htmlParent implements BaseComponent<T> {
 		// [key: string]: any;
 
@@ -221,12 +221,14 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 
 		constructor() {
 			super();
+			// let shadowRoot = this.attachShadow({ mode: 'open' });
+			// services should be injected her
 			this._model = new modelClass();
 			this._changeObservable = new Observable();
 			this._childBindMap = new Map();
-			this._render = componentRef.renderType === "html" ?
-				new HTMLComponentRender(this, componentRef) :
-				new JSXComponentRender(this, componentRef);
+			this._render = componentRef.renderType === "html"
+				? new HTMLComponentRender(this)
+				: new JSXComponentRender(this);
 
 			this._setAttributeNative = this.setAttribute;
 			this._getAttributeNative = this.getAttribute;
@@ -235,13 +237,6 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 			this.setAttribute = this._setAttribute;
 			this.getAttribute = this._getAttribute;
 			this.addEventListener = this._addEventListener;
-
-			componentRef.inputs.forEach(input => {
-				const inputDefaultValue = this._model[input.modelProperty];
-				if (inputDefaultValue) {
-					this._setAttribute(input.viewAttribute, inputDefaultValue);
-				}
-			});
 		}
 
 		getComponentRef(): ComponentRef<T> {
@@ -334,6 +329,12 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 		}
 
 		connectedCallback() {
+			componentRef.inputs.forEach(input => {
+				const inputDefaultValue = this._model[input.modelProperty];
+				if (inputDefaultValue) {
+					this._setAttributeHelper(input.viewAttribute, inputDefaultValue);
+				}
+			});
 			if (isOnChanges(this._model)) {
 				this._model.onChanges();
 			}

@@ -1,4 +1,4 @@
-import { isBaseComponent } from './component.js';
+import { isHTMLComponent } from './component.js';
 import { findByModelClassOrCreat } from '../reflect/bootstrap-data.js';
 import { ComponentRef } from '../elements/elements.js';
 
@@ -163,7 +163,7 @@ export function hasNativeAttr(element: string | HTMLElement, attr: string): bool
 }
 
 export function hasComponentAttr(element: HTMLElement, attr: string): boolean {
-    if (isBaseComponent(element)) {
+    if (isHTMLComponent(element)) {
         var componentRef: ComponentRef<any> = element.getComponentRef();
         return componentRef.inputs.some(input => input.viewAttribute === attr);
     }
@@ -173,4 +173,3 @@ export function hasComponentAttr(element: HTMLElement, attr: string): boolean {
 export function hasAttr(element: HTMLElement, attr: string): boolean {
     return hasNativeAttr(element, attr) || hasComponentAttr(element, attr);
 }
-
