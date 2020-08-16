@@ -1,6 +1,6 @@
 {
   "name": "aurora-ts",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "create and define a usable 'custom elements', that compatible with other frameworks, using Typescript",
   "homepage": "https://github.com/salemebo/aurora-ts",
   "author": "salem.ebo",
