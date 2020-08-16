@@ -1,10 +1,10 @@
 {
   "name": "aurora-ts",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "create and define a usable 'custom elements', that compatible with other frameworks, using Typescript",
   "homepage": "https://github.com/salemebo/aurora-ts",
   "author": "salem.ebo",
-  "license":"GPL-3.0",
+  "license": "GPL-3.0",
   "main": "esm2020/aurora.js",
   "module": "esm2020/aurora.js",
   "esm2020": "esm2020/aurora.js",
