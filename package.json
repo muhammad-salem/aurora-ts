@@ -5,7 +5,7 @@
   "homepage": "https://github.com/salemebo/aurora-ts",
   "author": "salem.ebo",
   "license":"GPL-3.0",
-  "browser": "esm2020/aurora.js",
+  "main": "esm2020/aurora.js",
   "module": "esm2020/aurora.js",
   "esm2020": "esm2020/aurora.js",
   "types": "esm2020/aurora.d.ts",
