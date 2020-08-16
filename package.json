@@ -1,20 +1,23 @@
 {
   "name": "aurora-ts",
-  "version": "1.0.0",
+  "version": "0.1.4",
   "description": "create and define a usable 'custom elements', that compatible with other frameworks, using Typescript",
   "homepage": "https://github.com/salemebo/aurora-ts",
-  "author": "@Salem",
-  "main": "esm2020/aurora.js",
+  "author": "salem.ebo",
+  "license":"GPL-3.0",
+  "browser": "esm2020/aurora.js",
   "module": "esm2020/aurora.js",
   "esm2020": "esm2020/aurora.js",
   "types": "esm2020/aurora.d.ts",
   "esm2015": "esm2015/aurora.js",
   "scripts": {
     "buildw": "tsc -w",
-    "build2020": "tsc",
-    "build2015": "tsc -p tsconfig.esm2015.json",
+    "build2020": "tsc -p src/tsconfig.esm2015.json",
+    "build2015": "tsc -p src/tsconfig.esm2015.json",
+    "buildamd": "tsc -p src/tsconfig.amd.json",
     "build": "rm -rf esm20* && tsc && tsc -p tsconfig.esm2015.json",
-    "test": "tsc -b -v -w test/tsconfig.test.json"
+    "test": "tsc -b -v -w test/tsconfig.test.json",
+    "prepublish": "tsc --build"
   },
   "devDependencies": {
     "@types/node": "^14.0.26",

@@ -81,7 +81,7 @@ export class AppView {
                 <div class="btn-group" role="group" aria-label="Basic example">
                     <button type="button" class="btn btn-primary" onclick={printModel}>Print</button>
                     <button type="button" class="btn btn-secondary" onclick={saveModel}>Save</button>
-                    <button type="button" class="btn btn-primary" onclick="fireEvent()">Event</button>
+                    <button type="button" class="btn btn-primary" click="fireEvent()">Event</button>
                 </div>
             </form>
 

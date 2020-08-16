@@ -3,7 +3,6 @@
 	"references": [
 		{ "path": "./src/tsconfig.esm2020.json" },
 		{ "path": "./src/tsconfig.esm2015.json" },
-		{ "path": "./src/tsconfig.amd.json" },
-		{"path": "./test/tsconfig.test.json"}
+		{ "path": "./src/tsconfig.amd.json" }
 	]
 }
