@@ -13,7 +13,8 @@
     "buildw": "tsc -w",
     "build2020": "tsc",
     "build2015": "tsc -p tsconfig.esm2015.json",
-    "build": "rm -rf esm20* && tsc && tsc -p tsconfig.esm2015.json"
+    "build": "rm -rf esm20* && tsc && tsc -p tsconfig.esm2015.json",
+    "test": "tsc -b -v -w test/tsconfig.test.json"
   },
   "devDependencies": {
     "@types/node": "^14.0.26",
