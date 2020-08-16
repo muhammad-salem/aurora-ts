@@ -1,12 +1,10 @@
-import { BaseComponent, isBaseComponent } from '../elements/component.js';
+import { HTMLComponent, isHTMLComponent } from '../elements/component.js';
 import { JsxComponent, Fragment } from './factory.js';
 import { ComponentRef, ListenerRef, PropertyRef } from '../elements/elements.js';
 import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
 import { EventEmitter } from '../core/events.js';
 import { getValueByPath, setValueByPath, updateAttribute, updateValue } from '../core/utils.js';
-import { findByModelClassOrCreat } from '../reflect/bootstrap-data.js';
-import { hasAttr } from '../elements/attributes.js';
 
 function getChangeEventName(element: HTMLElement, elementAttr: string) {
 	if (elementAttr === 'value') {
@@ -22,11 +20,12 @@ function getChangeEventName(element: HTMLElement, elementAttr: string) {
 
 
 export abstract class ComponentRender<T> {
+	componentRef: ComponentRef<T>
 	template: JsxComponent;
 	templateRegExp: RegExp;
 
-	constructor(public baiseView: BaseComponent<T> & HTMLElement,
-		public componentRef: ComponentRef<T>) {
+	constructor(public baiseView: HTMLComponent<T>) {
+		this.componentRef = baiseView.getComponentRef();
 	}
 
 	initElementData(element: HTMLElement, elementAttr: string, viewProperty: string, isAttr: boolean) {
@@ -69,28 +68,7 @@ export abstract class ComponentRender<T> {
 		});
 	}
 
-	// textChildTemplateHandler(element: Object, elemProp: string): void {
-	// 	const templateText: string = Reflect.get(element, elemProp);
-	// 	const result = [...templateText.matchAll(this.templateRegExp)];
-	// 	if (result.length === 0) {
-	// 		return;
-	// 	}
-	// 	const handler = () => {
-	// 		let renderText = templateText;
-	// 		result.forEach(match => {
-	// 			let tempValue = getValueByPath(this.baiseView._model, match[1]);
-	// 			if (typeof tempValue === 'function') {
-	// 				tempValue = tempValue.call(this.baiseView._model);
-	// 			}
-	// 			renderText = renderText.replace(match[0], tempValue);
-	// 		});
-	// 		Reflect.set(element, elemProp, renderText);
-	// 	}
-	// 	result.forEach(match => this.baiseView._changeObservable.subscribe(match[1], handler));
-	// 	this.baiseView._changeObservable.emit(result[0][1]);
-	// }
-
-	attrTemplateHandler(element: HTMLElement | Text, elementAttr: string, viewProperty: string, isAttr: boolean) {
+	attrTemplateHandler(element: HTMLElement | Text, elementAttr: string, viewProperty: string, isAttr?: boolean) {
 		const result = [...viewProperty.matchAll(this.templateRegExp)];
 		if (result.length === 0) {
 			return;
@@ -104,8 +82,12 @@ export abstract class ComponentRender<T> {
 				}
 				renderText = renderText.replace(match[0], tempValue);
 			});
-			// Reflect.set(element, elementAttr, renderText);
-			this.updateElementData(element, elementAttr, renderText, isAttr);
+			if (isAttr && element instanceof HTMLElement) {
+				element.setAttribute(elementAttr, renderText);
+			} else {
+				setValueByPath(element, elementAttr, renderText);
+			}
+
 		}
 		result.forEach(match => this.baiseView._changeObservable.subscribe(match[1], handler));
 		this.baiseView._changeObservable.emit(result[0][1]);
@@ -122,13 +104,13 @@ export abstract class ComponentRender<T> {
 	}
 
 	createElement(viewTemplate: JsxComponent): HTMLElement | DocumentFragment {
-		const element = this.createElementByTagName(viewTemplate.tagName);
+		const element = this.createElementByTagName(viewTemplate.tagName, viewTemplate.attributes?.is);
 		if (viewTemplate.attributes) {
 			const bindMap: Map<string, string> = new Map();
 			for (const key in viewTemplate.attributes) {
 				this.initAttribute(<HTMLElement>element, key, viewTemplate.attributes[key], bindMap);
 			}
-			if (isBaseComponent(element)) {
+			if (isHTMLComponent(element)) {
 				element._parentComponentBindMap = bindMap;
 			}
 		}
@@ -142,19 +124,53 @@ export abstract class ComponentRender<T> {
 
 	abstract initAttribute(element: HTMLElement, propertyKey: string, propertyValue: any, bindMap: Map<string, string>): void;
 
-	createElementByTagName(tagName: string): HTMLElement | DocumentFragment {
+	createElementByTagName(tagName: string, is?: string): HTMLElement | DocumentFragment {
 		if (Fragment === tagName.toLowerCase()) {
 			return document.createDocumentFragment();
-			// } else if (tagName.includes('-')) {
-			// 	const registry: ClassRegistry = dependencyInjector.getInstance(ClassRegistry);
-			// 	const componentRef: ComponentRef<T> | undefined = registry.getComponentRef(tagName);
-			// 	const element =  componentRef ?
-			// 		new componentRef.viewClass() : document.createElement(tagName);
-			//  Reflect.set(element, '_parentComponent', this.baiseView);
-			//  return element;
-		} else {
+		}
+		else if (tagName.includes('-')) {
+			let element: HTMLElement;
+			let ViewClass = customElements.get(tagName);
+			if (ViewClass) {
+				element = new ViewClass();
+			}
+			else {
+				element = document.createElement(tagName);
+				customElements.whenDefined(tagName).then(() => {
+					customElements.upgrade(element);
+					ViewClass = customElements.get(tagName);
+					if (!(element instanceof ViewClass)) {
+						const newChild = new ViewClass();
+						[].slice.call(element.attributes).forEach((attr: Attr) => {
+							newChild.setAttribute(attr.name, attr.value);
+						});
+						Object.getOwnPropertyNames(element).forEach(key => {
+							Reflect.set(newChild, key, Reflect.get(element, key));
+						})
+						// element.parentElement?.replaceChild(newChild, element);
+						element.replaceWith(newChild);
+					}
+				});
+			}
+			// const registry: ClassRegistry = dependencyInjector.getInstance(ClassRegistry);
+			// const componentRef = registry.getComponentRef<any>(tagName);
+
+			// if (componentRef) {
+			// 	if (componentRef.extend.classRef !== HTMLElement) {
+			// 		element = document.createElement(componentRef.extend.name as string, { is: tagName });
+			// 		// element.setAttribute('is', tagName);
+			// 	} else {
+			// 		element = new componentRef.viewClass();
+			// 	}
+			// } else {
+			// 	element = document.createElement(tagName, { is: tagName });
+			// }
+			Reflect.set(element, '_parentComponent', this.baiseView);
+			return element;
+		}
+		else {
 			// native tags // and custom tags
-			const element = document.createElement(tagName);
+			const element = document.createElement(tagName, is ? { is } : undefined);
 			Reflect.set(element, '_parentComponent', this.baiseView);
 			return element;
 		}
@@ -187,7 +203,7 @@ export abstract class ComponentRender<T> {
 		var node = document.createTextNode(child);
 		parent.appendChild(node);
 		// this.textChildTemplateHandler(node, 'textContent');
-		this.attrTemplateHandler(node, 'textContent', child, false);
+		this.attrTemplateHandler(node, 'textContent', child);
 	}
 
 	handelHostListener(listener: ListenerRef) {
