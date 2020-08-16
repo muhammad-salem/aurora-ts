@@ -96,7 +96,11 @@ export abstract class ComponentRender<T> {
 	initView(): void {
 		if (this.componentRef.template) {
 			this.template = this.componentRef.template(this.baiseView._model);
-			this.baiseView.appendChild(this.createElement(this.template));
+			if (this.baiseView.shadowRoot && this.componentRef.encapsulation === 'shadowDom') {
+				this.baiseView.shadowRoot.appendChild(this.createElement(this.template));
+			} else {
+				this.baiseView.appendChild(this.createElement(this.template));
+			}
 		}
 		this.componentRef.hostListeners?.forEach((listener) =>
 			this.handelHostListener(listener)

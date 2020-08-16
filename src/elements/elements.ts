@@ -79,6 +79,7 @@ export interface ComponentRef<T> {
 	descriptors: PropertyDescriptor[];
 
 	renderType: 'html' | 'jsx' | 'tsx';
+	encapsulation: 'none' | 'shadowDom';
 }
 
 
@@ -177,6 +178,7 @@ export class ComponentElement {
 		componentRef.hostBindings = componentRef.hostBindings || [];
 		componentRef.hostListeners = componentRef.hostListeners || [];
 		componentRef.descriptors = componentRef.descriptors || [];
+		componentRef.encapsulation = componentRef.encapsulation || 'none';
 
 		componentRef.viewClass = initViewClass(modelClass, componentRef);
 
@@ -221,7 +223,9 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 
 		constructor() {
 			super();
-			// let shadowRoot = this.attachShadow({ mode: 'open' });
+			if (componentRef.encapsulation === 'shadowDom') {
+				this.attachShadow({ mode: 'open' });
+			}
 			// services should be injected her
 			this._model = new modelClass();
 			this._changeObservable = new Observable();

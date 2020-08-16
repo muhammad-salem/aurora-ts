@@ -45,6 +45,17 @@ export interface ComponentOptions<T = Function> {
 	 * the tag name to inhert from as 'a', 'div', 'table', 'td', 'th', 'tr', etc ...
 	 */
 	extend?: string;
+
+	/**
+	 * An encapsulation policy for the template and CSS styles. One of:
+	 * <br/>
+	 *  'none': Use global CSS without any encapsulation.
+	 *  'shadowDom': Use Shadow DOM v1 to encapsulate styles.
+	 * 
+	 * default is 'none'
+	 * @type {'none' | 'shadowDom'}
+	 */
+	encapsulation?: 'none' | 'shadowDom';
 }
 
 export interface ChildOptions {
