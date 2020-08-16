@@ -1,13 +1,12 @@
 import { JsxComponent, Fragment } from '../jsx/factory.js';
 import { JSXRender } from '../core/decorators.js';
 import { ComponentRender } from './render.js';
-import { BaseComponent } from '../elements/component.js';
-import { ComponentRef } from '../elements/elements.js';
+import { HTMLComponent } from '../elements/component.js';
 import { hasAttr } from '../elements/attributes.js';
 
 export class HTMLComponentRender<T> extends ComponentRender<T> {
-    constructor(baiseView: BaseComponent<T> & HTMLElement, componentRef: ComponentRef<T>) {
-        super(baiseView, componentRef);
+    constructor(baiseView: HTMLComponent<T>) {
+        super(baiseView);
         this.templateRegExp = (/\{\{((\w| |\.|\+|-|\*|\\)*(\(\))?)\}\}/g);
     }
 
@@ -33,6 +32,18 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
             this.initElementData(element, elementAttr, viewProperty, isAttr);
             this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
         }
+        else if (typeof viewProperty === 'string' && (/\{\{(.+\w*)*\}\}/g).test(viewProperty)) {
+            // elementAttr="{{viewProperty}}" // just pass data
+            viewProperty = viewProperty.substring(2, viewProperty.length - 2);
+            const isAttr = hasAttr(element, elementAttr);
+            this.initElementData(element, elementAttr, viewProperty, isAttr);
+            // this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
+        }
+        else if (typeof viewProperty === 'string' && (/\{\{|\}\}/g).test(viewProperty)) {
+            // elementAttr="any string{{viewProperty}}any text" // just pass data
+            const isAttr = hasAttr(element, elementAttr);
+            this.attrTemplateHandler(element, elementAttr, viewProperty, isAttr);
+        }
         else if (elementAttr.startsWith('(')) {
             // (elementAttr)="modelProperty()"
             elementAttr = elementAttr.substring(1, elementAttr.length - 1);
@@ -41,10 +52,6 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
         else if (elementAttr.startsWith('on')) {
             // onelementAttr="modelProperty()"
             this.handleEvent(element, elementAttr.substring(2), viewProperty);
-        }
-        else if (viewProperty.includes('{{') && viewProperty.includes('}}')) {
-            // elementAttr="{{viewProperty}}" // just pass data
-            this.attrTemplateHandler(element, elementAttr, viewProperty);
         }
         else {
             if (typeof viewProperty === 'boolean' && !viewProperty) {
@@ -63,58 +70,6 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
             callback.call(this.baiseView._model);
         });
     }
-
-    // handleAttributes(element: HTMLElement, propertyKey: string, propertyValue: any) {
-    //     // console.log(key, value);
-
-    //     if (propertyKey.startsWith('#')) {
-    //         // this.baiseView[key.substring(1)] = element;
-    //         Reflect.set(this.baiseView, propertyKey.substring(1), element);
-    //     } else if (propertyKey.startsWith('[')) {
-    //         return;
-    //     } else if (propertyKey.startsWith('(')) {
-    //         return;
-    //     } else if (typeof propertyValue === 'string' && (/\{\{(.+\w*)*\}\}/g).test(propertyValue)) {
-    //         let propertyName = propertyValue.substring(2, propertyValue.length - 2);
-    //         // this.templateHandler(element, key);
-    //         element.setAttribute(propertyKey, this.baiseView._model[propertyName]);
-    //         console.log(propertyName);
-    //         if ('_observable' in element) {
-    //             // (<BaseComponent>element)._observable.emit(propertyValue);
-    //             (<BaseComponent<T>>element)._observable.subscribe(propertyKey, () => {
-    //                 this.baiseView._setModelProp(propertyName, (element as HTMLElement).getAttribute(propertyKey));
-    //                 // this.baiseView._model[propertyName] = (element as HTMLElement).getAttribute(propertyKey);
-    //                 console.log(propertyName, event);
-    //             });
-    //         } else {
-    //             // addListener(propertyKey, () => {
-    //             //     this.baiseView._setModelProp(propertyName, element.getAttribute(propertyKey));
-    //             // });
-    //             // element.addEventListener(propertyKey, (event) => {
-    //             //     this.baiseView._setModelProp(propertyName, element.getAttribute(propertyKey));
-    //             //     // this.baiseView._model[propertyName] = element.getAttribute(propertyKey);
-    //             //     console.log(propertyName, event);
-    //             // });
-    //         }
-
-    //     } else if (propertyKey.startsWith('on')) {
-    //         element.addEventListener(propertyKey.substring(2), (event) => {
-    //             if (typeof propertyValue === 'function') {
-    //                 propertyValue.call(this.baiseView._model);
-    //             } else if (typeof propertyValue === 'string') {
-    //                 propertyValue = propertyValue.substring(0, propertyValue.length - 2);
-    //                 this.baiseView._model[propertyValue]();
-    //             }
-    //         });
-    //     } else {
-    //         if (typeof propertyValue === 'boolean' && propertyValue) {
-    //             element.setAttribute(propertyKey, '');
-    //         } else {
-    //             element.setAttribute(propertyKey, propertyValue);
-    //         }
-    //     }
-    // }
-
 }
 
 export function toJSXRender<T>(html: string): JSXRender<T> {
@@ -196,13 +151,14 @@ function analysis(arr: string[]): (Child | string)[] {
     const childStack: (Child | string)[] = [];
     const stackTrace: (Child | string)[] = [];
     for (let i = 0; i < arr.length; i++) {
-        const current = arr[i];
+        let current = arr[i];
         if ((/^\^\w.*\//g).test(current)) {
             // self closing tag // has no childs // should push to parent
-            stackTrace.push(defineChild(arr[i]));
+            current = current.substring(0, current.length - 1).trim();
+            stackTrace.push(defineChild(current));
             popElement(stackTrace, childStack);
         } else if ((/^\^\w/g).test(current)) {
-            stackTrace.push(defineChild(arr[i]));
+            stackTrace.push(defineChild(current));
         } else if ((/^\^\/\w/g).test(current)) {
             popElement(stackTrace, childStack);
         } else {
@@ -211,6 +167,7 @@ function analysis(arr: string[]): (Child | string)[] {
         }
     }
     if (stackTrace.length > 0) {
+        console.error(stackTrace);
         throw new Error(`error parsing html, had ${stackTrace.length} element, with no closing tag`);
     }
     return childStack;
@@ -241,7 +198,9 @@ function defineChild(htmlStatement: string): Child {
         const attrs = htmlStatement.substring(fisrtSpace + 1);
         currentElement.attrs = {};
         let key: string | null = null, value: string | null = null;
-        const list = attrs.split(/\s/);
+        const list = attrs.split(/\s/)
+            .filter(str => str.trim())
+            .filter(str => str.length > 0);
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
             if (/(\[?\(?\w*\)?\]?)="(.*)"/g.test(item)) {
