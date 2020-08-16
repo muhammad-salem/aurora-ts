@@ -77,6 +77,16 @@ export class Observable {
         }
     }
 
+    removeSubscription(attrName: string, callback: Function): void {
+        const callbacks = this.subscripers.get(attrName);
+        if (callbacks) {
+            let index = callbacks.indexOf(callback);
+            if (index > -1) {
+                callbacks.splice(index, 1);
+            }
+        }
+    }
+
     destroy() {
         this.subscripers.clear();
     }
