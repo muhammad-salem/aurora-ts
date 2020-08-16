@@ -1,12 +1,11 @@
 import { ComponentRender } from './render.js';
-import { BaseComponent } from '../elements/component.js';
-import { ComponentRef } from '../elements/elements.js';
+import { HTMLComponent } from '../elements/component.js';
 import { setValueByPath } from '../core/utils.js';
 import { hasAttr } from '../elements/attributes.js';
 
 export class JSXComponentRender<T> extends ComponentRender<T> {
-    constructor(baiseView: BaseComponent<T> & HTMLElement, componentRef: ComponentRef<T>) {
-        super(baiseView, componentRef);
+    constructor(baiseView: HTMLComponent<T>) {
+        super(baiseView);
         // this.templateRegExp = (/\$(\w*)(\(\))?/g);
         this.templateRegExp = (/0\$\#\$(\w*)?/g);
     }
