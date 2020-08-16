@@ -6,7 +6,7 @@ import {
 import { LogService } from './person.js';
 
 @Component({
-	selector: 'bootstrap-btn',
+	selector: 'bootstrap-button',
 	extend: 'button'
 })
 export class PrimaryButton implements OnInit, OnChanges, AfterViewInit {

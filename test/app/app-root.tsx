@@ -19,8 +19,8 @@ import { Person } from './person.js';
 
 <person-edit #personEdit person="{{person1}}" (save)="printPerson($event)"></person-edit>
 
+<progress-bar value="40" min="0" max="100" person="{{person1}}"></progress-bar>
 
-<progress-bar value="40" min="0" max="100"></progress-bar>
 <div class="row">
     <div class="col-3">
         <person-view #pm1 person="{{person1}}" name="dddddddd" age="34" allowed></person-view>
@@ -39,35 +39,35 @@ import { Person } from './person.js';
 <div class="row p-1 m-1">
     <div class="col-12 p-1 m-1">
         <div class="btn-group btn-group-vertical" role="group">
-            <bootstrap-btn size="sm" color="primary">Primary</bootstrap-btn>
-            <bootstrap-btn size="sm" color="secondary">Secondary</bootstrap-btn>
-            <bootstrap-btn size="sm" color="success">Success</bootstrap-btn>
-            <bootstrap-btn size="sm" color="danger">Danger</bootstrap-btn>
-            <bootstrap-btn size="sm" color="warning">Warning</bootstrap-btn>
-            <bootstrap-btn size="sm" color="info">Info</bootstrap-btn>
-            <bootstrap-btn size="sm" color="light">Light</bootstrap-btn>
-            <bootstrap-btn size="sm" color="dark">Dark</bootstrap-btn>
-            <bootstrap-btn size="sm" color="link">Link</bootstrap-btn>
+            <bootstrap-button size="sm" color="primary">Primary</bootstrap-button>
+            <bootstrap-button size="sm" color="secondary">Secondary</bootstrap-button>
+            <bootstrap-button size="sm" color="success">Success</bootstrap-button>
+            <bootstrap-button size="sm" color="danger">Danger</bootstrap-button>
+            <bootstrap-button size="sm" color="warning">Warning</bootstrap-button>
+            <bootstrap-button size="sm" color="info">Info</bootstrap-button>
+            <bootstrap-button size="sm" color="light">Light</bootstrap-button>
+            <bootstrap-button size="sm" color="dark">Dark</bootstrap-button>
+            <bootstrap-button size="sm" color="link">Link</bootstrap-button>
         </div>
     </div>
     <div class="col-12 p-1 m-1">
         <div class="btn-group" role="group" aria-label="Basic example">
-            <bootstrap-btn size="sm" outline color="primary">Primary</bootstrap-btn>
-            <bootstrap-btn size="sm" outline color="secondary">Secondary</bootstrap-btn>
-            <bootstrap-btn size="sm" outline color="success">Success</bootstrap-btn>
-            <bootstrap-btn size="sm" outline color="danger">Danger</bootstrap-btn>
-            <bootstrap-btn size="sm" outline color="warning">Warning</bootstrap-btn>
-            <bootstrap-btn size="sm" outline color="info">Info</bootstrap-btn>
-            <bootstrap-btn size="sm" outline color="light">Light</bootstrap-btn>
-            <bootstrap-btn size="sm" outline color="dark">Dark</bootstrap-btn>
-            <bootstrap-btn size="sm" outline color="link">Link</bootstrap-btn>
+            <bootstrap-button size="sm" outline color="primary">Primary</bootstrap-button>
+            <bootstrap-button size="sm" outline color="secondary">Secondary</bootstrap-button>
+            <bootstrap-button size="sm" outline color="success">Success</bootstrap-button>
+            <bootstrap-button size="sm" outline color="danger">Danger</bootstrap-button>
+            <bootstrap-button size="sm" outline color="warning">Warning</bootstrap-button>
+            <bootstrap-button size="sm" outline color="info">Info</bootstrap-button>
+            <bootstrap-button size="sm" outline color="light">Light</bootstrap-button>
+            <bootstrap-button size="sm" outline color="dark">Dark</bootstrap-button>
+            <bootstrap-button size="sm" outline color="link">Link</bootstrap-button>
         </div>
     </div>
     <div class="col-12 p-1 m-1">
         <div class="btn-group" role="group" aria-label="Basic example">
-            <bootstrap-btn size="sm" outline color="secondary">Left</bootstrap-btn>
-            <bootstrap-btn size="md" outline color="secondary">Middle</bootstrap-btn>
-            <bootstrap-btn size="lg" outline color="secondary">Right</bootstrap-btn>
+            <bootstrap-button size="sm" outline color="secondary">Left</bootstrap-button>
+            <bootstrap-button size="md" outline color="secondary">Middle</bootstrap-button>
+            <bootstrap-button size="lg" outline color="secondary">Right</bootstrap-button>
         </div>
     </div>
 </div>

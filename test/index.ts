@@ -5,4 +5,5 @@
 // export * from './app/person.js';
 // export * from './app/app-root.js';
 
+export * from './html-test/html-app.js';
 export * from './jsx-test/jsx-app.js'

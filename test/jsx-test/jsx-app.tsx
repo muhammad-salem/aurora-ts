@@ -108,7 +108,7 @@ export class AppEdit {
 
     fireEvent() {
         // this.view.triggerEvent('editData');
-        this.view._parentComponent.triggerEvent('appModel');
+        this.view._parentComponent?.triggerEvent('appModel');
     }
 }
 
@@ -288,7 +288,6 @@ class AyKalam {
                             <app-view $viewData="modelE" />
                         </div>
                     </div>
-                    <div class="p-3 my-2 bg-success text-white"></div>
                 </div>
             </div>
         );
