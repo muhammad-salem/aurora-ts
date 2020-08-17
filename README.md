@@ -3,12 +3,15 @@
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Install Size][badge-size]][badge-size]
+[![LICENSE][license-img]][license-url]
 
 [npm-image]: https://img.shields.io/npm/v/aurora-ts.svg
 [npm-url]: https://npmjs.org/package/aurora-ts
 [downloads-image]: https://img.shields.io/npm/dm/aurora-ts.svg
 [downloads-url]: https://npmjs.org/package/aurora-ts
 [badge-size]: https://packagephobia.now.sh/badge?p=aurora-ts
+[license-img]: https://img.shields.io/github/license/salemebo/aurora-ts.svg
+[license-url]: https://github.com/salemebo/aurora-ts/blob/master/LICENSE
 
 Aurora is a web framework, that can create and define a usable 'custom elements', that compatible with other frameworks, using Typescript.
 
