@@ -116,11 +116,17 @@ export interface DataModel {
 
 @Component({
     selector: 'app-view',
-    template: () => {
+    template: ({viewData}: AppView) => {
         return (
             <Fragment>
+                {/* just pass data as text, jsx feature*/}
                 <h1>{viewData.name}</h1>
+                {/* just pass data as text, from prop viewData.name to innerHTML */}
+                <h1 innerHTML="$viewData.name"></h1>
+                {/* one way binding for 'innerHTML' to property 'viewData.name' */}
                 <h1 $innerHTML="viewData.name"></h1>
+                {/* two way binding for 'innerHTML' to property 'viewData.name' */}
+                <input type="text" $value="$viewData.name"></h1>
 
                 <h2 $innerHTML="viewData.version"></h2>
                 <div class="card">
