@@ -62,11 +62,13 @@ npm i --save aurora-ts
 | @ViewChildren | TO:DO |
 | @SelfSkip | TO:DO |
 | @Optional | TO:DO |
-| *if | TO:DO |
-| *for | TO:DO |
-| *switch | TO:DO |
-| Annotation metadate | ✓ |
+| *if Directive | TO:DO |
+| *for Directive | TO:DO |
+| *switch Directive | TO:DO |
+| [Annotation/Decorators reflect-metadata][metadata] | ✓ |
 | XSS (cross-site-scripting) | TO:DO |
+
+[metadata]: https://github.com/rbuckton/reflect-metadata
 
 ## Web Component standards
 
