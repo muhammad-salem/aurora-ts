@@ -23,17 +23,22 @@ No need for Virtual Dom.
 npm i --save aurora-ts
 ```
 
-## Support
+## [HTML Template] and [JSX / TSX] Features
 
 | Support | HTML Template| JSX |
 | -------------------- | - | - |
-| setAttribute | ✓ | ✓ |
-| getAttribute | ✓ | ✓ |
+| Parsing Attributes | ✓ | ✓ |
 | One Way Data Binding | ✓ | ✓ |
 | Two Way Data Binding | ✓ | ✓ |
 | Event Binding | ✓ | ✓ |
 | Template Parser | ✓ | no need |
 | Template Syntax | ✓ | no need |
+| Template HTML File | dynamic import | no need |
+| JSX Factory | no need | ✓ |
+| Fragment | ✓ | ✓ |
+| camelCase Property Naming | ✓ | ✓ |
+
+## Libary Features
 
 | Features | Aurora |
 | ------- | ------- |
@@ -44,15 +49,37 @@ npm i --save aurora-ts
 | Directives | TO:DO |
 | Services | TO:DO |
 | Pipes | TO:DO |
+| Lifecycle | ✓ |
+| @Input | ✓ |
+| @Output | ✓ |
+| @View | ✓ |
+| @HostListener | ✓ |
+| @ViewChild | TO:DO |
+| @HostBinding | TO:DO |
+| @ViewChildren | TO:DO |
+| @SelfSkip | TO:DO |
+| @Optional | TO:DO |
+| *if | TO:DO |
+| *for | TO:DO |
+| *switch | TO:DO |
+| Annotation metadate | ✓ |
+| XSS (cross-site-scripting) | TO:DO |
 
-| Custom Elements spec | Aurora | DOC |
-| ------- | ------- | - |
-| [Reflecting Properties to Attributes][attr-props] | ✓ |
-| [Observing Changes to Attributes][observ-attr] | ✓ |
-| [Element Upgrades][elem-upgrd] | ✓ |
+## Web Component standards
+
+| Standards  | Support |
+| ------- | ------- |
 | [Custom Elements][custom]  | ✓ |
 | [Shadow DOM][shadow] |  In Progress |
 | [Template Element][template]| TO:DO |
+
+## Custom Elements standards
+
+| Features | Aurora |
+| ------- | ------- |
+| [Reflecting Properties to Attributes][attr-props] | ✓ |
+| [Observing Changes to Attributes][observ-attr] | ✓ |
+| [Element Upgrades][elem-upgrd] | ✓ |
 | [Styling a Custom Element][style] | TO:DO |
 | [Extending native HTML elements][extend-native] | ✓ |
 | [Extending a Custom Element][extend-custom] | TO:DO |
@@ -153,7 +180,7 @@ export class AppEdit {
 
 @Component({
     selector: 'root-app',
-    encapsulation: 'none',
+    encapsulation: 'custom',
     template:
         `
         <div class="row" >
