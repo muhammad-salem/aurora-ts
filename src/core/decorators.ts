@@ -1,4 +1,4 @@
-/// <reference path='../types/html.ts'/>
+/// <reference path='../types/raw-module.ts'/>
 /// <reference path='../reflect/metadata.ts' />
 
 import { ComponentElement } from '../elements/elements.js';
