@@ -55,7 +55,7 @@ export interface ComponentOptions<T = Function> {
 	 * default is 'none'
 	 * @type {'none' | 'shadowDom'}
 	 */
-	encapsulation?: 'none' | 'shadowDom';
+	encapsulation?: 'custom' | 'template' | 'shadowDom';
 }
 
 export interface ChildOptions {

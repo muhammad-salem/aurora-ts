@@ -79,7 +79,7 @@ export interface ComponentRef<T> {
 	descriptors: PropertyDescriptor[];
 
 	renderType: 'html' | 'jsx' | 'tsx';
-	encapsulation: 'none' | 'shadowDom';
+	encapsulation: 'custom' | 'template' | 'shadowDom';
 }
 
 
@@ -178,7 +178,7 @@ export class ComponentElement {
 		componentRef.hostBindings = componentRef.hostBindings || [];
 		componentRef.hostListeners = componentRef.hostListeners || [];
 		componentRef.descriptors = componentRef.descriptors || [];
-		componentRef.encapsulation = componentRef.encapsulation || 'none';
+		componentRef.encapsulation = componentRef.encapsulation || 'custom';
 
 		componentRef.viewClass = initViewClass(modelClass, componentRef);
 
