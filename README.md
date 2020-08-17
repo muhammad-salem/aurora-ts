@@ -94,6 +94,10 @@ npm i --save aurora-ts
 [extend-custom]: https://developers.google.com/web/fundamentals/web-components/customelements#extendcustomeel
 [extend-native]: https://developers.google.com/web/fundamentals/web-components/customelements#extendhtml
 
+## future support
+
+- wasm
+
 ### `[JSX and HTML] -- template parser example`
 
 ``` typescript
