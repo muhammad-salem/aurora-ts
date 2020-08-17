@@ -1,4 +1,4 @@
-import { BaseComponent, HTMLComponent } from "../elements/component";
+import { HTMLComponent } from '../elements/component.js';
 
 export function isHTMLElement(object: any): object is HTMLElement {
 	return (
