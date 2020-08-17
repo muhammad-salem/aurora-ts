@@ -2,4 +2,6 @@
 .idea
 .vscode
 test
+public
 index.html
+aurora-ts-*.tgz
