@@ -1,16 +1,73 @@
 # Aurora
 
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![Install Size][badge-size]][badge-size]
+
+[npm-image]: https://img.shields.io/npm/v/aurora-ts.svg
+[npm-url]: https://npmjs.org/package/aurora-ts
+[downloads-image]: https://img.shields.io/npm/dm/aurora-ts.svg
+[downloads-url]: https://npmjs.org/package/aurora-ts
+[badge-size]: https://packagephobia.now.sh/badge?p=aurora-ts
+
 Aurora is a web framework, that can create and define a usable 'custom elements', that compatible with other frameworks, using Typescript.
 
-## `Install`
-
-``` bash
-npm i aurora-ts
+```text
+Render Once, Update Attributes/Properties On Change.
+No need for Virtual Dom.
 ```
 
-npm i aurora-ts
+## `Install - NPM`
 
-### `JSX Example`
+``` bash
+npm i --save aurora-ts
+```
+
+## Support
+
+| Support | HTML Template| JSX |
+| -------------------- | - | - |
+| setAttribute | ✓ | ✓ |
+| getAttribute | ✓ | ✓ |
+| One Way Data Binding | ✓ | ✓ |
+| Two Way Data Binding | ✓ | ✓ |
+| Event Binding | ✓ | ✓ |
+| Template Parser | ✓ | no need |
+| Template Syntax | ✓ | no need |
+
+| Features | Aurora |
+| ------- | ------- |
+| ES Module | ✓ |
+| JavaScript | ✓ |
+| Javascript | TO:DO |
+| Dependency Injection |  In Progress |
+| Directives | TO:DO |
+| Services | TO:DO |
+| Pipes | TO:DO |
+
+| Custom Elements spec | Aurora | DOC |
+| ------- | ------- | - |
+| [Reflecting Properties to Attributes][attr-props] | ✓ |
+| [Observing Changes to Attributes][observ-attr] | ✓ |
+| [Element Upgrades][elem-upgrd] | ✓ |
+| [Custom Elements][custom]  | ✓ |
+| [Shadow DOM][shadow] |  In Progress |
+| [Template Element][template]| TO:DO |
+| [Styling a Custom Element][style] | TO:DO |
+| [Extending native HTML elements][extend-native] | ✓ |
+| [Extending a Custom Element][extend-custom] | TO:DO |
+
+[attr-props]: https://developers.google.com/web/fundamentals/web-components/customelements#reflectattr
+[observ-attr]: https://developers.google.com/web/fundamentals/web-components/customelements#attrchanges
+[elem-upgrd]: https://developers.google.com/web/fundamentals/web-components/customelements#upgrades
+[custom]: https://developers.google.com/web/fundamentals/web-components/customelements
+[shadow]: https://developers.google.com/web/fundamentals/web-components/customelements#shadowdom
+[template]: https://developers.google.com/web/fundamentals/web-components/customelements#fromtemplate
+[style]: https://developers.google.com/web/fundamentals/web-components/customelements#styling
+[extend-custom]: https://developers.google.com/web/fundamentals/web-components/customelements#extendcustomeel
+[extend-native]: https://developers.google.com/web/fundamentals/web-components/customelements#extendhtml
+
+### `[JSX and HTML] -- template parser example`
 
 ``` typescript
 
@@ -42,7 +99,7 @@ export interface DataModel {
 })
 export class AppView {
     @Input()
-    viewData: DataModel;
+    viewData: DataModel;git clone https://github.com/salemebo/aurora-ts.git
 }
 
 @Component({
@@ -101,7 +158,7 @@ export class AppEdit {
         `
         <div class="row" >
             <div class="col-6" >
-                <app-edit [(editData)]="model" />
+                <app-edit [(editData)]="model" (save)="saveAction($event)" />
             </div>
             <div class="col-6" >
                 <app-view [viewData]="model" />
@@ -134,11 +191,26 @@ export class RootApp implements OnInit {
 
 in index.html add:
 
-```html
-    <script type="module" src="path-to-main-file/index.js"></script>
-    <root-app></root-app>
-```
+ ```html
+    <body>
+        <root-app></root-app>
+        <script type="module" src="path-to-main-file/index.js"></script>
+    </body>
+ ```
 
 #### `Screenshot`
 
-![aurora-capture](https://github.com/salemebo/aurora-ts/raw/master/.img/aurora-capture.gif)
+ ![aurora-capture](https://github.com/salemebo/aurora-ts/raw/master/.img/aurora-capture.gif)
+
+#### `aurora-examples`
+
+ @see <https://github.com/salemebo/aurora-examples>
+
+#### test local
+
+```bash
+git clone https://github.com/salemebo/aurora-ts.git
+npm i
+npm run test
+npm run serve
+```
