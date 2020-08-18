@@ -141,7 +141,7 @@ export interface DataModel {
 })
 export class AppView {
     @Input()
-    viewData: DataModel;git clone https://github.com/salemebo/aurora-ts.git
+    viewData: DataModel;
 }
 
 @Component({
