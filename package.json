@@ -18,7 +18,8 @@
     "buildamd": "tsc -p src/tsconfig.amd.json",
     "build": "rm -rf esm20* && rm -rf amd && rm -rf public && tsc && tsc --build",
     "serve": "serve",
-    "test": "tsc -b -v -w test/tsconfig.test.json",
+    "test": "tsc -b -v test/tsconfig.test.json",
+    "testw": "tsc -b -v -w test/tsconfig.test.json",
     "prepublish": "npm run build"
   },
   "devDependencies": {
