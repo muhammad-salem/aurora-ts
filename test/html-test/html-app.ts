@@ -106,7 +106,7 @@ export class HTMLEdit {
 
 @Component({
     selector: 'html-app',
-    encapsulation: 'none',
+    encapsulation: 'custom',
     template:
         `
         <div class="row">
