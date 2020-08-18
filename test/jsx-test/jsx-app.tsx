@@ -61,22 +61,22 @@ export class AppView {
         return (
             <form #form >
                 <div class="mb-3">
-                    <label for="appName" class="form-label">Name</label>
-                    <input id="appName" type="text" $value="$editData.name" />
+                    <label for="appName-{{modelId}}" class="form-label">Name</label>
+                    <input id="appName-{{modelId}}" type="text" $value="$editData.name" />
                 </div>
                 <div class="mb-3">
-                    <label for="appversin" class="form-label">Version</label>
-                    <input id="appversin" type="number" $value="$editData.version" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="title" class="form-label">Title</label>
-                    <input id="title" type="text" $value="$editData.description.title" />
+                    <label for="appversin-{{modelId}}" class="form-label">Version</label>
+                    <input id="appversin-{{modelId}}" type="number" $value="$editData.version" />
                 </div>
 
                 <div class="mb-3">
-                    <label for="desc" class="form-label">Description</label>
-                    <input id="desc" type="text" $value="$editData.description.desc" />
+                    <label for="title-{{modelId}}" class="form-label">Title</label>
+                    <input id="title-{{modelId}}" type="text" $value="$editData.description.title" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="desc-{{modelId}}" class="form-label">Description</label>
+                    <input id="desc-{{modelId}}" type="text" $value="$editData.description.desc" />
                 </div>
                 <div class="btn-group" role="group" aria-label="Basic example">
                     <button type="button" class="btn btn-primary" onclick={printModel}>Print</button>
@@ -89,6 +89,10 @@ export class AppView {
     }
 })
 export class AppEdit {
+
+    @Input()
+    modelId: number;
+
     @Input()
     editData: AppModel;
 
@@ -157,7 +161,7 @@ class AyKalam {
                                 {`<app-edit editData={jsxApp.modelA} />`}
                             </code>
                             <br />
-                            <app-edit editData={jsxApp.modelA} />
+                            <app-edit modelId="1" editData={jsxApp.modelA} />
                         </div>
                         <div class="col-6" >
                             One Way Binding
@@ -180,7 +184,7 @@ class AyKalam {
                                 {`<app-edit editData="$modelB" />`}
                             </code>
                             <br />
-                            <app-edit editData="$modelB" />
+                            <app-edit modelId="2" editData="$modelB" />
                         </div>
                         <div class="col-6" >
                             One Way Binding
@@ -203,7 +207,7 @@ class AyKalam {
                                 {`<app-edit $editData="modelC"/>`}
                             </code>
                             <br />
-                            <app-edit $editData="modelC" />
+                            <app-edit modelId="3" $editData="modelC" />
                         </div>
                         <div class="col-4" >
                             One Way Binding
@@ -212,7 +216,7 @@ class AyKalam {
                                 {`<app-edit $editData="modelC"/>`}
                             </code>
                             <br />
-                            <app-edit $editData="modelC" />
+                            <app-edit modelId="4" $editData="modelC" />
                         </div>
                         <div class="col-4" >
                             One Way Binding
@@ -235,7 +239,7 @@ class AyKalam {
                                 {`<app-edit $editData="modelD"/>`}
                             </code>
                             <br />
-                            <app-edit $editData="modelD" />
+                            <app-edit modelId="5" $editData="modelD" />
                         </div>
                         <div class="col-4" >
                             Two Way Binding
@@ -244,7 +248,7 @@ class AyKalam {
                                 {`<app-edit $editData="$modelD"/>`}
                             </code>
                             <br />
-                            <app-edit $editData="$modelD" />
+                            <app-edit modelId="6" $editData="$modelD" />
                         </div>
                         <div class="col-4" >
                             One Way Binding
@@ -267,7 +271,7 @@ class AyKalam {
                                 {`<app-edit $editData="$modelE"/>`}
                             </code>
                             <br />
-                            <app-edit $editData="$modelE" />
+                            <app-edit modelId="7" $editData="$modelE" />
                         </div>
                         <div class="col-4" >
                             Two Way Binding
@@ -276,7 +280,7 @@ class AyKalam {
                                 {`<app-edit $editData="$modelE"/>`}
                             </code>
                             <br />
-                            <app-edit $editData="$modelE" />
+                            <app-edit modelId="8" $editData="$modelE" />
                         </div>
                         <div class="col-4" >
                             One Way Binding

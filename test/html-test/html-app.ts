@@ -55,22 +55,22 @@ export class HTMLView2 {
         `
         <form #form >
             <div class="mb-3" >
-                <label for="appName" class="form-label">Name</label>
-                <input id="appName" type="text" [(value)]="editData.name"/>
+                <label for="appName-{{modelId}}" class="form-label">Name</label>
+                <input id="appName-{{modelId}}" type="text" [(value)]="editData.name"/>
             </div>
             <div class="mb-3" >
-                <label for="appversin" class="form-label" > Version </label>
-                <input id="appversin" type="number" [(value)]="editData.version"/>
-            </div>
-
-            <div class="mb-3" >
-                <label for="title" class="form-label" >Title</label>
-                <input id="title" type="text" [(value)]="editData.description.title"/>
+                <label for="appversin-{{modelId}}" class="form-label" > Version </label>
+                <input id="appversin-{{modelId}}" type="number" [(value)]="editData.version"/>
             </div>
 
             <div class="mb-3" >
-                <label for="desc" class="form-label">Description</label>
-                <input id="desc" type="text" [(value)]="editData.description.desc"/>
+                <label for="title-{{modelId}}" class="form-label" >Title</label>
+                <input id="title-{{modelId}}" type="text" [(value)]="editData.description.title"/>
+            </div>
+
+            <div class="mb-3" >
+                <label for="desc-{{modelId}}" class="form-label">Description</label>
+                <input id="desc-{{modelId}}" type="text" [(value)]="editData.description.desc"/>
             </div>
             <div class="btn-group" role="group" aria-label="Basic example" >
                 <button type="button" class="btn btn-primary" (click)="printModel()">Print</button>
@@ -81,6 +81,10 @@ export class HTMLView2 {
         `
 })
 export class HTMLEdit {
+
+    @Input()
+    modelId: string;
+
     @Input()
     editData: Model;
 
@@ -118,7 +122,7 @@ export class HTMLEdit {
                     <div class="col-6" >
                         No binding just pass data template handler
                         <br/>
-                        <html-edit editData="{{modelA}}" />
+                        <html-edit modelId="A" editData="{{modelA}}" />
                     </div>
                     <div class="col-6" >
                         One Way Binding
@@ -137,7 +141,7 @@ export class HTMLEdit {
                     <div class="col-6" >
                         No binding just pass data
                         <br/>
-                        <html-edit editData="{{modelB}}" />
+                        <html-edit modelId="B" editData="{{modelB}}" />
                     </div>
                     <div class="col-6" >
                         One Way Binding
@@ -160,7 +164,7 @@ export class HTMLEdit {
                             html-edit [editData]="modelC"
                         </code>
                         <br/>
-                        <html-edit [editData]="modelC" />
+                        <html-edit modelId="C1" [editData]="modelC" />
                     </div>
                     <div class="col-4" >
                         One Way Binding
@@ -169,7 +173,7 @@ export class HTMLEdit {
                             html-edit [editData]="modelC"
                         </code>
                         <br/>
-                        <html-edit [editData]="modelC" />
+                        <html-edit modelId="C2" [editData]="modelC" />
                     </div>
                     <div class="col-4" >
                         One Way Binding
@@ -192,13 +196,13 @@ export class HTMLEdit {
                             html-edit [editData]="modelD"
                         </code>
                         <br/>
-                        <html-edit [editData]="modelD" />
+                        <html-edit modelId="D1" [editData]="modelD" />
                     </div>
                     <div class="col-4" >
                         Two Way Binding
                         <br/>
                         <code>
-                            html-edit [(editData)]="modelD"
+                            html-edit modelId="D2" [(editData)]="modelD"
                         </code>
                         <br/>
                         <html-edit [(editData)]="modelD" />
@@ -224,7 +228,7 @@ export class HTMLEdit {
                             html-edit [(editData)]="modelE"
                         </code>
                         <br/>
-                        <html-edit [(editData)]="modelE" />
+                        <html-edit modelId="E1" [(editData)]="modelE" />
                     </div>
                     <div class="col-4" >
                         Two Way Binding
@@ -233,7 +237,7 @@ export class HTMLEdit {
                             html-edit [(editData)]="modelE"
                         </code>
                         <br/>
-                        <html-edit [(editData)]="modelE" />
+                        <html-edit modelId="E2" [(editData)]="modelE" />
                     </div>
                     <div class="col-4" >
                         One Way Binding
