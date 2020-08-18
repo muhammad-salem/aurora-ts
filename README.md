@@ -34,7 +34,7 @@ npm i --save aurora-ts
 | One Way Data Binding | ✓ | ✓ |
 | Two Way Data Binding | ✓ | ✓ |
 | Event Binding | ✓ | ✓ |
-| Template Parser | ✓ | no need |
+| Template Parser | ✓ | ✓ |
 | Template Syntax | ✓ | no need |
 | Template HTML File | dynamic import | no need |
 | JSX Factory | no need | ✓ |
@@ -77,7 +77,7 @@ npm i --save aurora-ts
 | ------- | ------- |
 | [Custom Elements][custom]  | ✓ |
 | [Shadow DOM][shadow] |  In Progress |
-| [Template Element][template]| TO:DO |
+| [Template Element][template]| ✓ |
 
 ## Custom Elements standards
 
