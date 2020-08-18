@@ -49,6 +49,7 @@ npm i --save aurora-ts
 | JavaScript | ✓ |
 | Javascript | TO:DO |
 | Dependency Injection |  In Progress |
+| Component| ✓ |
 | Directives | TO:DO |
 | Services | TO:DO |
 | Pipes | TO:DO |
