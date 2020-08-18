@@ -68,6 +68,17 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
         }
+        else if (typeof viewProperty === 'string' && (/^\{\{(.+\w*)*\}\}/g).test(viewProperty)) {
+            // elementAttr="{{viewProperty}}" // just pass data
+            viewProperty = viewProperty.substring(2, viewProperty.length - 2);
+            const isAttr = hasAttr(element, elementAttr);
+            this.initElementData(element, elementAttr, viewProperty, isAttr);
+        }
+        else if (typeof viewProperty === 'string' && (/\{\{|\}\}/g).test(viewProperty)) {
+            // elementAttr="any string{{viewProperty}}any text" // just pass data
+            const isAttr = hasAttr(element, elementAttr);
+            this.attrTemplateHandler(element, elementAttr, viewProperty, isAttr);
+        }
         else {
             if (typeof viewProperty === 'boolean' && !viewProperty) {
                 element.removeAttribute(elementAttr);
