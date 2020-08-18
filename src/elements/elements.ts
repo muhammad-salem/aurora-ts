@@ -14,9 +14,11 @@ import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
 import { Observable } from '../core/observable.js';
 import { findByModelClassOrCreat } from '../reflect/bootstrap-data.js';
-import { toJSXRender, HTMLComponentRender } from '../jsx/html-expression.js';
+import { HTMLComponentRender } from '../jsx/html-expression.js';
 import { JSXComponentRender } from '../jsx/jsx-expression.js';
 import { EventEmitter } from '../core/events.js';
+import { htmlTemplateToJSXRender } from '../jsx/html-template-parser.js';
+import { toJSXRender } from '../jsx/html-string-parser.js';
 
 export class PropertyRef {
 	constructor(public modelProperty: string, private _viewNanme?: string, descriptor?: PropertyDescriptor) { }
@@ -167,10 +169,20 @@ export class ComponentElement {
 			componentRef.renderType = 'html';
 		} else if (typeof componentRef.template === 'string') {
 			componentRef.template = toJSXRender(componentRef.template);
+			// componentRef.template = htmlTemplateToJSXRender(componentRef.template);
 			componentRef.renderType = 'html';
 		} else {
 			componentRef.renderType = 'jsx';
 		}
+		if (!componentRef.template && componentRef.encapsulation === 'template') {
+			const template = document.querySelector('#' + componentRef.selector);
+			if (template && template instanceof HTMLTemplateElement) {
+				componentRef.template = htmlTemplateToJSXRender(template);
+			} else {
+				// didn't find this template in 'index.html' document
+			}
+		}
+
 		componentRef.inputs = componentRef.inputs || [];
 		componentRef.outputs = componentRef.outputs || [];
 		componentRef.viewChild = componentRef.viewChild || [];
@@ -358,6 +370,12 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 			// setup ui view
 			this._render.initView();
 
+			if (componentRef.encapsulation === 'template' && !this._parentComponent) {
+				Array.prototype.slice.call(this.attributes).forEach((attr: Attr) => {
+					this.initOuterAttribute(attr);
+				});
+			}
+
 			if (componentRef.view) {
 				// this._model[componentRef.view] = this;
 				Reflect.set(this._model, componentRef.view, this);
@@ -380,6 +398,34 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 					this._model.afterViewChecked();
 				}
 			};
+		}
+
+		initOuterAttribute(attr: Attr) {
+			// [window, this] scop
+			let elementAttr = attr.name;
+			let modelProperty = attr.value;
+			if (elementAttr.startsWith('(')) {
+				// (elementAttr)="modelProperty()"
+				elementAttr = elementAttr.substring(1, elementAttr.length - 1);
+				// this.handleEvent(element, elementAttr, viewProperty);
+				modelProperty = modelProperty.endsWith('()') ?
+					modelProperty.substring(0, modelProperty.length - 2) : modelProperty;
+				let callback: Function = Reflect.get(window, modelProperty);
+				this.addEventListener(elementAttr, event => {
+					callback(event);
+				});
+			} else if (elementAttr.startsWith('on')) {
+				const modelEvent = this.getEventEmitter<any>(elementAttr.substring(2));
+				if (modelEvent) {
+					// modelEvent.subscribe(listener);
+					modelProperty = modelProperty.endsWith('()') ?
+						modelProperty.substring(0, modelProperty.length - 2) : modelProperty;
+					let listener: Function = Reflect.get(window, modelProperty);
+					modelEvent.subscribe((data: any) => {
+						(listener as Function)(data);
+					});
+				}
+			}
 		}
 
 		adoptedCallback() {
@@ -483,9 +529,13 @@ function initViewClass<T extends Object>(modelClass: TypeOf<T>, componentRef: Co
 		}
 
 		triggerParentEvent(elementAttr: string): void {
-			let parnetEventName = this.matchParentEvent(elementAttr);
-			if (parnetEventName && this._parentComponent) {
-				this._parentComponent._changeObservable.emit(parnetEventName);
+			if (this._parentComponent) {
+				let parnetEventName = this.matchParentEvent(elementAttr);
+				if (parnetEventName) {
+					this._parentComponent._changeObservable.emit(parnetEventName);
+				}
+			} else if (componentRef.encapsulation === 'template' && !this._parentComponent) {
+				this.triggerEvent(elementAttr);
 			}
 		}
 	};

@@ -241,8 +241,12 @@ export abstract class ComponentRender<T> {
 			(sourceModel[(output as PropertyRef).modelProperty] as EventEmitter<any>).subscribe((value: any) => {
 				eventCallback.call(sourceModel, value);
 			});
-		} else if (Reflect.has(source, 'on' + eventName)) {
+		}
+		else if (Reflect.has(source, 'on' + eventName)) {
 			this.addNativeEventListener(source, eventName, eventCallback);
+		}
+		else if (this.componentRef.encapsulation === 'template' && !this.baiseView._parentComponent) {
+			this.addNativeEventListener(this.baiseView, eventName, eventCallback);
 		}
 	}
 	addNativeEventListener(source: HTMLElement | Window, eventName: string, funcallback: Function) {
