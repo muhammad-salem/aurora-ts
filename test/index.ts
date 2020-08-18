@@ -7,3 +7,5 @@
 
 export * from './html-test/html-app.js';
 export * from './jsx-test/jsx-app.js'
+
+export * from './template-test/template-app.js';
