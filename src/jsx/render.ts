@@ -130,7 +130,7 @@ export abstract class ComponentRender<T> {
 	initView(): void {
 		if (this.componentRef.template) {
 			this.template = this.componentRef.template(this.baiseView._model);
-			if (this.baiseView.shadowRoot && this.componentRef.encapsulation === 'shadowDom') {
+			if (this.baiseView.shadowRoot && this.componentRef.isShadowDom) {
 				this.baiseView.shadowRoot.appendChild(this.createElement(this.template));
 			} else {
 				this.baiseView.appendChild(this.createElement(this.template));

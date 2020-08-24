@@ -72,8 +72,8 @@ export interface ComponentRef<T> {
 	descriptors: PropertyDescriptor[];
 
 	renderType: 'html' | 'jsx' | 'tsx';
-	encapsulation: 'custom' | 'template' | 'shadowDom';
-	isRichHTML: boolean;
+	encapsulation: 'custom' | 'shadow-dom' | 'template' | 'shadow-dom-template';
+	isShadowDom: boolean;
 }
 
 
@@ -165,7 +165,8 @@ export class ComponentElement {
 		} else {
 			componentRef.renderType = 'jsx';
 		}
-		if (!componentRef.template && componentRef.encapsulation === 'template') {
+
+		if (!componentRef.template && /template/g.test(componentRef.encapsulation)) {
 			const template = document.querySelector('#' + componentRef.selector);
 			if (template && template instanceof HTMLTemplateElement) {
 				componentRef.template = htmlTemplateToJSXRender(template);
@@ -182,7 +183,7 @@ export class ComponentElement {
 		componentRef.hostListeners = componentRef.hostListeners || [];
 		componentRef.descriptors = componentRef.descriptors || [];
 		componentRef.encapsulation = componentRef.encapsulation || 'custom';
-		componentRef.isRichHTML = componentRef.isRichHTML || false;
+		componentRef.isShadowDom = /shadow-dom/g.test(componentRef.encapsulation);
 
 		componentRef.viewClass = initCustomElementView(modelClass, componentRef);
 

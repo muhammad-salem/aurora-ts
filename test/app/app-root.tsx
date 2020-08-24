@@ -17,13 +17,13 @@ import { Person } from './person.js';
 <h3>data1 'data2' data3</h3>
 <h4>data1 {JSON.stringify(data)} data3</h4>
 
-<person-edit #personEdit person="{{person1}}" (save)="printPerson($event)"></person-edit>
+<person-edit #personEdit [(person)]="person1" (save)="printPerson($event)"></person-edit>
 
-<progress-bar value="40" min="0" max="100" person="{{person1}}"></progress-bar>
+<progress-bar [(value)]="person1.age" min="0" max="100"></progress-bar>
 
 <div class="row">
     <div class="col-3">
-        <person-view #pm1 person="{{person1}}" name="dddddddd" age="34" allowed></person-view>
+        <person-view #pm1 [(person)]="person1" name="dddddddd" age="34" allowed></person-view>
     </div>
     <div class="col-3">
         <person-view #pm2 person="{{person2}}" name="{{name}}" bind-age="years"></person-view>
@@ -39,6 +39,7 @@ import { Person } from './person.js';
 <div class="row p-1 m-1">
     <div class="col-12 p-1 m-1">
         <div class="btn-group btn-group-vertical" role="group">
+            <button is="bootstrap-button" size="sm" color="primary">Primary</button>
             <bootstrap-button size="sm" color="primary">Primary</bootstrap-button>
             <bootstrap-button size="sm" color="secondary">Secondary</bootstrap-button>
             <bootstrap-button size="sm" color="success">Success</bootstrap-button>

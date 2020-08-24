@@ -120,3 +120,11 @@ export function updateAttribute(to: HTMLElement, toPath: string, from: Object, f
 export function setComponentAttributeByPath<T>(element: HTMLComponent<T>, elementAttrPath: string, value: any): void {
 	element.setAttribute(elementAttrPath, value);
 }
+
+
+export function ToCamelCase(str: string) {
+	return str.replace(/([A-Z])/g, ' $1')
+		// uppercase the first character
+		.replace(/^./, function (str) { return str.toUpperCase(); })
+		.replace(/ /g, '');
+}

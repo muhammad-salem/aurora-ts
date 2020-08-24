@@ -1,7 +1,7 @@
 import { TypeOf } from '../core/decorators.js';
-import { EventEmitter } from '../core/events.js';
+import { EventEmitter, Subscription } from '../core/events.js';
 import { isAfterContentChecked, isAfterContentInit, isAfterViewChecked, isAfterViewInit, isDoCheck, isOnChanges, isOnDestroy, isOnInit } from '../core/lifecycle.js';
-import { Observable } from '../core/observable.js';
+import { ToCamelCase } from '../core/utils.js';
 import { BaseComponent, HTMLComponent } from '../elements/component.js';
 import { ComponentRef, PropertyRef } from '../elements/elements.js';
 import { Tag } from '../elements/tags.js';
@@ -19,6 +19,7 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 
 		_model: T & { [key: string]: any } & Model;
 		_render: ComponentRender<T>;
+		_shadowRoot: ShadowRoot;
 
 		_setAttributeNative: Function;
 		_getAttributeNative: Function;
@@ -26,8 +27,8 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 
 		constructor() {
 			super();
-			if (componentRef.encapsulation === 'shadowDom') {
-				this.attachShadow({ mode: 'open' });
+			if (componentRef.isShadowDom) {
+				this._shadowRoot = this.attachShadow({ mode: 'open' });
 			}
 			// services should be injected her
 			let model = new modelClass();
@@ -326,6 +327,34 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 			},
 			enumerable: true
 		});
+		let eventListener: Function | undefined;
+		let subscription: Subscription<any>;
+		Object.defineProperty(viewClass.prototype, 'on' + ToCamelCase(output.viewAttribute), {
+			// get(): EventEmitter<any> {
+			// 	// return this._model[output.modelProperty];
+			// },
+			get(): Function | undefined {
+				// return this._model[output.modelProperty];
+				return eventListener;
+			},
+			set(event: string | Function): void {
+				if (!event) {
+					if (subscription) {
+						subscription.unsubscribe();
+						eventListener = undefined;
+					}
+				}
+				if (typeof event === 'string') {
+					if (event.endsWith('()')) {
+						event = event.substring(0, event.length - 2);
+					}
+					event = Reflect.get(window, event);
+				}
+				eventListener = event as Function;
+				subscription = (this._model[output.modelProperty] as EventEmitter<any>).subscribe(event);
+			},
+			enumerable: true
+		});
 	});
 	Object.defineProperty(viewClass, 'observedAttributes', {
 		get() {
@@ -336,3 +365,4 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 	Object.defineProperty(modelClass, componentRef.selector, { value: viewClass });
 	return viewClass;
 }
+

@@ -1,5 +1,4 @@
 import { Component, OnInit, Output, EventEmitter, HostListener } from '../../dist/aurora.js';
-import { trace } from 'console';
 
 interface CustomTemplateModel {
     name: string
@@ -19,8 +18,7 @@ Reflect.set(window, 'onCustomTemplateSave', onCustomTemplateSave);
 
 @Component({
     selector: 'custom-template-id',
-    encapsulation: 'template',
-    isRichHTML: true
+    encapsulation: 'shadow-dom-template'
 })
 
 export class CustomTemplate implements OnInit {

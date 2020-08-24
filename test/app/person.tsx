@@ -126,8 +126,8 @@ export class PersonModel implements OnInit {
 	template: ({ person, printPerson }: PersonEdit) => {
 		return (
 			<form #form >
-				<input if="show" type="text" $value="person.name" />
-				<input type="number" $value="person.age" />
+				<input if="show" type="text" $value="$person.name" />
+				<input type="number" $value="$person.age" />
 				<input type="button" onclick={printPerson} value="Save" />
 			</form >
 		);
@@ -150,40 +150,19 @@ class PersonEdit {
 }
 
 
+@Component({
+	selector: 'progress-bar',
+	template: '<progress [min]="min" [max]="max" [value]="value" ></progress>'
+})
+class ProgressBar {
 
-// type SS = (model: PersonModel) => JsxComponent;
+	@Input()
+	min: number;
 
-// type SSD<T> = (model: T) => JsxComponent;
+	@Input()
+	max: number;
 
-// const d: SS = (persn: PersonModel) => {
-// 	return <div>{persn.name}</div>
-// };
-// let persn: PersonModel = new PersonModel(new LogService());
-// console.log(d(persn));
+	@Input()
+	value: number;
 
-// const s: SSD<PersonModel> = ({ name, years }: PersonModel) => {
-// 	return <div name={name} $attr="$name">{years}</div>
-// };
-// console.log(s(persn));
-
-// type jsxRender<T> = (model: T) => JsxComponent;
-
-// interface FF<T> {
-// 	template: jsxRender<T> | string
-// }
-
-// function sss1(com: FF<PersonModel>) {
-// 	console.log((com.template as jsxRender<PersonModel>)(persn));
-// }
-
-// function sss2<T extends object>(com: FF<T>) {
-// 	console.log((com.template as jsxRender<T>)(persn as T));
-// }
-
-// sss1({
-// 	template: s
-// });
-
-// sss2({
-// 	template: d
-// });
+}
