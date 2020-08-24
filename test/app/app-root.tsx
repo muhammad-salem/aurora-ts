@@ -1,4 +1,4 @@
-import { Component, Input, HostListener, View } from '../../esm2020/aurora.js';
+import { Component, Input, HostListener, View } from '../../dist/aurora.js';
 import { Person } from './person.js';
 // import personHTML from './app-root.html';
 

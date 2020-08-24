@@ -4,7 +4,7 @@ import { JsxComponent, Fragment } from './factory.js';
 export function toJSXRender<T>(html: string): JSXRender<T> {
     // should render her all the variables and resolve binding
     let renderComponent = parseHtmlToJsxComponent(html) as JsxComponent;
-    console.log('toJSXRender', renderComponent);
+    // model: T, never used, as it is a jsx thing
     return (model: T) => renderComponent;
 }
 

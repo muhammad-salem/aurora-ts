@@ -8,15 +8,14 @@
     "prebuild2": "rm -rf build",
     "build": "tsc -b",
     "postbuild2": "node tools/tool-mg.js ./src ./build",
-    "buildw": "tsc -b -w",
-    "server": "ariiad -rl ./dist/"
+    "buildw": "tsc -b -w"
   },
   "author": "@Salem",
   "dependencies": {
     "bootstrap": "^5.0.0-alpha1"
   },
   "devDependencies": {
-    "@types/node": "^14.0.24",
-    "typescript": "^3.9.7"
+    "@types/node": "^14.6.0",
+    "typescript": "^4.0.2"
   }
 }

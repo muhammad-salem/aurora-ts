@@ -56,6 +56,19 @@ export interface ComponentOptions<T = Function> {
 	 * @type {'none' | 'shadowDom'}
 	 */
 	encapsulation?: 'custom' | 'template' | 'shadowDom';
+
+	/**
+	 * mark this component as it will be created by the browser itself,
+	 * 
+	 * writtenin 'index.html' file,
+	 * OR
+	 *  set value of 'innerHTML' in js code,
+	 * 
+	 * should rename attributes and event names of this component to be all lowwercase
+	 * the @Input('propname') propName: any;
+	 * the @Output('savebuttonclick') saveButtonClick: EventEmitter<any>;
+	 */
+	isRichHTML?: boolean;
 }
 
 export interface ChildOptions {
@@ -68,8 +81,8 @@ export interface ViewChildOpt {
 }
 
 export function Input(name?: string): Function {
-	return (target: Object, propertyKey: string, desc?: PropertyDescriptor) => {
-		ComponentElement.addInput(target, propertyKey, name || propertyKey, desc);
+	return (target: Object, propertyKey: string) => {
+		ComponentElement.addInput(target, propertyKey, name || propertyKey);
 	};
 }
 export function Output(name?: string): Function {
@@ -83,18 +96,14 @@ export function View(): Function {
 	};
 }
 
-export function ViewChild(
-	selector: string | typeof HTMLElement | CustomElementConstructor,
-	childOptions?: ChildOptions
-): Function {
+export function ViewChild( selector: string | typeof HTMLElement | CustomElementConstructor,
+	childOptions?: ChildOptions ): Function {
 	return (target: Object, propertyKey: string) => {
 		ComponentElement.addViewChild(target, propertyKey, name, childOptions);
 	};
 }
 
-export function ViewChildren(
-	selector: string | typeof HTMLElement | CustomElementConstructor
-): Function {
+export function ViewChildren(selector: string | typeof HTMLElement | CustomElementConstructor): Function {
 	return (target: Object, propertyKey: string) => {
 		ComponentElement.addViewChildren(target, propertyKey, name);
 	};

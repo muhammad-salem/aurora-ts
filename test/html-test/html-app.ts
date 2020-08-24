@@ -1,4 +1,4 @@
-import { Input, Component, Output, EventEmitter, View, BaseComponent, OnInit } from '../../esm2020/aurora.js';
+import { Input, Component, Output, EventEmitter, View, BaseComponent, OnInit } from '../../dist/aurora.js';
 
 
 
@@ -61,6 +61,7 @@ export class HTMLView2 {
             <div class="mb-3" >
                 <label for="appversin-{{modelId}}" class="form-label" > Version </label>
                 <input id="appversin-{{modelId}}" type="number" [(value)]="editData.version"/>
+                <input id="appversin-{{modelId}}-2" type="number" [(value)]="editData.version"/>
             </div>
 
             <div class="mb-3" >
@@ -103,8 +104,7 @@ export class HTMLEdit {
     }
 
     fireEvent() {
-        // this.view.triggerEvent('editData');
-        this.view._parentComponent?.triggerEvent('appModel');
+        this.view.triggerOutput('editData');
     }
 }
 

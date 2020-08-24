@@ -2,7 +2,7 @@
 import {
 	Component, Input, View, HostListener,
 	OnInit, OnChanges, AfterViewInit
-} from '../../esm2020/aurora.js';
+} from '../../dist/aurora.js';
 import { LogService } from './person.js';
 
 @Component({

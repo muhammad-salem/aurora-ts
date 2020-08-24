@@ -1,6 +1,6 @@
-import { Observable } from '../core/observable.js';
 import { EventEmitter } from '../core/events.js';
 import { PropertyRef, ComponentRef } from './elements.js';
+import { Model } from '../model/model-change-detection.js';
 
 export interface CustomElement {
 	attributeChangedCallback(name: string, oldValue: string, newValue: string): void;
@@ -10,42 +10,48 @@ export interface CustomElement {
 }
 
 export interface BaseComponent<T extends Object> extends CustomElement {
-	_model: T & { [key: string]: any };
-	_changeObservable: Observable;
-	_childBindMap: Map<string, Array<string>>;
-	_parentComponent?: BaseComponent<any>;
-	_parentComponentBindMap?: Map<string, string>;
+	_model: T & Model & { [key: string]: any };
+	// _changeObservable: Observable;
 
 	getComponentRef(): ComponentRef<T>;
 
-	hasInput(viewProp: string): boolean;
+	hasInputStartWith(viewProp: string): boolean;
+	getInputStartWith(viewProp: string): PropertyRef | undefined;
 	getInput(viewProp: string): PropertyRef | undefined;
 	getInputValue(viewProp: string): any;
 	setInputValue(viewProp: string, value: any): void;
+
+	hasInput(viewProp: string): boolean;
+	hasProp(propName: string): boolean;
 	hasOutput(viewProp: string): boolean;
+
 	getOutput(viewProp: string): PropertyRef | undefined;
 	getEventEmitter<V>(viewProp: string): EventEmitter<V> | undefined;
-	triggerEvent(eventName: string, value?: any): void;
-	hasProp(propName: string): boolean;
 
-	bindAttr(view: string, elementAttr: string): void;
-	getBindAttr(view: string): string[];
-	searchBindAttr(elementAttr: string): string[];
-	searchParentBindAttr(elementAttr: string): [string, string] | undefined;
-	notifyParentComponent(eventName: string): void;
-	matchParentEvent(elementAttr: string): string | undefined;
-	triggerParentEvent(elementAttr: string): void;
+	triggerOutput(eventName: string, value?: any): void;
+	triggerModelChange(eventName: string, value?: any, source?: HTMLElement): void;
 }
 
 export interface HTMLComponent<T> extends BaseComponent<T>, HTMLElement { }
 
-export function isHTMLComponent(object: Object): object is HTMLComponent<any> {
+export function isHTMLComponent(object: any): object is HTMLComponent<any> {
 	return Reflect.has(object, '_model')
-		&& Reflect.has(object, '_changeObservable')
-		&& Reflect.has(object, '_childBindMap')
+		// && Reflect.has(object, '_changeObservable')
 		&& object instanceof HTMLElement;
 }
 
 export function isNativeElement(element: HTMLElement): element is HTMLElement {
 	return element && element instanceof HTMLElement && !element.tagName?.includes('-');
+}
+
+type BindValue = { attrName: string, source: Object };
+
+interface BindingProperty {
+	oneWay: { [key: string]: BindValue },
+	twoWay: { [key: string]: BindValue },
+
+	addOneWay(attrName: string, element: HTMLElement, elementAttr: string): void;
+	addTwoWay(attrName: string, element: HTMLElement, elementAttr: string): void;
+
+
 }

@@ -1,12 +1,15 @@
 {
 	"extends": "../tsconfig.base.json",
 	"compilerOptions": {
-		"target": "ES2015",
-		"outDir": "../esm2015/",
-		"module": "ES2015",
+		"outDir": "../dist/",
+		"target": "ES2020",
+		"module": "ES2020",
 		"composite": true,
 		"rootDir": ".",
-		"typeRoots": ["./types", "../node_modules/@types"]
+		"typeRoots": [
+			"./types",
+			"../node_modules/@types"
+		]
 	},
 	"include": [
 		"**/*.ts",
@@ -14,5 +17,6 @@
 	],
 	"files": [
 		"aurora.ts"
-	]
+	],
+	"compileOnSave": true
 }

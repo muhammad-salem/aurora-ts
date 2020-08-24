@@ -1,65 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<title>Aurora TS</title>
-		<base href="/" />
-		<meta content="width=device-width, initial-scale=1" name="viewport" />
-		<link href="/test/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-	</head>
 
-	<body class="container-fluid py-5">
+<head>
+	<meta charset="utf-8" />
+	<title>Aurora TS</title>
+	<base href="/" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+	<link href="/test/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
 
+<body class="container-fluid py-5">
 
+	<dev-app></dev-app>
+	<html-app></html-app>
 
-		<custom-template-id (save)="onCustomTemplateSave()"
-				onclick="templateClicked()"
-				(datachange)="onCustomTemplateSave()" ></custom-template-id>
+	<!-- <parent-app></parent-app>
 
-		<template id="custom-template-id">
-			<style data-id="8">
-				p { color: green; }
-			</style>
-			some text
-			<p>I'm in Shadow DOM. My markup was stamped from a &lt;template&gt;.</p>
-			<code>
+	<bind-view></bind-view>
+
+	<custom-template-id (save)="onCustomTemplateSave()" onclick="templateClicked()"
+		(datachange)="onCustomTemplateSave()"></custom-template-id>
+
+	<template id="custom-template-id">
+		<style data-id="8">
+			p {
+				color: green;
+			}
+		</style>
+		some text
+		<p>I'm in Shadow DOM. My markup was stamped from a &lt;template&gt;.</p>
+		<code>
 				let a = new Arry(4,5,6);
 				{{model.name}}
 			</code>
-			<p innerHTML="{{model.name}}"></p>
-			<p>{{model.name}}</p>
-			<p>{{model.type}}</p>
-			<input type="text" [(value)]="model.name" placeholder="Name" />
-			<input type="text" [(value)]="model.type" placeholder="Type" />
-			<button class="btn btn-primary" type="button" (click)="onSaveButtonClick()">Save</button>
-			<button class="btn btn-secondary" type="button" (click)="onChangeButtonClick()">Change</button>
-		</template>
+		<p innerHTML="{{model.name}}"></p>
+		<p>{{model.name}}</p>
+		<p>{{model.type}}</p>
+		<input type="text" [(value)]="model.name" placeholder="Name" />
+		<input type="text" [(value)]="model.type" placeholder="Type" />
+		<button class="btn btn-primary" type="button" (click)="onSaveButtonClick()">Save</button>
+		<button class="btn btn-secondary" type="button" (click)="onChangeButtonClick()">Change</button>
+	</template>
 
-		<app-root></app-root>
-		<div class="row">
-			<div class="col-2">
-				<p>
-					HTML Tempplate Parsing
-					(Angular Like)
-				</p>
-			</div>
-			<div class="col-10">
-				<html-app></html-app>
-			</div>
+	<app-root></app-root>
+	<div class="row">
+		<div class="col-2">
+			<p>
+				HTML Tempplate Parsing
+				(Angular Like)
+			</p>
 		</div>
-        <div class="p-3 my-2 bg-danger"></div>
-		<div class="row">
-			<div class="col-2">
-				<p>
-					JSX Factory
-					(React Like)
-				</p>
-			</div>
-			<div class="col-10">
-				<jsx-app></jsx-app>
-			</div>
+		<div class="col-10">
+			<html-app></html-app>
 		</div>
-		
-		<script type="module" src="/public/index.js"></script>
-	</body>
+	</div>
+	<div class="p-3 my-2 bg-danger"></div>
+	<div class="row">
+		<div class="col-2">
+			<p>
+				JSX Factory
+				(React Like)
+			</p>
+		</div>
+		<div class="col-10">
+			<jsx-app></jsx-app>
+		</div>
+	</div> -->
+
+	<script type="module" src="/public/index.js"></script>
+</body>
+
 </html>

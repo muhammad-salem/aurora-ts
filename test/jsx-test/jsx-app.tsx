@@ -1,5 +1,7 @@
-import { Input, Component, JsxFactory, Fragment, Output, EventEmitter, View, BaseComponent, OnInit } from '../../esm2020/aurora.js';
-
+import {
+    Input, Component, JsxFactory, Fragment,
+    Output, EventEmitter, View, BaseComponent, OnInit
+} from '../../dist/aurora.js';
 
 
 export interface AppModel {
@@ -111,8 +113,7 @@ export class AppEdit {
     }
 
     fireEvent() {
-        // this.view.triggerEvent('editData');
-        this.view._parentComponent?.triggerEvent('appModel');
+        this.view.triggerOutput('editData');
     }
 }
 

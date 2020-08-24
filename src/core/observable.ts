@@ -4,32 +4,36 @@ interface ObservedCallback {
     callbackArray: Function[];
 }
 
-export class ObservableValue {
-    private subscripers: Map<string, ObservedCallback> = new Map();
+export class Observable {
+
+    private subscripers: Map<string, Function[]> = new Map();
+    
     constructor() { }
-    emit(propertyPath: string, value?: any): void {
-        const observed = this.subscripers.get(propertyPath);
-        if (observed) {
-            observed.oldValue = value;
-            observed.callbackArray.forEach(callback => {
+    
+    emit(eventName: string, value?: any): void {
+        const calls = this.subscripers.get(eventName);
+        if (calls) {
+            calls.forEach(callback => {
                 try {
                     callback(value);
                 } catch (error) {
                     console.error("error at call ", callback.name);
                 }
             });
-        } else {
-            this.subscripers.set(propertyPath, { oldValue: value, callbackArray: [] });
         }
     }
-    subscribe(attrName: string, callback: Function): void {
-        const observed = this.subscripers.get(attrName);
-        if (observed) {
-            observed.callbackArray.push(callback);
-            observed.oldValue || callback(observed.oldValue);
+    
+    subscribe(eventName: string, callback: Function): void {
+        const calls = this.subscripers.get(eventName);
+        if (calls) {
+            calls.push(callback);
         } else {
-            this.subscripers.set(attrName, { callbackArray: [callback] });
+            this.subscripers.set(eventName, [callback]);
         }
+    }
+
+    has(eventName: string): boolean {
+        return this.subscripers.has(eventName);
     }
 
     destroy() {
@@ -38,7 +42,7 @@ export class ObservableValue {
 }
 
 
-export class Observable {
+export class SimmlerObservable {
     private subscripers: Map<string, Function[]> = new Map();
     constructor() { }
     emit(propertyPath: string): void {
@@ -87,11 +91,11 @@ export class Observable {
         }
     }
 
-    destroy() {
-        this.subscripers.clear();
-    }
-
     has(attrName: string): boolean {
         return this.subscripers.has(attrName);
+    }
+
+    destroy() {
+        this.subscripers.clear();
     }
 }

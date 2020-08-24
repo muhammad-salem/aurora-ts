@@ -26,7 +26,7 @@ No need for Virtual Dom.
 npm i --save aurora-ts
 ```
 
-## [HTML Template] and [JSX / TSX] Features
+## 'HTML Template' and 'JSX' Features
 
 | Support | HTML Template| JSX |
 | -------------------- | - | - |

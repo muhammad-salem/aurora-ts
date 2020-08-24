@@ -2,7 +2,7 @@ import {
 	Service, Component, Input, Output, View, ViewChild,
 	ViewChildren, Optional, HostListener, SelfSkip, HostBinding,
 	OnInit, EventEmitter, JsxFactory
-} from '../../esm2020/aurora.js';
+} from '../../dist/aurora.js';
 
 // import html from './person-view.html';
 

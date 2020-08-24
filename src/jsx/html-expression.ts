@@ -8,7 +8,7 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
         this.templateRegExp = (/\{\{((\w| |\.|\+|-|\*|\\)*(\(\))?)\}\}/g);
     }
 
-    initAttribute(element: HTMLElement, elementAttr: string, viewProperty: string, bindMap: Map<string, string>): void {
+    initAttribute(element: HTMLElement, elementAttr: string, viewProperty: string): void {
 
         if (elementAttr.startsWith('#')) {
             // this.baiseView[elementAttr.substring(1)] = element;
@@ -19,16 +19,18 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
             elementAttr = elementAttr.substring(2, elementAttr.length - 2);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
-            this.addElementPropertyBinding(element, elementAttr, viewProperty);
-            bindMap.set(elementAttr, viewProperty);
+            this.bind2Way(element, elementAttr, viewProperty, isAttr);
+            // this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
+            // this.addElementPropertyBinding(element, elementAttr, viewProperty);
+            // bindMap.set(elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('[')) {
             // [elementAttr]="modelProperty"
             elementAttr = elementAttr.substring(1, elementAttr.length - 1);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
+            // this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
+            this.bind1Way(element, elementAttr, viewProperty, isAttr);
         }
         else if (typeof viewProperty === 'string' && (/^\{\{(.+\w*)*\}\}/g).test(viewProperty)) {
             // elementAttr="{{viewProperty}}" // just pass data

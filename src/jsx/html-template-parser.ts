@@ -13,8 +13,8 @@ export function htmlTemplateToJSXRender<T>(template: HTMLTemplateElement | strin
         temp = template;
     }
     let renderComponent = htmlTemplateParser(temp) as JsxComponent;
-    console.log('htmlTemplateToJSXRender', renderComponent);
-    return () => renderComponent;
+    // model: T, never used, as it is a jsx thing
+    return (model: T) => renderComponent;
 }
 
 export function htmlTemplateParser(template: HTMLTemplateElement): JsxComponent | undefined {

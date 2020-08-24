@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, HostListener } from '../../esm2020/aurora.js';
+import { Component, OnInit, Output, EventEmitter, HostListener } from '../../dist/aurora.js';
 import { trace } from 'console';
 
 interface CustomTemplateModel {
@@ -19,7 +19,8 @@ Reflect.set(window, 'onCustomTemplateSave', onCustomTemplateSave);
 
 @Component({
     selector: 'custom-template-id',
-    encapsulation: 'template'
+    encapsulation: 'template',
+    isRichHTML: true
 })
 
 export class CustomTemplate implements OnInit {
@@ -36,8 +37,8 @@ export class CustomTemplate implements OnInit {
 
     onInit() {
         this.model = {
-            name: 'CustomTemplate',
-            type: 'custom template'
+            name: 'element name',
+            type: 'custom template type'
         };
     }
 

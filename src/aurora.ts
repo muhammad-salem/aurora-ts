@@ -21,6 +21,10 @@ export * from './elements/component.js';
 export * from './elements/elements.js';
 export * from './elements/tags.js';
 
+export * from './model/model-change-detection.js';
+export * from './view/custom-element.js';
+// export * from './view/template-element.js';
+
 export * from './directives/if.js';
 
 // export * from './core/decorators.js';
