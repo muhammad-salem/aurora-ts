@@ -20,7 +20,7 @@ Render Once, Update Attributes/Properties On Change.
 No need for Virtual Dom.
 ```
 
-## `Install - NPM`
+## `Install`
 
 ``` bash
 npm i --save aurora-ts
@@ -76,8 +76,9 @@ npm i --save aurora-ts
 | Standards  | Support |
 | ------- | ------- |
 | [Custom Elements][custom]  | ✓ |
-| [Shadow DOM][shadow] |  In Progress |
+| [Shadow DOM][shadow] | ✓ |
 | [Template Element][template]| ✓ |
+| [Template Element with Shadow DOM][template]| ✓ |
 
 ## Custom Elements standards
 
