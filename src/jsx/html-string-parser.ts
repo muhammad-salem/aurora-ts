@@ -1,4 +1,5 @@
 import { JSXRender } from '../core/decorators.js';
+import { isEmptyElment } from '../elements/tags.js';
 import { JsxComponent, Fragment } from './factory.js';
 
 export function toJSXRender<T>(html: string): JSXRender<T> {
@@ -83,13 +84,32 @@ function analysis(arr: string[]): (Child | string)[] {
     const stackTrace: (Child | string)[] = [];
     for (let i = 0; i < arr.length; i++) {
         let current = arr[i];
-        if ((/^\^\w.*\//g).test(current)) {
+        if ((/^\^!--([\w|\s]+)--/g).test(current)) {
+            // comment
+            console.log(current);
+
+            let match = (/^\^!--([\w|\s]+)--/g).exec(current);
+            if (match) {
+                const comment: Child = {};
+                comment.tag = 'comment';
+                comment.attrs = { 'comment': match[1] };
+                stackTrace.push(comment);
+                popElement(stackTrace, childStack);
+            }
+        }
+        else if ((/^\^\w.*\//g).test(current)) {
             // self closing tag // has no childs // should push to parent
             current = current.substring(0, current.length - 1).trim();
             stackTrace.push(defineChild(current));
             popElement(stackTrace, childStack);
         } else if ((/^\^\w/g).test(current)) {
             stackTrace.push(defineChild(current));
+            let child = stackTrace[stackTrace.length - 1];
+            if (typeof child === 'object') {
+                if (isEmptyElment(child.tag as string)) {
+                    popElement(stackTrace, childStack);
+                }
+            }
         } else if ((/^\^\/\w/g).test(current)) {
             popElement(stackTrace, childStack);
         } else {

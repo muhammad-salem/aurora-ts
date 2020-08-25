@@ -172,3 +172,8 @@ export function getTagName(classRef: TagClassRef): string | null {
 	}
 	return null;
 }
+
+export const EmptyElments = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+export function isEmptyElment(tagName: string) {
+	return EmptyElments.includes(tagName);
+}
