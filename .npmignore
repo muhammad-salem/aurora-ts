@@ -1,6 +1,7 @@
 .img
 .idea
 .vscode
+src
 test
 public
 index.html
