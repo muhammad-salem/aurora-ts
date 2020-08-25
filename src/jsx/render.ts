@@ -130,8 +130,13 @@ export abstract class ComponentRender<T> {
 	initView(): void {
 		if (this.componentRef.template) {
 			this.template = this.componentRef.template(this.baiseView._model);
-			if (this.baiseView.shadowRoot && this.componentRef.isShadowDom) {
-				this.baiseView.shadowRoot.appendChild(this.createElement(this.template));
+			if (this.componentRef.isShadowDom) {
+				if (this.baiseView.shadowRoot /* OPEN MODE */) {
+					this.baiseView.shadowRoot.appendChild(this.createElement(this.template));
+				} else /* CLOSED MODE*/ {
+					const shadowRoot = Reflect.get(this.baiseView, '_shadowRoot');
+					shadowRoot.appendChild(this.createElement(this.template));
+				}
 			} else {
 				this.baiseView.appendChild(this.createElement(this.template));
 			}
@@ -144,8 +149,16 @@ export abstract class ComponentRender<T> {
 		);
 	}
 
-	createElement(viewTemplate: JsxComponent): HTMLElement | DocumentFragment {
-		const element = this.createElementByTagName(viewTemplate.tagName, viewTemplate.attributes?.is);
+	createElement(viewTemplate: JsxComponent): HTMLElement | DocumentFragment | Comment {
+		const element = this.createElementByTagName(
+			viewTemplate.tagName,
+			viewTemplate.attributes?.is,
+			viewTemplate.attributes?.comment);
+
+		if (element instanceof Comment) {
+			return element;
+		}
+
 		if (viewTemplate.attributes && viewTemplate.tagName !== Fragment) {
 			for (const key in viewTemplate.attributes) {
 				this.initAttribute(<HTMLElement>element, key, viewTemplate.attributes[key]);
@@ -165,10 +178,18 @@ export abstract class ComponentRender<T> {
 
 	abstract initAttribute(element: HTMLElement, propertyKey: string, propertyValue: any): void;
 
-	createElementByTagName(tagName: string, is?: string): HTMLElement | DocumentFragment {
+	createElementByTagName(tagName: string, is?: string, comment?: string): HTMLElement | DocumentFragment | Comment {
 		if (Fragment === tagName.toLowerCase()) {
 			return document.createDocumentFragment();
 		}
+
+		if ('comment' === tagName.toLowerCase()) {
+			if (!comment) {
+				comment = '//'
+			}
+			return document.createComment(comment);
+		}
+
 		let element: HTMLElement;
 		if (tagName.includes('-')) {
 			let ViewClass = customElements.get(tagName);

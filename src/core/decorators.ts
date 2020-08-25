@@ -90,6 +90,16 @@ export interface ComponentOptions<T = Function> {
 	 * @type {'custom' | 'shadowDom' | 'template' | 'shadowDom-template'}
 	 */
 	encapsulation?: 'custom' | 'shadow-dom' | 'template' | 'shadow-dom-template';
+
+	/**
+	 * default: 'open'
+	 */
+	shadowDomMode?: ShadowRootMode;
+
+	/**
+	 * default: false
+	 */
+	shadowDomDelegatesFocus?: boolean;
 }
 
 export interface ChildOptions {

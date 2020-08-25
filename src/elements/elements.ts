@@ -74,6 +74,8 @@ export interface ComponentRef<T> {
 	renderType: 'html' | 'jsx' | 'tsx';
 	encapsulation: 'custom' | 'shadow-dom' | 'template' | 'shadow-dom-template';
 	isShadowDom: boolean;
+	shadowDomMode: ShadowRootMode;
+	shadowDomDelegatesFocus: boolean;
 }
 
 
@@ -184,6 +186,8 @@ export class ComponentElement {
 		componentRef.descriptors = componentRef.descriptors || [];
 		componentRef.encapsulation = componentRef.encapsulation || 'custom';
 		componentRef.isShadowDom = /shadow-dom/g.test(componentRef.encapsulation);
+		componentRef.shadowDomMode = componentRef.shadowDomMode || 'open';
+		componentRef.shadowDomDelegatesFocus = componentRef.shadowDomDelegatesFocus === true || false;
 
 		componentRef.viewClass = initCustomElementView(modelClass, componentRef);
 

@@ -28,18 +28,19 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 		constructor() {
 			super();
 			if (componentRef.isShadowDom) {
-				this._shadowRoot = this.attachShadow({ mode: 'open' });
+				// this._shadowRoot = this.attachShadow({ mode: 'open' });
+				// this._shadowRoot = this.attachShadow({ mode: 'closed' });
+
+				this._shadowRoot = this.attachShadow({
+					mode: componentRef.shadowDomMode,
+					delegatesFocus: componentRef.shadowDomDelegatesFocus
+				});
 			}
 			// services should be injected her
 			let model = new modelClass();
 			defineModel(model);
 			if (isModel(model)) {
 				this._model = model;
-			}
-			// if model had view decorator
-			if (componentRef.view) {
-				// this._model[componentRef.view] = this;
-				Reflect.set(this._model, componentRef.view, this);
 			}
 
 			this._render = componentRef.renderType === "html"
@@ -199,7 +200,7 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 				this._model.afterContentChecked();
 			}
 
-			// if (componentRef.encapsulation === 'template' && !this.hasParentComponent()) {
+			// if (!this.hasParentComponent()) {
 			// 	Array.prototype.slice.call(this.attributes).forEach((attr: Attr) => {
 			// 		this.initOuterAttribute(attr);
 			// 	});
@@ -207,6 +208,12 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 
 			// setup ui view
 			this._render.initView();
+
+			// if model had view decorator
+			if (componentRef.view) {
+				// this._model[componentRef.view] = this;
+				Reflect.set(this._model, componentRef.view, this);
+			}
 
 			// init Host Listener events
 			this._render.initHostListener();
