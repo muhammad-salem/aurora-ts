@@ -57,6 +57,11 @@ function toJsxAttributes(attributes: NamedNodeMap): JsxAttributes {
 function createComponent(child: ChildNode): string | JsxComponent {
     if (child instanceof Text) {
         return (child.textContent as string).trim();
+    } else if (child instanceof Comment) {
+        return {
+            tagName: 'comment',
+            attributes: { comment: child.textContent }
+        };
     } else {
         const element: HTMLElement = child as HTMLElement;
         let root: JsxComponent = {
