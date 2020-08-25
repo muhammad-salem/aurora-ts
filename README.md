@@ -13,7 +13,7 @@
 [license-img]: https://img.shields.io/github/license/salemebo/aurora-ts.svg
 [license-url]: https://github.com/salemebo/aurora-ts/blob/master/LICENSE
 
-Aurora is a web framework, that can create and define a usable 'custom elements', that compatible with other frameworks, using Typescript.
+Aurora is a web framework, that can create and define a Web Component standards ('custom elements', 'Shadow DOM' and 'HTML Templates'), that compatible with other frameworks, using Typescript.
 
 ```text
 Render Once, Update Attributes/Properties On Change.
@@ -77,8 +77,8 @@ npm i --save aurora-ts
 | ------- | ------- |
 | [Custom Elements][custom]  | ✓ |
 | [Shadow DOM][shadow] | ✓ |
-| [Template Element][template]| ✓ |
-| [Template Element with Shadow DOM][template]| ✓ |
+| [HTML Templates Element][template]| ✓ |
+| [HTML Templates Element with Shadow DOM][template]| ✓ |
 
 ## Custom Elements standards
 
@@ -91,6 +91,24 @@ npm i --save aurora-ts
 | [Extending native HTML elements][extend-native] | ✓ |
 | [Extending a Custom Element][extend-custom] | TO:DO |
 
+## Shadow DOM standards
+
+| Features | Aurora |
+| ------- | ------- |
+| [Open Mode][shadow-mode-open] | ✓ |
+| [Closed Mode][shadow-mode-closed] | ✓ |
+| [delegatesFocus][shadow-focus] | ✓ |
+| [ Shadow DOM event model][shadow-event] | ✓ |
+
+## HTML Templates Element standards
+
+| Features | Aurora |
+| ------- | ------- |
+| [Load template by ID from document][template-id] | ✓ |
+| As Normal Cutom Element | ✓ |
+| As Shadow DOM Element | ✓ |
+
+
 [attr-props]: https://developers.google.com/web/fundamentals/web-components/customelements#reflectattr
 [observ-attr]: https://developers.google.com/web/fundamentals/web-components/customelements#attrchanges
 [elem-upgrd]: https://developers.google.com/web/fundamentals/web-components/customelements#upgrades
@@ -100,6 +118,11 @@ npm i --save aurora-ts
 [style]: https://developers.google.com/web/fundamentals/web-components/customelements#styling
 [extend-custom]: https://developers.google.com/web/fundamentals/web-components/customelements#extendcustomeel
 [extend-native]: https://developers.google.com/web/fundamentals/web-components/customelements#extendhtml
+[shadow-mode-open]:https://developers.google.com/web/fundamentals/web-components/shadowdom#elements
+[shadow-mode-closed]: https://developers.google.com/web/fundamentals/web-components/shadowdom#closed
+[shadow-focus]: https://developers.google.com/web/fundamentals/web-components/shadowdom#focus
+[shadow-event]: https://developers.google.com/web/fundamentals/web-components/shadowdom#events
+[template-id]: https://developers.google.com/web/fundamentals/web-components/customelements#fromtemplate
 
 ## future support
 
