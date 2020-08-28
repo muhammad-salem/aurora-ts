@@ -96,7 +96,7 @@ export function setValueByPath(parent: any, objectPath: string, value: any) {
 	ref[argument.prop[index]] = value;
 }
 
-export function updateValue(from: Object, fromPath: string, to: Object, toPath: string): void {
+export function updateValue(to: Object, toPath: string, from: Object, fromPath: string): void {
 	const value = getValueByPath(from, fromPath);
 	if (value) {
 		setValueByPath(to, toPath, value);
