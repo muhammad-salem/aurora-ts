@@ -121,6 +121,7 @@ export function Output(name?: string): Function {
 		ComponentElement.addOutput(target, propertyKey, name || propertyKey);
 	};
 }
+
 export function View(): Function {
 	return (target: Object, propertyKey: string) => {
 		ComponentElement.setComponentView(target, propertyKey);
@@ -130,13 +131,13 @@ export function View(): Function {
 export function ViewChild(selector: string | typeof HTMLElement | CustomElementConstructor,
 	childOptions?: ChildOptions): Function {
 	return (target: Object, propertyKey: string) => {
-		ComponentElement.addViewChild(target, propertyKey, name, childOptions);
+		ComponentElement.addViewChild(target, propertyKey, selector, childOptions);
 	};
 }
 
 export function ViewChildren(selector: string | typeof HTMLElement | CustomElementConstructor): Function {
 	return (target: Object, propertyKey: string) => {
-		ComponentElement.addViewChildren(target, propertyKey, name);
+		ComponentElement.addViewChildren(target, propertyKey, selector);
 	};
 }
 
