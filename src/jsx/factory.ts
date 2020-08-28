@@ -17,13 +17,26 @@ export interface JsxComponent {
 	children?: (string | JsxComponent)[];
 }
 
+export interface JsxComponentWithName extends JsxComponent {
+	definedElement: HTMLElement;
+}
+
+export function isJsxComponentWithName(componet: JsxComponent): componet is JsxComponentWithName {
+	return Reflect.has(componet, 'definedElement');
+}
+
+export function toJsxComponentWithName(componet: JsxComponent, definedElement: HTMLElement): void {
+	(componet as JsxComponentWithName).definedElement = definedElement;
+}
+
 // export type JsxType = HTMLElement | HTMLElement[] | Comment;
 // export type JsxType = string | JsxComponent;
 // export type JsxType = JsxComponent | JsxComponent[];
 
-export const Fragment = 'fragment';
-
 export class JsxFactory {
+
+	static Fragment = 'fragment';
+
 	static createElement(tagName: string, attributes: JsxAttributes | undefined, ...children: JsxComponent[]): JsxComponent {
 		return {
 			tagName: tagName,
