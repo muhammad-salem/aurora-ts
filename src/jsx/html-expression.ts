@@ -5,13 +5,12 @@ import { hasAttr } from '../elements/attributes.js';
 export class HTMLComponentRender<T> extends ComponentRender<T> {
     constructor(baiseView: HTMLComponent<T>) {
         super(baiseView);
-        this.templateRegExp = (/\{\{((\w| |\.|\+|-|\*|\\)*(\(\))?)\}\}/g);
     }
 
     initAttribute(element: HTMLElement, elementAttr: string, viewProperty: string): void {
 
         if (elementAttr.startsWith('#')) {
-            // this.baiseView[elementAttr.substring(1)] = element;
+            // <app-tag #element-name ></app-tag>
             Reflect.set(this.baiseView, elementAttr.substring(1), element);
         }
         else if (elementAttr.startsWith('[(')) {
@@ -20,16 +19,12 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
             this.bind2Way(element, elementAttr, viewProperty, isAttr);
-            // this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
-            // this.addElementPropertyBinding(element, elementAttr, viewProperty);
-            // bindMap.set(elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('[')) {
             // [elementAttr]="modelProperty"
             elementAttr = elementAttr.substring(1, elementAttr.length - 1);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            // this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
             this.bind1Way(element, elementAttr, viewProperty, isAttr);
         }
         else if (typeof viewProperty === 'string' && (/^\{\{(.+\w*)*\}\}/g).test(viewProperty)) {
@@ -37,7 +32,7 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
             viewProperty = viewProperty.substring(2, viewProperty.length - 2);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            // this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
+            this.bind1Way(element, elementAttr, viewProperty, isAttr);
         }
         else if (typeof viewProperty === 'string' && (/\{\{|\}\}/g).test(viewProperty)) {
             // elementAttr="any string{{viewProperty}}any text" // just pass data

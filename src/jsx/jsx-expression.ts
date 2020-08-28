@@ -6,14 +6,12 @@ import { hasAttr } from '../elements/attributes.js';
 export class JSXComponentRender<T> extends ComponentRender<T> {
     constructor(baiseView: HTMLComponent<T>) {
         super(baiseView);
-        // this.templateRegExp = (/\$(\w*)(\(\))?/g);
-        this.templateRegExp = (/0\$\#\$(\w*)?/g);
     }
 
     initAttribute(element: HTMLElement, elementAttr: string, viewProperty: any): void {
 
         if (elementAttr.startsWith('#')) {
-            // this.baiseView[elementAttr.substring(1)] = element;
+            // <app-tag #element-name ></app-tag>
             Reflect.set(this.baiseView, elementAttr.substring(1), element);
         }
         else if (elementAttr.startsWith('$') && typeof viewProperty === 'string' && viewProperty.startsWith('$')) {
@@ -22,8 +20,6 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             viewProperty = viewProperty.substring(1);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            // this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
-            // this.addElementPropertyBinding(element, elementAttr, viewProperty);
             this.bind2Way(element, elementAttr, viewProperty, isAttr);
         }
         else if (elementAttr.startsWith('$') && typeof viewProperty === 'string') {
@@ -31,7 +27,6 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             elementAttr = elementAttr.substring(1);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            // this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
             this.bind1Way(element, elementAttr, viewProperty, isAttr);
         }
         else if (elementAttr.startsWith('$') && typeof viewProperty === 'object') {
@@ -74,7 +69,6 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             viewProperty = viewProperty.substring(2, viewProperty.length - 2);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            // this.addViewPropertyBinding(element, elementAttr, viewProperty, isAttr);
             this.bind1Way(element, elementAttr, viewProperty, isAttr);
         }
         else if (typeof viewProperty === 'string' && (/\{\{|\}\}/g).test(viewProperty)) {
