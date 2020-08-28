@@ -1,6 +1,6 @@
 import { JSXRender } from '../core/decorators.js';
 import { isEmptyElment } from '../elements/tags.js';
-import { JsxComponent, Fragment } from './factory.js';
+import { JsxComponent, JsxFactory } from './factory.js';
 
 export function toJSXRender<T>(html: string): JSXRender<T> {
     // should render her all the variables and resolve binding
@@ -21,7 +21,7 @@ export function childsToJsxComponent(childList: (string | Child)[]): JsxComponen
         const child = childList[0];
         if (typeof child === 'string') {
             /** a case that should never happen **/
-            return { tagName: Fragment, children: [child] };
+            return { tagName: JsxFactory.Fragment, children: [child] };
         } else {
             let root: JsxComponent = {
                 tagName: child.tag as string,
@@ -37,7 +37,7 @@ export function childsToJsxComponent(childList: (string | Child)[]): JsxComponen
         }
 
     } else if (childList.length > 1) {
-        let root: JsxComponent = { tagName: Fragment, children: [] };
+        let root: JsxComponent = { tagName: JsxFactory.Fragment, children: [] };
         childList.forEach(item => {
             root.children?.push(createComponent(item));
         });

@@ -1,4 +1,4 @@
-import { Component, Fragment, Input, JsxFactory, OnInit } from '../../dist/aurora.js';
+import { Component, Input, JsxFactory, OnInit } from '../../dist/aurora.js';
 
 @Component({
     selector: 'bind-view',
@@ -45,7 +45,7 @@ type D = { a: number, b: number, c: number };
     selector: 'd-view',
     template: ({ data }: DView) => {
         return (
-            <Fragment>
+            <>
                 {/* <div $innerHTML="$data.a"></div>
                 <div $innerHTML="$data.b"></div>
                 <div $innerHTML="$data.c"></div>
@@ -53,7 +53,7 @@ type D = { a: number, b: number, c: number };
                 <div>{data.a}</div>
                 <div>{data.b}</div>
                 <div>{data.c}</div>
-            </Fragment>
+            </>
         );
     }
 })

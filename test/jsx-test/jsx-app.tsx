@@ -1,5 +1,5 @@
 import {
-    Input, Component, JsxFactory, Fragment,
+    Input, Component, JsxFactory,
     Output, EventEmitter, View, BaseComponent, OnInit
 } from '../../dist/aurora.js';
 
@@ -17,7 +17,7 @@ export interface AppModel {
     selector: 'app-view1',
     template: ({ viewData }: AppView1) => {
         return (
-            <Fragment>
+            <JsxFactory.Fragment>
                 <h1> {viewData.name} </h1>
                 <h2> {viewData.version} </h2>
                 <div class="card">
@@ -28,7 +28,7 @@ export interface AppModel {
                         {viewData.description.desc}
                     </div>
                 </div>
-            </Fragment>
+            </JsxFactory.Fragment>
         );
     }
 })
@@ -41,14 +41,14 @@ export class AppView1 {
     selector: 'app-view',
     template: () => {
         return (
-            <Fragment>
+            <JsxFactory.Fragment>
                 <h1 $innerHTML="viewData.name"></h1>
                 <h2 $innerHTML="viewData.version"></h2>
                 <div class="card">
                     <div class="card-header" $innerHTML="viewData.description.title"></div>
                     <div class="card-body" $innerHTML="viewData.description.desc" ></div>
                 </div>
-            </Fragment>
+            </JsxFactory.Fragment>
         );
     }
 })

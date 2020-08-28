@@ -1,4 +1,4 @@
-import { Input, Component, Fragment, JsxFactory, OnInit } from '../../dist/aurora.js';
+import { Input, Component, JsxFactory, OnInit } from '../../dist/aurora.js';
 
 interface Developer {
     name: string;
@@ -13,13 +13,13 @@ interface Developer {
     selector: 'dev-edit',
     template: ({ print }: DeveloperEdit) => {
         return (
-            <Fragment>
+            <JsxFactory.Fragment>
                 <input type="text" $value="$name" />
                 <input type="number" $value="$age" />
                 <input type="text" $value="$job.title" />
                 <input type="text" $value="$job.lang" />
                 <button onclick={print}>Print</button>
-            </Fragment>
+            </JsxFactory.Fragment>
         );
     }
 })
@@ -45,7 +45,7 @@ export class DeveloperEdit implements Developer {
     selector: 'dev-view',
     template: ({ print }: DeveloperView) => {
         return (
-            <Fragment>
+            <>
                 <p innerHTML="{{name}}"></p>
                 <p $innerHTML="age"></p>
                 <p $innerHTML="job.title"></p>
@@ -58,7 +58,7 @@ export class DeveloperEdit implements Developer {
 
                 <button onclick={print}>Print</button>
 
-            </Fragment>
+            </>
         );
     }
 })
@@ -84,8 +84,7 @@ export class DeveloperView implements Developer {
     selector: 'dev-app',
     template: () => {
         return (
-            <Fragment>
-
+            <>
                 <input type="text" $value="$data.name" />
                 <input type="number" $value="$data.age" />
                 <input type="text" $value="$data.job.title" />
@@ -94,15 +93,13 @@ export class DeveloperView implements Developer {
                 <dev-view
                     $name="$data.name"
                     $age="$data.age"
-                    $job="$data.job"
-                ></dev-view>
+                    $job="$data.job"></dev-view>
                 <br />
                 <dev-edit
                     $name="$data.name"
                     $age="$data.age"
-                    $job="$data.job"
-                ></dev-edit>
-            </Fragment>
+                    $job="$data.job"></dev-edit>
+            </>
         );
     }
 })

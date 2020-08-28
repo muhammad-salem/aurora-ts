@@ -1,5 +1,5 @@
 import { JSXRender } from '../core/decorators.js';
-import { JsxComponent, Fragment, JsxAttributes } from './factory.js';
+import { JsxComponent, JsxFactory, JsxAttributes } from './factory.js';
 
 
 export function htmlTemplateToJSXRender<T>(template: HTMLTemplateElement | string): JSXRender<T> {
@@ -23,12 +23,12 @@ export function htmlTemplateParser(template: HTMLTemplateElement): JsxComponent 
     } else if (template.content.childNodes.length === 1) {
         const child = template.content.firstChild;
         if (child instanceof Text) {
-            return { tagName: Fragment, children: [(child.textContent as string).trim()] };
+            return { tagName: JsxFactory.Fragment, children: [(child.textContent as string).trim()] };
         } else if (child instanceof HTMLElement) {
             return createComponent(child) as JsxComponent;
         }
     } else if (template.content.childNodes.length > 1) {
-        let root: JsxComponent = { tagName: Fragment, children: [] };
+        let root: JsxComponent = { tagName: JsxFactory.Fragment, children: [] };
         template.content.childNodes.forEach(item => {
             appendChildToElement(createComponent(item), root);
         });
