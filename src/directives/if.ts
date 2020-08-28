@@ -11,12 +11,12 @@ export class IfDirective implements OnInit, AfterViewInit {
 	@Input() if: boolean;
 
 	@Input()
-	set ifThen(view: any) {}
+	set ifThen(view: any) { }
 
 	@Input()
-	set ifElse(view: any) {}
+	set ifElse(view: any) { }
 
-	constructor() {}
+	constructor() { }
 	onInit(): void {
 		console.log('IfDirective#onInit()');
 	}
