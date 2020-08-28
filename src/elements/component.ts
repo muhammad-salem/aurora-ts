@@ -30,6 +30,7 @@ export interface BaseComponent<T extends Object> extends CustomElement {
 
 	triggerOutput(eventName: string, value?: any): void;
 	triggerModelChange(eventName: string, value?: any, source?: HTMLElement): void;
+	emitRootChanges(): void;
 }
 
 export interface HTMLComponent<T> extends BaseComponent<T>, HTMLElement { }
