@@ -7,7 +7,6 @@
 	],
 	"compilerOptions": {
 		"outDir": "../public/",
-		"importHelpers": false,
 		"rootDir": ".",
 		"typeRoots": [
 			"../src/types",
