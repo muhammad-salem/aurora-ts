@@ -12,7 +12,6 @@ import { Model, defineModel, isModel } from '../model/model-change-detection.js'
 
 
 export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, componentRef: ComponentRef<T>): TypeOf<HTMLComponent<T>> {
-	const viewClassName = `${modelClass.name}View`;
 	const htmlParent = (componentRef.extend as Tag).classRef as TypeOf<HTMLElement>;
 	let viewClass: TypeOf<HTMLComponent<T>>;
 	viewClass = class extends htmlParent implements BaseComponent<T> {
@@ -234,8 +233,31 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 				if (isAfterViewChecked(this._model)) {
 					this._model.afterViewChecked();
 				}
+				this.emitRootChanges();
 			};
+			this.emitRootChanges();
 		}
+
+		emitRootChanges() {
+			const sources: any[] = [];
+			Object.keys(this._model.__observable).forEach(key => {
+				this._model.emitChangeModel(key, sources);
+			});
+		}
+
+		// emitRootChanges() {
+		// 	const calledKeys: string[] = [];
+		// 	Object.keys(this._model.__observable).forEach(key => {
+		// 		if (calledKeys.includes(key)) {
+		// 			return;
+		// 		}
+		// 		if ((/\./g.test(key))) {
+		// 			key = key.substring(0, key.indexOf('.'));
+		// 		}
+		// 		this._model.emitChangeModel(key);
+		// 		calledKeys.push(key);
+		// 	});
+		// }
 
 		// initOuterAttribute(attr: Attr) {
 		// 	// [window, this] scop
@@ -368,8 +390,12 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 			return componentRef.inputs.map(input => input.viewAttribute);
 		}
 	});
+	const viewClassName = componentRef.selector
+		.split('-')
+		.map(name => name.replace(/^\w/, s => s.toUpperCase()))
+		.join('');
 	Object.defineProperty(viewClass, 'name', { value: viewClassName });
-	Object.defineProperty(modelClass, componentRef.selector, { value: viewClass });
+	Object.defineProperty(modelClass, viewClassName, { value: viewClass });
 	return viewClass;
 }
 

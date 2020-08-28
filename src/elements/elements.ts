@@ -6,7 +6,7 @@ import { findByTagName, Tag } from './tags.js';
 import { HTMLComponent } from './component.js';
 import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
-import { findByModelClassOrCreat } from '../reflect/bootstrap-data.js';
+import { findByModelClassOrCreat, setBootstrapTagNameMatadata } from '../reflect/bootstrap-data.js';
 import { htmlTemplateToJSXRender } from '../jsx/html-template-parser.js';
 import { toJSXRender } from '../jsx/html-string-parser.js';
 import { initCustomElementView } from '../view/custom-element.js';
@@ -153,11 +153,13 @@ export class ComponentElement {
 
 	static defineComponent<T extends Object>(modelClass: TypeOf<T>, opts: ComponentOptions<T>) {
 		var bootstrap: BootstropMatadata = findByModelClassOrCreat(modelClass.prototype);
-		for (const key in opts) {
-			bootstrap[key] = Reflect.get(opts, key);
+
+		var componentRef: ComponentRef<T> = opts as unknown as ComponentRef<T>;
+		for (const key in bootstrap) {
+			Reflect.set(componentRef, key, bootstrap[key]);
 		}
-		bootstrap.extend = findByTagName(opts.extend);
-		var componentRef: ComponentRef<T> = bootstrap as ComponentRef<T>;
+		componentRef.extend = findByTagName(opts.extend);
+
 		if (!componentRef.template) {
 			componentRef.renderType = 'html';
 		} else if (typeof componentRef.template === 'string') {
@@ -190,6 +192,8 @@ export class ComponentElement {
 		componentRef.shadowDomDelegatesFocus = componentRef.shadowDomDelegatesFocus === true || false;
 
 		componentRef.viewClass = initCustomElementView(modelClass, componentRef);
+		const componentRefName = componentRef.viewClass.name + 'ComponentRef';
+		setBootstrapTagNameMatadata(modelClass, componentRefName, componentRef);
 
 		dependencyInjector.getInstance(ClassRegistry).registerComponent(modelClass);
 		dependencyInjector
@@ -204,10 +208,12 @@ export class ComponentElement {
 				options.extends = parentTagName;
 			}
 		}
+
 		customElements.define(
 			componentRef?.selector as string,
 			componentRef.viewClass as CustomElementConstructor,
 			options
 		);
+
 	}
 }
