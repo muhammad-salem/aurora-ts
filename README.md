@@ -4,16 +4,19 @@
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Install Size][badge-size]][badge-size]
 [![LICENSE][license-img]][license-url]
+![npm-dependencies][npm-dep-url]
 
 [npm-image]: https://img.shields.io/npm/v/aurora-ts.svg
 [npm-url]: https://npmjs.org/package/aurora-ts
 [downloads-image]: https://img.shields.io/npm/dm/aurora-ts.svg
 [downloads-url]: https://npmjs.org/package/aurora-ts
 [badge-size]: https://packagephobia.now.sh/badge?p=aurora-ts
-[license-img]: https://img.shields.io/github/license/salemebo/aurora-ts.svg
+[license-img]: https://img.shields.io/github/license/salemebo/aurora-ts
 [license-url]: https://github.com/salemebo/aurora-ts/blob/master/LICENSE
+[npm-dep-url]: https://img.shields.io/david/salemebo/aurora-ts.svg?maxAge=2592000
 
 Aurora is a web framework, that can create and define a Web Component standards ('custom elements', 'Shadow DOM' and 'HTML Templates'), that compatible with other frameworks, using Typescript.
+ - Template can be a JSX template or  HTML template.
 
 ```text
 Render Once, Update Attributes/Properties On Change.
@@ -35,11 +38,12 @@ npm i --save aurora-ts
 | Two Way Data Binding | ✓ | ✓ |
 | Event Binding | ✓ | ✓ |
 | Template Parser | ✓ | ✓ |
-| Template Syntax | ✓ | no need |
-| Template HTML File | dynamic import | no need |
+| Template Syntax | ✓ | ✓ |
+| Template HTML File | fetch | no need |
 | JSX Factory | no need | ✓ |
 | Fragment | ✓ | ✓ |
 | camelCase Property Naming | ✓ | ✓ |
+| lowercase for root element Property Naming | ✓ | ✓ |
 
 ## Libary Features
 
@@ -58,7 +62,7 @@ npm i --save aurora-ts
 | @Output | ✓ |
 | @View | ✓ |
 | @HostListener | ✓ |
-| @ViewChild | TO:DO |
+| @ViewChild | ✓ |
 | @HostBinding | TO:DO |
 | @ViewChildren | TO:DO |
 | @SelfSkip | TO:DO |
@@ -90,6 +94,7 @@ npm i --save aurora-ts
 | [Styling a Custom Element][style] | TO:DO |
 | [Extending native HTML elements][extend-native] | ✓ |
 | [Extending a Custom Element][extend-custom] | TO:DO |
+| [Two Component On Same Model Class][two-component] | ✓ |
 
 ## Shadow DOM standards
 
@@ -123,10 +128,8 @@ npm i --save aurora-ts
 [shadow-focus]: https://developers.google.com/web/fundamentals/web-components/shadowdom#focus
 [shadow-event]: https://developers.google.com/web/fundamentals/web-components/shadowdom#events
 [template-id]: https://developers.google.com/web/fundamentals/web-components/customelements#fromtemplate
+[two-component]:https://github.com/salemebo/aurora-ts/blob/master/test/multi-component/m-person.tsx
 
-## future support
-
-- wasm
 
 ### `[JSX and HTML] -- template parser example`
 
