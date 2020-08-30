@@ -59,7 +59,8 @@ export class PersonComponent implements OnInit, AfterViewInit {
 @Component({
     selector: 'multi-comp-app1',
     template: ` <person-edit [(personName)]="person.personName" [(personAge)]="person.personAge"/>
-                <person-view [(personName)]="person.personName" [(personAge)]="person.personAge"/>
+                <person-view [(personName)]="person.personName" 
+                             [(personAge)]="person.personAge"/>
                 `
 })
 
@@ -69,7 +70,7 @@ export class PersonComponent implements OnInit, AfterViewInit {
                 <person-view #view [(personName)]="edit.personName" [(personAge)]="edit.personAge"/>
                 <person-view #view personName="{{edit.personName}}" personAge="{{edit.personAge}}"/>
                 <div>
-                    <br />    
+                    <br />
                     person.personName: {{person.personName}} - person.personAge: {{person.personAge}}
                     <br />
                     edit.personName: {{edit.personName}} - edit.personAge: {{edit.personAge}}

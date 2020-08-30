@@ -97,7 +97,8 @@ function analysis(arr: string[]): (Child | string)[] {
                 popElement(stackTrace, childStack);
             }
         }
-        else if ((/^\^\w.*\//g).test(current)) {
+        // else if ((/^\^\w.*\//g).test(current)) {
+        else if ((/^\^(\w|\s).*\//gs).test(current)) {
             // self closing tag // has no childs // should push to parent
             current = current.substring(0, current.length - 1).trim();
             stackTrace.push(defineChild(current));
