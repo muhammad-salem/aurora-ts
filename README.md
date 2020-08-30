@@ -50,8 +50,7 @@ npm i --save aurora-ts
 | Features | Aurora |
 | ------- | ------- |
 | ES Module | ✓ |
-| JavaScript | ✓ |
-| Javascript | TO:DO |
+| JavaScript | TO:DO |
 | Dependency Injection |  In Progress |
 | Component| ✓ |
 | Directives | TO:DO |
@@ -95,6 +94,7 @@ npm i --save aurora-ts
 | [Extending native HTML elements][extend-native] | ✓ |
 | [Extending a Custom Element][extend-custom] | TO:DO |
 | [Two Component On Same Model Class][two-component] | ✓ |
+| [Two Component Share Same Model Instanse][two-component] | TO:DO |
 
 ## Shadow DOM standards
 
@@ -267,14 +267,6 @@ in index.html add:
         <script type="module" src="path-to-main-file/index.js"></script>
     </body>
  ```
-
-#### `Screenshot`
-
- ![aurora-capture](https://github.com/salemebo/aurora-ts/raw/master/.img/aurora-capture.gif)
-
-#### `aurora-examples`
-
- @see <https://github.com/salemebo/aurora-examples>
 
 #### test local
 
