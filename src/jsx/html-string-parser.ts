@@ -86,8 +86,6 @@ function analysis(arr: string[]): (Child | string)[] {
         let current = arr[i];
         if ((/^\^!--([\w|\s]+)--/g).test(current)) {
             // comment
-            console.log(current);
-
             let match = (/^\^!--([\w|\s]+)--/g).exec(current);
             if (match) {
                 const comment: Child = {};

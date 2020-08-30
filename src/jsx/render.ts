@@ -128,7 +128,6 @@ export abstract class ComponentRender<T> {
 		}
 		const propSrcs: { [match: string]: PropertySource } = {};
 		result.forEach(match => Reflect.set(propSrcs, match[0], this.getPropertySource(match[1])));
-		console.log('srcs', propSrcs);
 		const handler = () => {
 			let renderText = viewProperty;
 			Object.keys(propSrcs).forEach(propTemplate => {
@@ -325,9 +324,9 @@ export abstract class ComponentRender<T> {
 			// native tags // and custom tags can be used her
 			element = document.createElement(tagName, is ? { is } : undefined);
 		}
-		// if (isHTMLComponent(element)) {
-		// 	element.setParentComponent(this.baiseView);
-		// }
+		if (isHTMLComponent(element)) {
+			element.setParentComponent(this.baiseView);
+		}
 		return element;
 	}
 
