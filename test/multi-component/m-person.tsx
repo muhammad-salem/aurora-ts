@@ -58,7 +58,10 @@ export class PersonComponent implements OnInit, AfterViewInit {
 
 @Component({
     selector: 'multi-comp-app1',
-    template: ` <person-edit [(personName)]="person.personName" [(personAge)]="person.personAge"/>
+    template: ` <person-edit
+                    [(personName)]="person.personName" 
+                    [(personAge)]="person.personAge">
+                </person-edit>
                 <person-view [(personName)]="person.personName" 
                              [(personAge)]="person.personAge"/>
                 `

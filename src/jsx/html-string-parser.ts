@@ -142,12 +142,10 @@ function popElement(stackTrace: (string | Child)[], childStack: (string | Child)
 
 function defineChild(htmlStatement: string): Child {
     const currentElement: Child = {};
-    const [tagName] = htmlStatement.split(/\s/);
-    currentElement.tag = tagName.substring(1);
-    const fisrtSpace = htmlStatement.indexOf(' ');
-
-    if (fisrtSpace > 0) {
-        const attrs = htmlStatement.substring(fisrtSpace + 1);
+    const whitespace = htmlStatement.search(/\s/);
+    currentElement.tag = htmlStatement.substring(1, whitespace > 0 ? whitespace : undefined);
+    if (whitespace > 0) {
+        const attrs = htmlStatement.substring(whitespace + 1);
         currentElement.attrs = {};
         let key: string | null = null, value: string | null = null;
         const list = attrs.split(/\s/)
