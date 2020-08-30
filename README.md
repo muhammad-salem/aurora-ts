@@ -19,7 +19,7 @@ Aurora is a web framework, that can create and define a Web Component standards 
  - Template can be a JSX template or  HTML template.
 
 ```text
-Render Once, Update Attributes/Properties On Change.
+Render Once, Update Properties On Change.
 No need for Virtual Dom.
 ```
 
@@ -103,7 +103,7 @@ npm i --save aurora-ts
 | [Open Mode][shadow-mode-open] | ✓ |
 | [Closed Mode][shadow-mode-closed] | ✓ |
 | [delegatesFocus][shadow-focus] | ✓ |
-| [ Shadow DOM event model][shadow-event] | ✓ |
+| [Shadow DOM event model][shadow-event] | ✓ |
 
 ## HTML Templates Element standards
 
