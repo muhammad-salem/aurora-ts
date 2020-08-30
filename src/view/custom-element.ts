@@ -24,12 +24,11 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 		_getAttributeNative: Function;
 		_addEventListenerNative: Function;
 
+		_parentComponent: BaseComponent<object>;
+
 		constructor() {
 			super();
 			if (componentRef.isShadowDom) {
-				// this._shadowRoot = this.attachShadow({ mode: 'open' });
-				// this._shadowRoot = this.attachShadow({ mode: 'closed' });
-
 				this._shadowRoot = this.attachShadow({
 					mode: componentRef.shadowDomMode,
 					delegatesFocus: componentRef.shadowDomDelegatesFocus
@@ -64,6 +63,18 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 
 		getComponentRef(): ComponentRef<T> {
 			return componentRef;
+		}
+
+		setParentComponent(parent: BaseComponent<any>): void {
+			this._parentComponent = parent;
+		}
+
+		getParentComponent(): BaseComponent<any> {
+			return this._parentComponent;
+		}
+
+		hasParentComponent(): boolean {
+			return this._parentComponent ? true : false;
 		}
 
 		hasInputStartWith(viewProp: string): boolean {
@@ -183,6 +194,11 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 			// 	});
 			// }
 
+			if (!this.hasParentComponent() && this.attributes.length > 0) {
+				let attrs: Attr[] = [].slice.call(this.attributes);
+				attrs.forEach(attr => this.initOuterAttribute(attr));
+			}
+
 			if (isOnChanges(this._model)) {
 				this._model.onChanges();
 			}
@@ -245,47 +261,56 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 			});
 		}
 
-		// emitRootChanges() {
-		// 	const calledKeys: string[] = [];
-		// 	Object.keys(this._model.__observable).forEach(key => {
-		// 		if (calledKeys.includes(key)) {
-		// 			return;
-		// 		}
-		// 		if ((/\./g.test(key))) {
-		// 			key = key.substring(0, key.indexOf('.'));
-		// 		}
-		// 		this._model.emitChangeModel(key);
-		// 		calledKeys.push(key);
-		// 	});
-		// }
+		initOuterAttribute(attr: Attr) {
+			// [window, this] scop
+			let elementAttr = attr.name;
+			let modelProperty = attr.value;
+			if (elementAttr.startsWith('[')) {
+				elementAttr = elementAttr.substring(1, elementAttr.length - 1);
+				if (Reflect.has(window, modelProperty)) {
+					this.setInputValue(elementAttr, Reflect.get(window, modelProperty));
+				}
+				//   else {
+				// 	let value: any;
+				// 	Object.defineProperty(window, modelProperty, {
+				// 		set: (v: any) => {
+				// 			value = v;
+				// 			if (this) {
+				// 				this.setInputValue(elementAttr, v);
+				// 				// fake connect element
+				// 				this.connectedCallback();
+				// 			}
+				// 		},
+				// 		get: (): any => value
+				// 	});
+				// }
 
-		// initOuterAttribute(attr: Attr) {
-		// 	// [window, this] scop
-		// 	let elementAttr = attr.name;
-		// 	let modelProperty = attr.value;
-		// 	if (elementAttr.startsWith('(')) {
-		// 		// (elementAttr)="modelProperty()"
-		// 		elementAttr = elementAttr.substring(1, elementAttr.length - 1);
-		// 		// this.handleEvent(element, elementAttr, viewProperty);
-		// 		modelProperty = modelProperty.endsWith('()') ?
-		// 			modelProperty.substring(0, modelProperty.length - 2) : modelProperty;
-		// 		let callback: Function = Reflect.get(window, modelProperty);
-		// 		this.addEventListener(elementAttr, event => {
-		// 			callback(event);
-		// 		});
-		// 	} else if (elementAttr.startsWith('on')) {
-		// 		const modelEvent = this.getEventEmitter<any>(elementAttr.substring(2));
-		// 		if (modelEvent) {
-		// 			// modelEvent.subscribe(listener);
-		// 			modelProperty = modelProperty.endsWith('()') ?
-		// 				modelProperty.substring(0, modelProperty.length - 2) : modelProperty;
-		// 			let listener: Function = Reflect.get(window, modelProperty);
-		// 			modelEvent.subscribe((data: any) => {
-		// 				(listener as Function)(data);
-		// 			});
-		// 		}
-		// 	}
-		// }
+			}
+			else if (elementAttr.startsWith('(')) {
+				// (elementAttr)="modelProperty()"
+				elementAttr = elementAttr.substring(1, elementAttr.length - 1);
+				// this.handleEvent(element, elementAttr, viewProperty);
+				modelProperty = modelProperty.endsWith('()') ?
+					modelProperty.substring(0, modelProperty.length - 2) : modelProperty;
+				let callback: Function = Reflect.get(window, modelProperty);
+				this.addEventListener(elementAttr, event => {
+					callback(event);
+				});
+			} else if (elementAttr.startsWith('on')) {
+				const modelEvent = this.getEventEmitter<any>(elementAttr.substring(2));
+				if (modelEvent) {
+					// modelEvent.subscribe(listener);
+					modelProperty = modelProperty.endsWith('()') ?
+						modelProperty.substring(0, modelProperty.length - 2) : modelProperty;
+					let listener: Function = Reflect.get(window, modelProperty);
+					modelEvent.subscribe((data: any) => {
+						(listener as Function)(data);
+					});
+				}
+			} else {
+				this.setInputValue(attr.name, attr.value);
+			}
+		}
 
 		adoptedCallback() {
 			// restart the process
