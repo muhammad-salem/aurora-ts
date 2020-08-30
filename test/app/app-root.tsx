@@ -7,7 +7,7 @@ import { Person } from './person.js';
     selector: 'app-root',
     template:
         `
-<div [name]="name" [(id)]="id" (click)="onClick()">
+<div >
     {{appVersion}}
     {{appName}}
 </div>

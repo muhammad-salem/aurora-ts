@@ -288,3 +288,34 @@ export class HTMLApp implements OnInit {
     }
 
 }
+
+@Component({
+    selector: 'html-jsx',
+    template:
+        `
+    <div class="row">
+		<div class="col-2">
+			<p>
+				HTML Tempplate Parsing
+				(Angular Like)
+			</p>
+		</div>
+		<div class="col-10">
+			<html-app></html-app>
+		</div>
+	</div>
+	<div class="p-3 my-2 bg-danger"></div>
+	<div class="row">
+		<div class="col-2">
+			<p>
+				JSX Factory
+				(React Like)
+			</p>
+		</div>
+		<div class="col-10">
+			<jsx-app></jsx-app>
+		</div>
+	</div>
+    `
+})
+class HTMLandJSX { }

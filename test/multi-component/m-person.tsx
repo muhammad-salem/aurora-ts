@@ -5,7 +5,7 @@ import {
 } from '../../dist/aurora.js';
 
 const compRefPersonEdit: ComponentOptions<PersonComponent> = {
-    selector: 'person-edit',
+    selector: 'm-person-edit',
     template: ({ personName, personAge }: PersonComponent) => {
         return (
             <>
@@ -18,7 +18,7 @@ const compRefPersonEdit: ComponentOptions<PersonComponent> = {
 };
 
 const compRefPersonView: ComponentOptions<PersonComponent> = {
-    selector: 'person-view',
+    selector: 'm-person-view',
     template: ({ personName, personAge }: PersonComponent) => {
         return (
             <>
@@ -58,20 +58,20 @@ export class PersonComponent implements OnInit, AfterViewInit {
 
 @Component({
     selector: 'multi-comp-app1',
-    template: ` <person-edit
+    template: ` <m-person-edit
                     [(personName)]="person.personName" 
                     [(personAge)]="person.personAge">
-                </person-edit>
-                <person-view [(personName)]="person.personName" 
+                </m-person-edit>
+                <m-person-view [(personName)]="person.personName" 
                              [(personAge)]="person.personAge"/>
                 `
 })
 
 @Component({
     selector: 'multi-comp-app2',
-    template: ` <person-edit #edit [(personName)]="person.personName" [(personAge)]="person.personAge"/>
-                <person-view #view [(personName)]="edit.personName" [(personAge)]="edit.personAge"/>
-                <person-view #view personName="{{edit.personName}}" personAge="{{edit.personAge}}"/>
+    template: ` <m-person-edit #edit [(personName)]="person.personName" [(personAge)]="person.personAge"/>
+                <m-person-view #view [(personName)]="edit.personName" [(personAge)]="edit.personAge"/>
+                <m-person-view #view personName="{{edit.personName}}" personAge="{{edit.personAge}}"/>
                 <div>
                     <br />
                     person.personName: {{person.personName}} - person.personAge: {{person.personAge}}
@@ -99,6 +99,5 @@ class MultiComponentApp implements OnInit, AfterViewInit {
     afterViewInit(): void {
         console.log('editElem', this.editElem);
     }
-
 
 }
