@@ -7,7 +7,8 @@
 		"typeRoots": [
 			"./types",
 			"../node_modules/@types"
-		]
+		],
+		"noEmitHelpers": true
 	},
 	"include": [
 		"**/*.ts",
