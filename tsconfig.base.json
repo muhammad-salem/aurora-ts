@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-    // "baseUrl": "./",
-    // "outDir": "dist",
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
@@ -20,7 +18,6 @@
     "removeComments": true,
     "jsx": "react",
     "jsxFactory": "JsxFactory.createElement",
-    "jsxFragmentFactory": "JsxFactory.Fragment",
-    // "composite": true
+    "jsxFragmentFactory": "JsxFactory.Fragment"
   }
 }
