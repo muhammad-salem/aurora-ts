@@ -30,7 +30,7 @@ import { Component, Input, JsxFactory, OnInit } from '../../dist/aurora.js';
                         </tr>
                     </tbody>
                 </table>
-            </div>
+            </div >
         );
     }
 })
