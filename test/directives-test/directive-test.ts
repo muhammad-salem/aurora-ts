@@ -117,7 +117,7 @@ class IfControlFlow implements OnInit, AfterViewInit {
         </div>        
         `
 })
-class DirectiveTest {
+class DirectiveTest implements AfterViewInit {
 
     condition: boolean = true;
 
@@ -127,6 +127,16 @@ class DirectiveTest {
     ];
 
     constructor() { }
+
+    @View()
+    view: HTMLComponent<DirectiveTest>;
+
+    afterViewInit(): void {
+        setInterval(() => {
+            this.condition = !this.condition;
+            this.view.triggerModelChange('condition');
+        }, 1000);
+    }
 }
 
 class Person {
