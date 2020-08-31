@@ -26,3 +26,4 @@ export * from './model/model-change-detection.js';
 export * from './view/custom-element.js';
 
 export * from './directives/if.js';
+export * from './directives/for.js';
