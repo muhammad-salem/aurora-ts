@@ -53,7 +53,7 @@ npm i --save aurora-ts
 | JavaScript | TO:DO |
 | Dependency Injection |  In Progress |
 | Component| ✓ |
-| Directives | TO:DO |
+| Directives | ✓ |
 | Services | TO:DO |
 | Pipes | TO:DO |
 | Lifecycle | ✓ |
@@ -66,7 +66,7 @@ npm i --save aurora-ts
 | @ViewChildren | TO:DO |
 | @SelfSkip | TO:DO |
 | @Optional | TO:DO |
-| *if Directive | TO:DO |
+| *if Directive | ✓ |
 | *for Directive | TO:DO |
 | *switch Directive | TO:DO |
 | [Annotation/Decorators reflect-metadata][metadata] | ✓ |
