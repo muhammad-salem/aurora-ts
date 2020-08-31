@@ -5,7 +5,7 @@ import {
 
 
 @Component({
-    selector: 'if-cf',
+    selector: 'if-component',
 })
 class IfControlFlow implements OnInit, AfterViewInit {
 
@@ -71,7 +71,7 @@ class IfControlFlow implements OnInit, AfterViewInit {
             attributes: {},
             children: [
                 {
-                    tagName: 'if-cf',
+                    tagName: 'if-component',
                     attributes: {
                         '$if': 'condition'
                     },
@@ -98,9 +98,9 @@ class IfControlFlow implements OnInit, AfterViewInit {
     template:
         `
         condition: {{condition}} {{!condition}}
-        <if-cf [if]="condition" >
+        <if-component [if]="condition" >
             <div>first child</div>
-        </if-cf>
+        </if-component>
         `
 })
 @Component({
