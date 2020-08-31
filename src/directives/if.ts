@@ -1,52 +1,44 @@
-import { OnInit, AfterViewInit } from '../core/lifecycle.js';
-import { View, Input, HostBinding, Directive } from '../core/decorators.js';
+import { OnInit } from '../core/lifecycle.js';
+import { Directive } from '../core/decorators.js';
 import { StructuralDirective } from './directive.js';
 import { JsxComponent } from '../jsx/factory.js';
-import { HTMLComponent } from '../elements/component.js';
 import { ComponentRender } from '../jsx/render.js';
+import { subscribe1way } from '../model/model-change-detection.js';
 
 @Directive({
 	selector: '*if',
 })
-export class IfDirective<T> extends StructuralDirective<T> implements OnInit, AfterViewInit {
+export class IfDirective<T> extends StructuralDirective<T> implements OnInit {
+
+	condition: boolean;
+	element: HTMLElement;
 
 	constructor(
 		render: ComponentRender<T>,
-		parentComponent: HTMLComponent<T>,
 		comment: Comment,
-		value: string,
-		children: (string | JsxComponent)[]
-	) {
-		super(render, parentComponent, comment, value, children);
+		statement: string,
+		component: JsxComponent) {
+		super(render, comment, statement, component);
 	}
-
-	// @Input() comment: Comment;
-	// @Input() component: JsxComponent;
-	// @Input() viewComponent: HTMLComponent<object>;
-	// @Input() render: ComponentRender<object>;
-
-	@HostBinding('condition')
-	condition: boolean;
-
-	@View()
-	view: HTMLElement;
-
-	@Input()
-	set if(condition: boolean) { }
-
-	@Input()
-	set ifThen(view: any) { }
-
-	@Input()
-	set ifElse(view: any) { }
-
 
 	onInit(): void {
 		console.log('IfDirective#onInit()');
+		this.element = this.render.createElement(this.component) as HTMLElement;
+		const propertySrc = this.render.getPropertySource(this.statement);
+		let callback1 = () => {
+			this.render.updateElementData(this, 'condition', propertySrc);
+			this._updateView();
+		};
+		subscribe1way(propertySrc.src, propertySrc.property, this, 'condition', callback1);
+		callback1();
 	}
 
-	afterViewInit(): void {
-		console.log('IfDirective#onInit()');
+	private _updateView() {
+		if (this.condition) {
+			this.comment.after(this.element);
+		} else {
+			this.element.remove();
+		}
 	}
 
 }
