@@ -20,17 +20,14 @@ export function directiveAnalysis(root: JsxComponent): JsxComponent {
             return {
                 tagName: JsxFactory.Directive,
                 attributes: {
-                    ...root.attributes,
                     directiveName: directive,
-                    directiveValue: directiveValue
-                },
-                children: [
-                    {
+                    directiveValue: directiveValue,
+                    component: {
                         tagName: root.tagName,
                         attributes: root.attributes,
                         children: root.children?.map(child => childDirectiveAnalysis(child))
                     }
-                ]
+                }
             }
         }
     }

@@ -20,14 +20,14 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             viewProperty = viewProperty.substring(1);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            this.bind2Way(element, elementAttr, viewProperty, isAttr);
+            this.bind2Way(element, elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('$') && typeof viewProperty === 'string') {
             // $elementAttr="viewProperty" 
             elementAttr = elementAttr.substring(1);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            this.bind1Way(element, elementAttr, viewProperty, isAttr);
+            this.bind1Way(element, elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('$') && typeof viewProperty === 'object') {
             // $elementAttr={viewProperty} // as an object
@@ -69,7 +69,7 @@ export class JSXComponentRender<T> extends ComponentRender<T> {
             viewProperty = viewProperty.substring(2, viewProperty.length - 2);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            this.bind1Way(element, elementAttr, viewProperty, isAttr);
+            this.bind1Way(element, elementAttr, viewProperty);
         }
         else if (typeof viewProperty === 'string' && (/\{\{|\}\}/g).test(viewProperty)) {
             // elementAttr="any string{{viewProperty}}any text" // just pass data

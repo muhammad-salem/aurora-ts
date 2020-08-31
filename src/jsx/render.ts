@@ -1,4 +1,5 @@
 import { EventEmitter } from '../core/events.js';
+import { isOnInit } from '../core/lifecycle.js';
 import { getValueByPath, setValueByPath, updateAttribute, updateValue } from '../core/utils.js';
 import { HTMLComponent, isHTMLComponent } from '../elements/component.js';
 import { ComponentRef, ListenerRef, PropertyRef } from '../elements/elements.js';
@@ -73,7 +74,7 @@ export abstract class ComponentRender<T> {
 		}
 	}
 
-	updateElementData(element: HTMLElement | Text, elementAttr: string, propertySrc: PropertySource, isAttr: boolean) {
+	updateElementData(element: HTMLElement | Text | Object, elementAttr: string, propertySrc: PropertySource) {
 		updateValue(element, elementAttr, propertySrc.src, propertySrc.property);
 	}
 
@@ -81,21 +82,21 @@ export abstract class ComponentRender<T> {
 		updateValue(propertySrc.src, propertySrc.property, element, elementAttr);
 	}
 
-	bind1Way(element: HTMLElement, elementAttr: string, viewProperty: string, isAttr: boolean) {
+	bind1Way(element: HTMLElement, elementAttr: string, viewProperty: string) {
 		const propertySrc = this.getPropertySource(viewProperty);
 		let callback1 = () => {
-			this.updateElementData(element, elementAttr, propertySrc, isAttr);
+			this.updateElementData(element, elementAttr, propertySrc);
 		};
 		subscribe1way(propertySrc.src, propertySrc.property, element, elementAttr, callback1);
 	}
 
-	bind2Way(element: HTMLElement, elementAttr: string, viewProperty: string, isAttr: boolean) {
+	bind2Way(element: HTMLElement, elementAttr: string, viewProperty: string) {
 		const propertySrc = this.getPropertySource(viewProperty);
 		const callback2 = () => {
 			this.updateViewData(element, elementAttr, propertySrc);
 		};
 		const callback1 = () => {
-			this.updateElementData(element, elementAttr, propertySrc, isAttr);
+			this.updateElementData(element, elementAttr, propertySrc);
 		};
 		subscribe2way(propertySrc.src, propertySrc.property, element, elementAttr, callback1, callback2);
 
@@ -254,6 +255,7 @@ export abstract class ComponentRender<T> {
 		else if (JsxFactory.Directive === viewTemplate.tagName.toLowerCase() && viewTemplate.attributes) {
 			let directiveName: string = viewTemplate.attributes.directiveName;
 			let directiveValue = viewTemplate.attributes.directiveValue;
+			let component = viewTemplate.attributes.component;
 			element = document.createComment(`${directiveName}=${directiveValue}`);
 			const directiveRef = dependencyInjector
 				.getInstance(ClassRegistry)
@@ -263,16 +265,17 @@ export abstract class ComponentRender<T> {
 				if (directiveName.startsWith('*')) {
 					// structural directive selector as '*if'
 					// const directiveClass = directiveRef.modelClass as TypeOf<StructuralDirective<T>>;
-
-
 					const directive = new directiveRef.modelClass(
 						this,
-						this.baiseView,
 						element,
 						directiveValue,
-						viewTemplate.children);
+						component);
+					if (isOnInit(directive)) {
+						directive.onInit();
+					}
+
 				} else {
-					// attributes directive selector as '[if]'
+					// attributes directive selector as '[class]'
 				}
 			} else {
 				// didn't fond directive or it not yet defined
@@ -294,13 +297,8 @@ export abstract class ComponentRender<T> {
 			for (const key in viewTemplate.attributes) {
 				this.initAttribute(<HTMLElement>element, key, viewTemplate.attributes[key]);
 			}
-			// if (isHTMLComponent(element)) {
-			// 	element._parentComponentBindMap = bindMap;
-			// }
-			// Reflect.set(element, '_parentComponentBindMap', bindMap);
 		}
 		if (viewTemplate.children && viewTemplate.children.length > 0) {
-			// const ditrectives: object[] = [];
 			for (const child of viewTemplate.children) {
 				this.appendChild(element, child);
 			}

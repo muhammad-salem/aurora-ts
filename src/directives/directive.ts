@@ -18,11 +18,10 @@ import { ComponentRender } from '../jsx/render.js';
  */
 export class StructuralDirective<T> {
     constructor(
-        private render: ComponentRender<T>,
-        private parentComponent: HTMLComponent<T>,
-        private comment: Comment,
-        private value: string,
-        private children: (string | JsxComponent)[]
+        protected render: ComponentRender<T>,
+        protected comment: Comment,
+        protected statement: string,
+        protected component: JsxComponent
     ) { }
 }
 
@@ -30,5 +29,5 @@ export class StructuralDirective<T> {
  * An attributes directive selector as '[if]'
  */
 export class AttributeDirective<T> {
-    constructor(protected viewContainer: ComponentRender<T>, ...values: any[]) { }
+    constructor(protected render: ComponentRender<T>, ...values: any[]) { }
 }

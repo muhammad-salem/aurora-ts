@@ -18,21 +18,21 @@ export class HTMLComponentRender<T> extends ComponentRender<T> {
             elementAttr = elementAttr.substring(2, elementAttr.length - 2);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            this.bind2Way(element, elementAttr, viewProperty, isAttr);
+            this.bind2Way(element, elementAttr, viewProperty);
         }
         else if (elementAttr.startsWith('[')) {
             // [elementAttr]="modelProperty"
             elementAttr = elementAttr.substring(1, elementAttr.length - 1);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            this.bind1Way(element, elementAttr, viewProperty, isAttr);
+            this.bind1Way(element, elementAttr, viewProperty);
         }
         else if (typeof viewProperty === 'string' && (/^\{\{(.+\w*)*\}\}/g).test(viewProperty)) {
             // elementAttr="{{viewProperty}}" // just pass data
             viewProperty = viewProperty.substring(2, viewProperty.length - 2);
             const isAttr = hasAttr(element, elementAttr);
             this.initElementData(element, elementAttr, viewProperty, isAttr);
-            this.bind1Way(element, elementAttr, viewProperty, isAttr);
+            this.bind1Way(element, elementAttr, viewProperty);
         }
         else if (typeof viewProperty === 'string' && (/\{\{|\}\}/g).test(viewProperty)) {
             // elementAttr="any string{{viewProperty}}any text" // just pass data

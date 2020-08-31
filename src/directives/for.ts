@@ -1,31 +1,24 @@
-import { OnInit, AfterViewInit } from '../core/lifecycle.js';
-import { View, Input, HostBinding, Directive } from '../core/decorators.js';
+import { OnInit } from '../core/lifecycle.js';
+import { Directive } from '../core/decorators.js';
 import { StructuralDirective } from './directive.js';
 import { JsxComponent } from '../jsx/factory.js';
-import { HTMLComponent } from '../elements/component.js';
 import { ComponentRender } from '../jsx/render.js';
 
 @Directive({
     selector: '*for',
 })
-export class ForDirective<T> extends StructuralDirective<T> implements OnInit, AfterViewInit {
+export class ForDirective<T> extends StructuralDirective<T> implements OnInit {
 
     constructor(
         render: ComponentRender<T>,
-        parentComponent: HTMLComponent<T>,
         comment: Comment,
         value: string,
-        children: (string | JsxComponent)[]
-    ) {
-        super(render, parentComponent, comment, value, children);
+        component: JsxComponent) {
+        super(render, comment, value, component);
     }
 
     onInit(): void {
-
-    }
-
-    afterViewInit(): void {
-
+        console.log('ForDirective#onInit()');
     }
 
 }

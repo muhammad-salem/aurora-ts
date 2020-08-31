@@ -49,17 +49,14 @@ export class JsxFactory {
 				return {
 					tagName: JsxFactory.Directive,
 					attributes: {
-						...attributes,
 						directiveName: directive,
-						directiveValue: directiveValue
-					},
-					children: [
-						{
+						directiveValue: directiveValue,
+						component: {
 							tagName: tagName,
 							attributes,
 							children
 						}
-					]
+					}
 				}
 			}
 		}
