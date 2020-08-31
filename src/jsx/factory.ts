@@ -18,15 +18,15 @@ export interface JsxComponent {
 }
 
 export interface JsxComponentWithName extends JsxComponent {
-	definedElement: HTMLElement;
+	element: HTMLElement;
 }
 
-export function isJsxComponentWithName(componet: JsxComponent): componet is JsxComponentWithName {
-	return Reflect.has(componet, 'definedElement');
+export function isJsxComponentWithElement(componet: JsxComponent): componet is JsxComponentWithName {
+	return Reflect.has(componet, 'element');
 }
 
-export function toJsxComponentWithName(componet: JsxComponent, definedElement: HTMLElement): void {
-	(componet as JsxComponentWithName).definedElement = definedElement;
+export function toJsxComponentWithElement(componet: JsxComponent, element: HTMLElement): void {
+	(componet as JsxComponentWithName).element = element;
 }
 
 // export type JsxType = HTMLElement | HTMLElement[] | Comment;
@@ -37,11 +37,36 @@ export class JsxFactory {
 
 	static Fragment = 'fragment';
 
+	static Directive = 'directive';
+
 	static createElement(tagName: string, attributes: JsxAttributes | undefined, ...children: JsxComponent[]): JsxComponent {
+		if (attributes) {
+			const keys = Object.keys(attributes);
+			const directive = keys.find(key => key.startsWith('*'));
+			if (directive) {
+				const directiveValue = attributes[directive];
+				Reflect.deleteProperty(attributes, directive);
+				return {
+					tagName: JsxFactory.Directive,
+					attributes: {
+						...attributes,
+						directiveName: directive,
+						directiveValue: directiveValue
+					},
+					children: [
+						{
+							tagName: tagName,
+							attributes,
+							children
+						}
+					]
+				}
+			}
+		}
 		return {
 			tagName: tagName,
 			attributes,
-			children,
+			children
 		};
 	}
 }

@@ -5,8 +5,44 @@ import { JsxComponent, JsxFactory } from './factory.js';
 export function toJSXRender<T>(html: string): JSXRender<T> {
     // should render her all the variables and resolve binding
     let renderComponent = parseHtmlToJsxComponent(html) as JsxComponent;
+    renderComponent = directiveAnalysis(renderComponent);
     // model: T, never used, as it is a jsx thing
     return (model: T) => renderComponent;
+}
+
+export function directiveAnalysis(root: JsxComponent): JsxComponent {
+    if (root.attributes) {
+        const keys = Object.keys(root.attributes);
+        const directive = keys.find(key => key.startsWith('*'));
+        if (directive) {
+            const directiveValue = root.attributes[directive];
+            Reflect.deleteProperty(root.attributes, directive);
+            return {
+                tagName: JsxFactory.Directive,
+                attributes: {
+                    ...root.attributes,
+                    directiveName: directive,
+                    directiveValue: directiveValue
+                },
+                children: [
+                    {
+                        tagName: root.tagName,
+                        attributes: root.attributes,
+                        children: root.children?.map(child => childDirectiveAnalysis(child))
+                    }
+                ]
+            }
+        }
+    }
+    root.children = root.children?.map(child => childDirectiveAnalysis(child));
+    return root;
+}
+
+function childDirectiveAnalysis(child: string | JsxComponent): string | JsxComponent {
+    if (typeof child === 'string') {
+        return child;
+    }
+    return directiveAnalysis(child);
 }
 
 export function parseHtmlToJsxComponent(html: string): JsxComponent | undefined {

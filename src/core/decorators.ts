@@ -9,7 +9,7 @@ export interface DirectiveOptions {
 }
 
 export interface TypeOf<T> extends Function {
-	new(): T;
+	new(...values: any): T;
 }
 
 export interface HTMLType extends TypeOf<HTMLElement> {

@@ -10,6 +10,7 @@ import { findByModelClassOrCreat, setBootstrapTagNameMatadata } from '../reflect
 import { htmlTemplateToJSXRender } from '../jsx/html-template-parser.js';
 import { toJSXRender } from '../jsx/html-string-parser.js';
 import { initCustomElementView } from '../view/custom-element.js';
+import { StructuralDirective, AttributeDirective } from '../directives/directive.js';
 
 export class PropertyRef {
 	constructor(public modelProperty: string, private _viewNanme?: string) { }
@@ -34,16 +35,21 @@ export interface BootstropMatadata {
 	[key: string]: any;
 }
 
-export interface ServiceRef extends ServiceOptions {
-	descriptors: PropertyDescriptor[];
+export interface ServiceRef<T> {
+	provideIn: TypeOf<CustomElementConstructor> | 'root' | 'platform' | 'any';
+	modelClass: TypeOf<T>;
 }
 
-export interface PipeRef extends PipeOptions {
+export interface PipeRef<T> {
 	name: string;
 	pure: boolean;
-	descriptors: PropertyDescriptor[];
+	modelClass: TypeOf<T>;
 }
-export interface DirectiveRef extends DirectiveOptions {
+export interface DirectiveRef<T> {
+	selector: string;
+
+	modelClass: TypeOf<StructuralDirective<T>>; // | TypeOf<AttributeDirective<T>>;
+
 	inputs: PropertyRef[];
 	outputs: PropertyRef[];
 	view: string;
@@ -51,8 +57,6 @@ export interface DirectiveRef extends DirectiveOptions {
 	ViewChildren: ChildRef[];
 	hostListeners: ListenerRef[];
 	hostBindings: HostBindingRef[];
-	directiveOptions: DirectiveOptions;
-	descriptors: PropertyDescriptor[];
 }
 
 export interface ComponentRef<T> {
@@ -62,6 +66,8 @@ export interface ComponentRef<T> {
 	extend: Tag;
 
 	viewClass: TypeOf<HTMLComponent<T>>; //CustomElementConstructor;
+	modelClass: TypeOf<T>;
+
 	inputs: PropertyRef[];
 	outputs: PropertyRef[];
 	view: string;
@@ -69,7 +75,6 @@ export interface ComponentRef<T> {
 	ViewChildren: ChildRef[];
 	hostBindings: HostBindingRef[];
 	hostListeners: ListenerRef[];
-	descriptors: PropertyDescriptor[];
 
 	renderType: 'html' | 'jsx' | 'tsx';
 	encapsulation: 'custom' | 'shadow-dom' | 'template' | 'shadow-dom-template';
@@ -132,6 +137,7 @@ export class ComponentElement {
 		for (const key in opts) {
 			bootstrap[key] = Reflect.get(opts, key);
 		}
+		bootstrap.modelClass = modelClass;
 		dependencyInjector.getInstance(ClassRegistry).registerDirective(modelClass);
 	}
 
@@ -185,12 +191,12 @@ export class ComponentElement {
 		componentRef.ViewChildren = componentRef.ViewChildren || [];
 		componentRef.hostBindings = componentRef.hostBindings || [];
 		componentRef.hostListeners = componentRef.hostListeners || [];
-		componentRef.descriptors = componentRef.descriptors || [];
 		componentRef.encapsulation = componentRef.encapsulation || 'custom';
 		componentRef.isShadowDom = /shadow-dom/g.test(componentRef.encapsulation);
 		componentRef.shadowDomMode = componentRef.shadowDomMode || 'open';
 		componentRef.shadowDomDelegatesFocus = componentRef.shadowDomDelegatesFocus === true || false;
 
+		componentRef.modelClass = modelClass;
 		componentRef.viewClass = initCustomElementView(modelClass, componentRef);
 		const componentRefName = componentRef.viewClass.name + 'ComponentRef';
 		setBootstrapTagNameMatadata(modelClass, componentRefName, componentRef);
