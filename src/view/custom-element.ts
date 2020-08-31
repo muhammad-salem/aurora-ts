@@ -24,7 +24,7 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 		_getAttributeNative: Function;
 		_addEventListenerNative: Function;
 
-		_parentComponent: BaseComponent<object>;
+		_parentComponent: HTMLComponent<object>;
 
 		constructor() {
 			super();
@@ -65,11 +65,11 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 			return componentRef;
 		}
 
-		setParentComponent(parent: BaseComponent<any>): void {
+		setParentComponent(parent: HTMLComponent<any>): void {
 			this._parentComponent = parent;
 		}
 
-		getParentComponent(): BaseComponent<any> {
+		getParentComponent(): HTMLComponent<any> {
 			return this._parentComponent;
 		}
 

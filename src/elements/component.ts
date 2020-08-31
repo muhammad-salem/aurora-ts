@@ -15,8 +15,8 @@ export interface BaseComponent<T extends Object> extends CustomElement {
 
 	getComponentRef(): ComponentRef<T>;
 
-	setParentComponent<V>(parent: BaseComponent<V>): void;
-	getParentComponent<V>(): BaseComponent<V>;
+	setParentComponent<V>(parent: HTMLComponent<V>): void;
+	getParentComponent<V>(): HTMLComponent<V>;
 	hasParentComponent(): boolean;
 
 	hasInputStartWith(viewProp: string): boolean;
@@ -37,7 +37,7 @@ export interface BaseComponent<T extends Object> extends CustomElement {
 	emitRootChanges(): void;
 }
 
-export interface HTMLComponent<T> extends BaseComponent<T>, HTMLElement { }
+export interface HTMLComponent<T extends Object> extends BaseComponent<T>, HTMLElement { }
 
 export function isHTMLComponent(object: any): object is HTMLComponent<any> {
 	return Reflect.has(object, '_model')
