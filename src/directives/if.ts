@@ -1,14 +1,38 @@
 import { OnInit, AfterViewInit } from '../core/lifecycle.js';
-import { Directive, View, Input } from '../core/decorators.js';
+import { View, Input, HostBinding, Directive } from '../core/decorators.js';
+import { StructuralDirective } from './directive.js';
+import { JsxComponent } from '../jsx/factory.js';
+import { HTMLComponent } from '../elements/component.js';
+import { ComponentRender } from '../jsx/render.js';
 
 @Directive({
-	selector: '[if]',
+	selector: '*if',
 })
-export class IfDirective implements OnInit, AfterViewInit {
-	@View()
-	comment: Comment;
+export class IfDirective<T> extends StructuralDirective<T> implements OnInit, AfterViewInit {
 
-	@Input() if: boolean;
+	constructor(
+		render: ComponentRender<T>,
+		parentComponent: HTMLComponent<T>,
+		comment: Comment,
+		value: string,
+		children: (string | JsxComponent)[]
+	) {
+		super(render, parentComponent, comment, value, children);
+	}
+
+	// @Input() comment: Comment;
+	// @Input() component: JsxComponent;
+	// @Input() viewComponent: HTMLComponent<object>;
+	// @Input() render: ComponentRender<object>;
+
+	@HostBinding('condition')
+	condition: boolean;
+
+	@View()
+	view: HTMLElement;
+
+	@Input()
+	set if(condition: boolean) { }
 
 	@Input()
 	set ifThen(view: any) { }
@@ -16,11 +40,13 @@ export class IfDirective implements OnInit, AfterViewInit {
 	@Input()
 	set ifElse(view: any) { }
 
-	constructor() { }
+
 	onInit(): void {
 		console.log('IfDirective#onInit()');
 	}
+
 	afterViewInit(): void {
 		console.log('IfDirective#onInit()');
 	}
+
 }
