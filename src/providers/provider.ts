@@ -1,4 +1,4 @@
-import { ComponentRef, PropertyRef } from '../elements/elements.js';
+import { ComponentRef, DirectiveRef, PropertyRef } from '../elements/elements.js';
 import { getBootstrapMatadata } from '../reflect/bootstrap-data.js';
 
 export type ProviderType = 'component' | 'service' | 'directive' | 'pipe' | 'self';
@@ -84,5 +84,26 @@ export class /*ClassProvider implements*/ ClassRegistry {
 			}
 		}
 		return false;
+	}
+
+	hasDirective<T>(selector: string): boolean {
+		for (const directiveClass of this.directiveSet) {
+			const directiveRef: DirectiveRef<T> =
+				getBootstrapMatadata(directiveClass.prototype);
+			if (directiveRef.selector === selector) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	getDirectiveRef<T>(selector: string): DirectiveRef<T> | undefined {
+		for (const directiveClass of this.directiveSet) {
+			const directiveRef: DirectiveRef<T> =
+				getBootstrapMatadata(directiveClass.prototype);
+			if (directiveRef.selector === selector) {
+				return directiveRef;
+			}
+		}
 	}
 }
