@@ -5,7 +5,7 @@ import { ComponentRef, ListenerRef, PropertyRef } from '../elements/elements.js'
 import { defineModel, isModel, Model, subscribe1way, subscribe2way } from '../model/model-change-detection.js';
 import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
-import { JsxFactory, JsxComponent, isJsxComponentWithName } from './factory.js';
+import { JsxFactory, JsxComponent, isJsxComponentWithElement } from './factory.js';
 import { ElementMutation } from './mutation.js';
 
 function getChangeEventName(element: HTMLElement, elementAttr: string): string {
@@ -179,27 +179,42 @@ export abstract class ComponentRender<T> {
 					Reflect.set(this.baiseView._model, view.modelName, viewChildMap[selctorName]);
 				}
 			});
+			// if (this.componentRef.isShadowDom) {
+			// 	if (this.baiseView.shadowRoot /* OPEN MODE */) {
+			// 		this.baiseView.shadowRoot.appendChild(this.createElement(this.template));
+			// 	} else /* CLOSED MODE*/ {
+			// 		const shadowRoot = Reflect.get(this.baiseView, '_shadowRoot');
+			// 		shadowRoot.appendChild(this.createElement(this.template));
+			// 	}
+			// } else {
+			// 	this.baiseView.appendChild(this.createElement(this.template));
+			// }
+			let rootRef: HTMLElement | ShadowRoot;
 			if (this.componentRef.isShadowDom) {
 				if (this.baiseView.shadowRoot /* OPEN MODE */) {
-					this.baiseView.shadowRoot.appendChild(this.createElement(this.template));
+					rootRef = this.baiseView.shadowRoot;
 				} else /* CLOSED MODE*/ {
-					const shadowRoot = Reflect.get(this.baiseView, '_shadowRoot');
-					shadowRoot.appendChild(this.createElement(this.template));
+					rootRef = Reflect.get(this.baiseView, '_shadowRoot') as ShadowRoot;
+					Reflect.deleteProperty(this.baiseView, '_shadowRoot');
 				}
 			} else {
-				this.baiseView.appendChild(this.createElement(this.template));
+				rootRef = this.baiseView;
 			}
+			rootRef.appendChild(this.createElement(this.template));
 		}
 	}
 
 	initHostListener(): void {
-		this.componentRef.hostListeners?.forEach((listener) =>
-			this.handelHostListener(listener)
+		this.componentRef.hostListeners?.forEach(
+			listener => this.handelHostListener(listener)
 		);
 	}
 
 	defineElementNameKey(component: JsxComponent | string, viewChildMap?: { [name: string]: any }) {
 		if (typeof component === 'string') {
+			return;
+		}
+		if (component.tagName === JsxFactory.Directive) {
 			return;
 		}
 		if (!viewChildMap) {
@@ -232,9 +247,36 @@ export abstract class ComponentRender<T> {
 	}
 
 	createElement(viewTemplate: JsxComponent): HTMLElement | DocumentFragment | Comment {
-		let element;
-		if (isJsxComponentWithName(viewTemplate)) {
-			element = viewTemplate.definedElement
+		let element: HTMLElement | DocumentFragment | Comment;
+		if (isJsxComponentWithElement(viewTemplate)) {
+			element = viewTemplate.element
+		}
+		else if (JsxFactory.Directive === viewTemplate.tagName.toLowerCase() && viewTemplate.attributes) {
+			let directiveName: string = viewTemplate.attributes.directiveName;
+			let directiveValue = viewTemplate.attributes.directiveValue;
+			element = document.createComment(`${directiveName}=${directiveValue}`);
+			const directiveRef = dependencyInjector
+				.getInstance(ClassRegistry)
+				.getDirectiveRef<T>(viewTemplate.attributes.directiveName);
+			if (directiveRef) {
+
+				if (directiveName.startsWith('*')) {
+					// structural directive selector as '*if'
+					// const directiveClass = directiveRef.modelClass as TypeOf<StructuralDirective<T>>;
+
+
+					const directive = new directiveRef.modelClass(
+						this,
+						this.baiseView,
+						element,
+						directiveValue,
+						viewTemplate.children);
+				} else {
+					// attributes directive selector as '[if]'
+				}
+			} else {
+				// didn't fond directive or it not yet defined
+			}
 		}
 		else {
 			element = this.createElementByTagName(
@@ -258,6 +300,7 @@ export abstract class ComponentRender<T> {
 			// Reflect.set(element, '_parentComponentBindMap', bindMap);
 		}
 		if (viewTemplate.children && viewTemplate.children.length > 0) {
+			// const ditrectives: object[] = [];
 			for (const child of viewTemplate.children) {
 				this.appendChild(element, child);
 			}
@@ -330,27 +373,31 @@ export abstract class ComponentRender<T> {
 		return element;
 	}
 
-	appendChild(parent: Node, child: any) {
-		if (!child) {
-			return;
-		}
-
-		if (typeof child === 'string') {
-			this.appendTextNode(parent, child);
-		} else if (Array.isArray(child)) {
-			for (const value of child) {
-				this.appendChild(parent, value);
-			}
-		} else if (child instanceof Node) {
-			parent.appendChild(child);
-		} else if (typeof child === 'boolean') {
-			// <>{condition && <a>Display when condition is true</a>}</>
-			// if condition is false, the child is a boolean, but we don't want to display anything
-		} else if (typeof child === 'object' && Reflect.has(child, 'tagName')) {
+	appendChild(parent: Node, child: string | JsxComponent) {
+		if (typeof child === 'object' && Reflect.has(child, 'tagName')) {
 			parent.appendChild(this.createElement(child));
 		} else {
 			this.appendTextNode(parent, String(child));
 		}
+		// if (!child) {
+		// 	return;
+		// }
+		// if (typeof child === 'string') {
+		// 	this.appendTextNode(parent, child);
+		// } else if (Array.isArray(child)) {
+		// 	for (const value of child) {
+		// 		this.appendChild(parent, value);
+		// 	}
+		// } else if (child instanceof Node) {
+		// 	parent.appendChild(child);
+		// } else if (typeof child === 'boolean') {
+		// 	// <>{condition && <a>Display when condition is true</a>}</>
+		// 	// if condition is false, the child is a boolean, but we don't want to display anything
+		// } else if (typeof child === 'object' && Reflect.has(child, 'tagName')) {
+		// 	parent.appendChild(this.createElement(child));
+		// } else {
+		// 	this.appendTextNode(parent, String(child));
+		// }
 	}
 
 	appendTextNode(parent: Node, child: string) {
