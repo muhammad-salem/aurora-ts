@@ -3,6 +3,11 @@ declare global {
     namespace Reflect {
         function decorate(decorators: Function[], target: any, key?: string | symbol, desc?: any): any;
     }
+
+    function __decorate(decorators: Function[], target: any, key?: string | symbol, desc?: any): any;
+    function __param(paramIndex: number, decorator: Function): Function;
+    function __metadata(metadataKey: any, metadataValue: any): Function | undefined;
+
 }
 
 export function __decorate(decorators: Function[], target: any, key?: string | symbol, desc?: any): any {
