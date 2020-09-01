@@ -1,6 +1,7 @@
 import { EventEmitter } from '../core/events.js';
 import { PropertyRef, ComponentRef } from './elements.js';
 import { Model } from '../model/model-change-detection.js';
+import { TypeOf } from '../core/decorators.js';
 
 export interface CustomElement {
 	attributeChangedCallback(name: string, oldValue: string, newValue: string): void;
@@ -45,18 +46,15 @@ export function isHTMLComponent(object: any): object is HTMLComponent<any> {
 		&& object instanceof HTMLElement;
 }
 
-export function isNativeElement(element: HTMLElement): element is HTMLElement {
+export function isHTMLComponentOfType(object: any, typeClass: TypeOf<Object>): object is HTMLComponent<any> {
+	return isHTMLComponent(object)
+		&& Reflect.get(object, '_model') instanceof typeClass;
+}
+
+export function isHTMLElement(element: HTMLElement): element is HTMLElement {
 	return element && element instanceof HTMLElement && !element.tagName?.includes('-');
 }
 
-type BindValue = { attrName: string, source: Object };
-
-interface BindingProperty {
-	oneWay: { [key: string]: BindValue },
-	twoWay: { [key: string]: BindValue },
-
-	addOneWay(attrName: string, element: HTMLElement, elementAttr: string): void;
-	addTwoWay(attrName: string, element: HTMLElement, elementAttr: string): void;
-
-
+export function isHTMLUnknownElement(element: HTMLElement): element is HTMLElement {
+	return element && element instanceof HTMLUnknownElement && !element.tagName?.includes('-');
 }
