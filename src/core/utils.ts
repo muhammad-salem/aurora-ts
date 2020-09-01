@@ -1,11 +1,3 @@
-import { HTMLComponent } from '../elements/component.js';
-
-export function isHTMLElement(object: any): object is HTMLElement {
-	return (
-		object.prototype instanceof HTMLElement ||
-		object.__proto__ instanceof HTMLElement
-	);
-}
 
 function keyFor(keys: string[], paramPath: string): string | false {
 	for (let i = 0; i < keys.length; i++) {
@@ -24,6 +16,7 @@ interface Args {
 	prop: string[];
 	params?: string[];
 }
+
 export function mapFunArgs(path: string): Args[] {
 	const splits = splitByRegix(path, /\(|\)/g);
 	let temp: Args = {
@@ -81,8 +74,6 @@ export function getValueByPath(parent: any, objectPath: string, skipFirst?: bool
 	return ref;
 }
 
-
-
 export function setValueByPath(parent: any, objectPath: string, value: any) {
 	const argument = mapFunArgs(objectPath)[0];
 	let ref = parent;
@@ -112,15 +103,6 @@ export function updateValue(to: Object, toPath: string, from: Object, fromPath: 
 export function updateAttribute(to: HTMLElement, toPath: string, from: Object, fromPath: string): void {
 	to.setAttribute(toPath, getValueByPath(from, fromPath));
 }
-
-// export function setAttributeByPath(element: HTMLElement, elementAttr: string, value: any): void {
-// 	to.setAttribute(toPath, getValueByPath(from, fromPath));
-// }
-
-export function setComponentAttributeByPath<T>(element: HTMLComponent<T>, elementAttrPath: string, value: any): void {
-	element.setAttribute(elementAttrPath, value);
-}
-
 
 export function ToCamelCase(str: string) {
 	return str.replace(/([A-Z])/g, ' $1')
