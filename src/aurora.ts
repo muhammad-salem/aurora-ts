@@ -3,6 +3,13 @@ export * from './reflect/metadata.js';
 export * from './providers/injector.js';
 export * from './providers/provider.js';
 
+export * from './expressions/index.js';
+
+// export * from './graph/template-graph.js';
+// export * from './graph/graph-parser.js';
+
+export * from './expressions/index.js';
+
 export * from './core/path.js';
 
 export * from './core/decorators.js';
