@@ -17,10 +17,13 @@ import { HTMLComponent } from '../src/aurora.js';
 // export * from './life-cycle/lifecycle-test.js';
 // export * from './multi-component/m-person.js';
 
-export * from './directives-test/directive-test.js';
+// export * from './directives-test/directive-test.js';
+
+export * from './expressions/template-expressions.js';
 
 let appSelectors = [
-    'structural-directive-app',
+    'exep-app',
+    // 'structural-directive-app',
     // 'directive-app',
     // 'directive-test',
     // 'multi-comp-app1',
