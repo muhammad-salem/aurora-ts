@@ -134,7 +134,7 @@ class DirectiveTest implements AfterViewInit {
     afterViewInit(): void {
         setInterval(() => {
             this.condition = !this.condition;
-            this.view.triggerModelChange('condition');
+            this.view.emitChanges('condition');
         }, 1000);
     }
 }

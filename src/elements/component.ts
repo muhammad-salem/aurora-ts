@@ -11,8 +11,8 @@ export interface CustomElement {
 }
 
 export interface BaseComponent<T extends Object> extends CustomElement {
+
 	_model: T & Model & { [key: string]: any };
-	// _changeObservable: Observable;
 
 	getComponentRef(): ComponentRef<T>;
 
@@ -36,13 +36,14 @@ export interface BaseComponent<T extends Object> extends CustomElement {
 	triggerOutput(eventName: string, value?: any): void;
 	triggerModelChange(eventName: string, value?: any, source?: HTMLElement): void;
 	emitRootChanges(): void;
+	emitChanges(...events: string[]): void;
+
 }
 
 export interface HTMLComponent<T extends Object> extends BaseComponent<T>, HTMLElement { }
 
 export function isHTMLComponent(object: any): object is HTMLComponent<any> {
 	return Reflect.has(object, '_model')
-		// && Reflect.has(object, '_changeObservable')
 		&& object instanceof HTMLElement;
 }
 
