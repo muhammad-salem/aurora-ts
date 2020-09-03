@@ -254,9 +254,13 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 			this.emitRootChanges();
 		}
 
-		emitRootChanges() {
+		emitRootChanges(): void {
+			this.emitChanges(...Object.keys(this._model.__observable));
+		}
+
+		emitChanges(...events: string[]): void {
 			const sources: any[] = [];
-			Object.keys(this._model.__observable).forEach(key => {
+			events.forEach(key => {
 				this._model.emitChangeModel(key, sources);
 			});
 		}
