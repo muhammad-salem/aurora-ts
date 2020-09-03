@@ -42,10 +42,18 @@ export class JsxFactory {
 	static createElement(tagName: string, attributes: JsxAttributes | undefined, ...children: JsxComponent[]): JsxComponent {
 		if (attributes) {
 			const keys = Object.keys(attributes);
-			const directive = keys.find(key => key.startsWith('*'));
+			let directive = keys.find(key => key.startsWith('*')) || keys.find(key => key === '#directive');
 			if (directive) {
-				const directiveValue = attributes[directive];
-				Reflect.deleteProperty(attributes, directive);
+				let directiveValue: string = attributes[directive];
+				if (directive.startsWith('#')) {
+					let temp = directiveValue.split('|', 2);
+					Reflect.deleteProperty(attributes, directive);
+					directive = temp[0];
+					directiveValue = temp[1];
+				} else {
+					directiveValue = attributes[directive];
+					Reflect.deleteProperty(attributes, directive);
+				}
 				return {
 					tagName: JsxFactory.Directive,
 					attributes: {
