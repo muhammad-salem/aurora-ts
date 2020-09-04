@@ -3,6 +3,7 @@
 
 import { ComponentElement } from '../elements/elements.js';
 import { JsxComponent } from '../jsx/factory.js';
+import { fetchHtml } from './path.js';
 
 export interface DirectiveOptions {
 	selector: string;
@@ -26,8 +27,31 @@ export interface PipeOptions {
 }
 
 export type JSXRender<T> = (model: T) => JsxComponent;
+
+export type TemplateUrl = { filename?: string; moduleMeta: { url: string } };
+
 export interface ComponentOptions<T = Function> {
 	selector: string;
+	/**
+	 * add html file url path to featch,
+	 * templateUrl had prourity than template, and will override it.
+	 *
+	 * Can provide file name as "persin-view.html" will resolved 
+	 * as 'http://site-address.org/persin-view.html',
+	 * 
+	 * OR as an object { moduleMeta: import.meta, filename: 'persin-edit.html' }
+	 *  let (import.meta = '/person/person.js') will resolved 
+	 * as 'http://site-address.org/person/person-edit.html',
+	 * 
+	 * OR as an object { moduleMeta: import.meta }
+	 * let (import.meta = '/person/person.js') will resolved as 'http://site-address.org/person/person.html'.
+	 * 
+	 * if url not found, component will not be defined,
+	 * 
+	 * if you didn't use webpack or rollup.js or any bundler, 
+	 * you should copy the html files to its folder by yourself. 
+	 */
+	templateUrl?: TemplateUrl | string;
 	/**
 	 * template: typeof 'string' ==> html template,
 	 * 			 TypeOf 'JSXRender<T>' ==> JSX, create factory
@@ -48,7 +72,6 @@ export interface ComponentOptions<T = Function> {
 
 	/**
 	 * An encapsulation policy for the template and CSS styles. One of:
-	 * <br/>
 	 *  'custom': Use global CSS without any encapsulation.
 	 *  'shadow-dom': Use Shadow DOM v1 to encapsulate styles.
 	 * 
@@ -59,18 +82,26 @@ export interface ComponentOptions<T = Function> {
 	 * Both 'template' & 'shadow-dom-template' encapsulation type:
 	 *  should had atrribttes name like lowercase,
 	 * 	the browser itself, will convert all attributes to lowercase
-	 * ```js
-	 * @Input('personage') personAge: number;
-	 * @Input('propname') propName: string;
-	 * @Output('savebuttonclick') saveButtonClick = new EventEmitter<Persons>();
-	 * @View('personform') personForm: HTMLFormElement;
+	 * 
+	 * ```typescript
+	 *		@Input('personage') personAge: number;
+	 *		@Input('propname') propName: string;
+	 *		@Output('savebuttonclick') saveButtonClick = new EventEmitter<Persons>();
+	 *		@View('personform') personForm: HTMLFormElement;
 	 * ```
-	 * any root element as '<root-app></root-app>',
+	 * 
+	 * any root element as 
+	 * 
+	 * ```html
+	 * <root-app></root-app>
+	 * ```
+	 * 
 	 * the supported bind options is 'One way binding *(as passing data only)'
 	 *  and 'template parsing' and 'event binding' syntax, HTML (angular) like.
 	 * it load its attributes from 'window object'
 	 * 
 	 * so to pass date to A root element, 
+	 * 
 	 * ```html
 	 * <script>
 	 * 	let appVersion = '0.1.504';
@@ -178,9 +209,16 @@ export function Directive(opt: DirectiveOptions): Function {
 	};
 }
 
-export function Component<T extends Object>(opt: ComponentOptions<T>): Function {
+export function Component<T extends object>(opt: ComponentOptions<T>): Function {
 	return (target: TypeOf<T>) => {
-		ComponentElement.defineComponent(target, opt);
+		if (opt.templateUrl) {
+			fetchHtml(opt.templateUrl).then(htmlTemplate => {
+				opt.template = htmlTemplate;
+				ComponentElement.defineComponent(target, opt);
+			});
+		} else {
+			ComponentElement.defineComponent(target, opt);
+		}
 		return target;
 	};
 }
