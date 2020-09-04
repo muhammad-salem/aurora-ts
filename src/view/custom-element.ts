@@ -12,6 +12,7 @@ import { HTMLComponentRender } from '../html/html-expression.js';
 import { JSXComponentRender } from '../jsx/jsx-expression.js';
 import { ComponentRender } from './render.js';
 import { Model, defineModel, isModel } from '../model/model-change-detection.js';
+import { Constructable } from '../providers/injector.js';
 
 
 export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, componentRef: ComponentRef<T>): TypeOf<HTMLComponent<T>> {
@@ -422,12 +423,37 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 			return componentRef.inputs.map(input => input.viewAttribute);
 		}
 	});
-	const viewClassName = componentRef.selector
-		.split('-')
-		.map(name => name.replace(/^\w/, s => s.toUpperCase()))
-		.join('');
-	Object.defineProperty(viewClass, 'name', { value: viewClassName });
-	Object.defineProperty(modelClass, viewClassName, { value: viewClass });
+	addViewToModelClass<T>(modelClass, componentRef.selector, viewClass);
 	return viewClass;
 }
 
+export type ComponentModelClass = Constructable & { [key: string]: string } & { component: { [key: string]: string } };
+
+export function isComponentModelClass(target: Constructable): target is ComponentModelClass {
+	return Reflect.has(target, 'component');
+}
+
+export function addViewToModelClass<T>(modelClass: TypeOf<T>, selector: string, viewClass: TypeOf<HTMLComponent<T>>) {
+	const viewClassName = selector
+		.split('-')
+		.map(name => name.replace(/^\w/, char => char.toUpperCase()))
+		.join('');
+	Object.defineProperty(viewClass, 'name', { value: viewClassName });
+	Object.defineProperty(modelClass, viewClassName, { value: viewClass });
+
+	if (!isComponentModelClass(modelClass)) {
+		Reflect.set(modelClass, 'component', {});
+	}
+
+	if (isComponentModelClass(modelClass)) {
+		modelClass.component[selector] = viewClassName;
+	}
+
+}
+
+export function getViewClass<T>(modelClass: TypeOf<T>, selector: string): TypeOf<HTMLComponent<T>> | undefined {
+	if (isComponentModelClass(modelClass)) {
+		let viewClassName = modelClass.component[selector];
+		return Reflect.get(modelClass, viewClassName);
+	}
+}
