@@ -212,10 +212,16 @@ export function Directive(opt: DirectiveOptions): Function {
 export function Component<T extends object>(opt: ComponentOptions<T>): Function {
 	return (target: TypeOf<T>) => {
 		if (opt.templateUrl) {
-			fetchHtml(opt.templateUrl).then(htmlTemplate => {
-				opt.template = htmlTemplate;
-				ComponentElement.defineComponent(target, opt);
-			});
+			fetchHtml(opt.templateUrl)
+				.then(htmlTemplate => {
+					if (htmlTemplate) {
+						opt.template = htmlTemplate;
+						ComponentElement.defineComponent(target, opt);
+					}
+				})
+				.catch(reason => {
+					console.error(`Error @URL: ${opt.templateUrl}, for model Class: ${target.name},\n Reason: ${reason}.`);
+				});
 		} else {
 			ComponentElement.defineComponent(target, opt);
 		}
