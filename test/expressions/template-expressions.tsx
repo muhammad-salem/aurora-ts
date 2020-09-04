@@ -54,15 +54,15 @@ class YService {
     }
 }
 
-Component({
+@Component({
     selector: 'd1-data',
-    templateUrl: 'test/expressions/d-data.html'
+    templateUrl: 'test/expressions/d-data.html2'
 })
 class Data1 {
     @Input()
     name: string;
 
-    data = 'data name';
+    data = 'component 1';
     constructor(public x: XService, public y: YService) { }
 }
 
@@ -72,6 +72,6 @@ fetchHtml('test/expressions/d-data.html').then((html: string) => {
         template: html
     })
     class Data2 {
-
+        data = 'component 2';
     }
 });
