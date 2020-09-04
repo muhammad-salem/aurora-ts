@@ -1,6 +1,6 @@
 import {
     AfterViewInit, Component, HTMLComponent,
-    JsxFactory, View, parseJS
+    JsxFactory, View, parseJS, htmlFullPath, fetchHtml, Input, Service
 } from '../../dist/aurora.js';
 
 
@@ -43,3 +43,35 @@ export class ExpressionTest implements AfterViewInit {
         }, 1000);
     }
 }
+
+interface XService {
+    log(...args: any[]): void;
+}
+
+class YService {
+    print(...args: any[]): void {
+        console.log(...args);
+    }
+}
+
+Component({
+    selector: 'd1-data',
+    templateUrl: 'test/expressions/d-data.html'
+})
+class Data1 {
+    @Input()
+    name: string;
+
+    data = 'data name';
+    constructor(public x: XService, public y: YService) { }
+}
+
+fetchHtml('test/expressions/d-data.html').then((html: string) => {
+    @Component({
+        selector: 'd2-data',
+        template: html
+    })
+    class Data2 {
+
+    }
+});

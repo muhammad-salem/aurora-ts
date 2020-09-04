@@ -22,6 +22,8 @@ import { HTMLComponent } from '../src/aurora.js';
 export * from './expressions/template-expressions.js';
 
 let appSelectors = [
+    'd1-data',
+    'd2-data',
     'exep-app',
     // 'structural-directive-app',
     // 'directive-app',
