@@ -1,6 +1,6 @@
 import {
     AfterViewInit, Component, HTMLComponent,
-    JsxFactory, View, parseJS, htmlFullPath, fetchHtml, Input, Service
+    JsxFactory, View, parseJSExpression, htmlFullPath, fetchHtml, Input, Service
 } from '../../dist/aurora.js';
 
 
@@ -28,8 +28,8 @@ export class ExpressionTest implements AfterViewInit {
 
     a = 0;
 
-    exp1 = parseJS('show = !show');
-    exp2 = parseJS('a += 2');
+    exp1 = parseJSExpression('show = !show');
+    exp2 = parseJSExpression('a += 2');
 
     @View()
     view: HTMLComponent<ExpressionTest>;
@@ -56,7 +56,7 @@ class YService {
 
 @Component({
     selector: 'd1-data',
-    templateUrl: 'test/expressions/d-data.html2'
+    templateUrl: 'test/expressions/d-data.html'
 })
 class Data1 {
     @Input()
