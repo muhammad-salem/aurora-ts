@@ -10,11 +10,11 @@
   "types": "./dist/aurora.d.ts",
   "scripts": {
     "clean": "rm -rf dist && rm -rf public",
-    "buildw": "npm run clean && tsc -b -w",
+    "build-watch": "npm run clean && tsc -b -w",
     "build": "npm run clean && tsc -b",
     "serve": "npx serve",
-    "test": "npm run clean && tsc -b -v ./test/tsconfig.json",
-    "testw": "npm run clean && tsc -b -v -w ./test/tsconfig.json",
+    "test-build": "npm run clean && tsc -b -v ./test/tsconfig.json",
+    "test-watch": "npm run clean && tsc -b -v -w ./test/tsconfig.json",
     "prepublish": "npm run build"
   },
   "devDependencies": {

@@ -39,6 +39,7 @@ npm i --save aurora-ts
 | Event Binding | ✓ | ✓ |
 | Template Parser | ✓ | ✓ |
 | Template Syntax | ✓ | ✓ |
+| Template Reference Variables | ✓ | ✓ |
 | Template HTML File | fetch | no need |
 | JSX Factory | no need | ✓ |
 | Fragment | ✓ | ✓ |
@@ -54,8 +55,8 @@ npm i --save aurora-ts
 | Dependency Injection |  In Progress |
 | Component| ✓ |
 | Directives | ✓ |
-| Services | TO:DO |
 | Pipes | TO:DO |
+| Services | TO:DO |
 | Lifecycle | ✓ |
 | @Input | ✓ |
 | @Output | ✓ |
@@ -268,11 +269,14 @@ in index.html add:
     </body>
  ```
 
-#### test local
+#### local test
 
 ```bash
 git clone https://github.com/salemebo/aurora-ts.git
+cd aurora-ts/test
+nmp i
+cd ..
 npm i
-npm run test
-npm run serve
+npm run test-build
+npx serve
 ```
