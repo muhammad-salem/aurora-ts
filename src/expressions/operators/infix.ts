@@ -1,4 +1,3 @@
-import { TypeOf } from '../../core/decorators.js';
 import { Constructable } from '../../providers/injector.js';
 import { NodeExpression, PropertyNode, ValueNode } from '../expression.js';
 import { ConditionalOperators, UnaryOperators } from './unary.js';

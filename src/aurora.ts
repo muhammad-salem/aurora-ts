@@ -2,11 +2,7 @@ export * from './core/helpers.js';
 export * from './reflect/metadata.js';
 export * from './providers/injector.js';
 export * from './providers/provider.js';
-
 export * from './expressions/index.js';
-
-export * from './expressions/index.js';
-
 export * from './core/path.js';
 
 export * from './core/decorators.js';
