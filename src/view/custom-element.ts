@@ -1,13 +1,16 @@
 import { TypeOf } from '../core/decorators.js';
 import { EventEmitter, Subscription } from '../core/events.js';
-import { isAfterContentChecked, isAfterContentInit, isAfterViewChecked, isAfterViewInit, isDoCheck, isOnChanges, isOnDestroy, isOnInit } from '../core/lifecycle.js';
+import {
+	isAfterContentChecked, isAfterContentInit, isAfterViewChecked,
+	isAfterViewInit, isDoCheck, isOnChanges, isOnDestroy, isOnInit
+} from '../core/lifecycle.js';
 import { ToCamelCase } from '../core/utils.js';
 import { BaseComponent, HTMLComponent } from '../elements/component.js';
 import { ComponentRef, PropertyRef } from '../elements/elements.js';
 import { Tag } from '../elements/tags.js';
-import { HTMLComponentRender } from '../jsx/html-expression.js';
+import { HTMLComponentRender } from '../html/html-expression.js';
 import { JSXComponentRender } from '../jsx/jsx-expression.js';
-import { ComponentRender } from '../jsx/render.js';
+import { ComponentRender } from './render.js';
 import { Model, defineModel, isModel } from '../model/model-change-detection.js';
 
 

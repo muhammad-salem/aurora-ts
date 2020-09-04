@@ -1,6 +1,5 @@
-import { HTMLComponent } from '../elements/component.js';
 import { JsxComponent } from '../jsx/factory.js';
-import { ComponentRender } from '../jsx/render.js';
+import { ComponentRender } from '../view/render.js';
 
 /**
  * A structural directive selector '*if',

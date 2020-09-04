@@ -6,7 +6,7 @@ import { ComponentRef, ListenerRef, PropertyRef } from '../elements/elements.js'
 import { defineModel, isModel, Model, subscribe1way, subscribe2way } from '../model/model-change-detection.js';
 import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
-import { JsxFactory, JsxComponent, isJsxComponentWithElement } from './factory.js';
+import { JsxFactory, JsxComponent, isJsxComponentWithElement } from '../jsx/factory.js';
 import { ElementMutation } from './mutation.js';
 
 function getChangeEventName(element: HTMLElement, elementAttr: string): string {

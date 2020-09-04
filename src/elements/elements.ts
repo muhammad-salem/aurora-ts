@@ -7,8 +7,8 @@ import { HTMLComponent } from './component.js';
 import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
 import { findByModelClassOrCreat, setBootstrapTagNameMatadata } from '../reflect/bootstrap-data.js';
-import { htmlTemplateToJSXRender } from '../jsx/html-template-parser.js';
-import { toJSXRender } from '../jsx/html-string-parser.js';
+import { htmlTemplateToJSXRender } from '../html/html-template-parser.js';
+import { toJSXRender } from '../html/html-string-parser.js';
 import { initCustomElementView } from '../view/custom-element.js';
 import { StructuralDirective, AttributeDirective } from '../directives/directive.js';
 

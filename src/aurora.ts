@@ -12,11 +12,11 @@ export * from './core/lifecycle.js';
 export * from './core/utils.js';
 
 export * from './jsx/factory.js';
-export * from './jsx/render.js';
+export * from './view/render.js';
 export * from './jsx/jsx-expression.js';
-export * from './jsx/html-expression.js';
-export * from './jsx/html-string-parser.js';
-export * from './jsx/html-template-parser.js';
+export * from './html/html-expression.js';
+export * from './html/html-string-parser.js';
+export * from './html/html-template-parser.js';
 
 export * from './elements/component.js';
 export * from './elements/elements.js';

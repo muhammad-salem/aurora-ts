@@ -1,6 +1,6 @@
 import { JSXRender } from '../core/decorators.js';
 import { isEmptyElment } from '../elements/tags.js';
-import { JsxComponent, JsxFactory } from './factory.js';
+import { JsxComponent, JsxFactory } from '../jsx/factory.js';
 
 export function toJSXRender<T>(html: string): JSXRender<T> {
     // should render her all the variables and resolve binding

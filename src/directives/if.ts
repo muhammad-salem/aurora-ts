@@ -2,7 +2,7 @@ import { OnInit } from '../core/lifecycle.js';
 import { Directive } from '../core/decorators.js';
 import { StructuralDirective } from './directive.js';
 import { JsxComponent } from '../jsx/factory.js';
-import { ComponentRender } from '../jsx/render.js';
+import { ComponentRender } from '../view/render.js';
 import { subscribe1way } from '../model/model-change-detection.js';
 
 @Directive({

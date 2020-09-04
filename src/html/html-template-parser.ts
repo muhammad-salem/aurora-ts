@@ -1,5 +1,5 @@
 import { JSXRender } from '../core/decorators.js';
-import { JsxComponent, JsxFactory, JsxAttributes } from './factory.js';
+import { JsxComponent, JsxFactory, JsxAttributes } from '../jsx/factory.js';
 
 
 export function htmlTemplateToJSXRender<T>(template: HTMLTemplateElement | string): JSXRender<T> {

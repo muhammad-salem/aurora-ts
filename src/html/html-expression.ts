@@ -1,4 +1,4 @@
-import { ComponentRender } from './render.js';
+import { ComponentRender } from '../view/render.js';
 import { HTMLComponent } from '../elements/component.js';
 import { hasAttr } from '../elements/attributes.js';
 
