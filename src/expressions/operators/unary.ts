@@ -29,7 +29,6 @@
  */
 
 import { NodeExpression } from '../expression.js';
-import { ObjectOperator } from './infix.js';
 
 export enum UnaryType {
     PREFIX,

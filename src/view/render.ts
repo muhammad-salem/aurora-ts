@@ -8,6 +8,7 @@ import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
 import { JsxFactory, JsxComponent, isJsxComponentWithElement } from '../jsx/factory.js';
 import { ElementMutation } from './mutation.js';
+import { NodeExpression, parseHtmlExpression } from '../expressions/index.js';
 
 function getChangeEventName(element: HTMLElement, elementAttr: string): string {
 	if (elementAttr === 'value') {
@@ -22,7 +23,7 @@ function getChangeEventName(element: HTMLElement, elementAttr: string): string {
 }
 
 interface PropertySource {
-	property: string, src: object
+	property: string, src: object, expression: NodeExpression
 }
 
 export abstract class ComponentRender<T> {
@@ -37,6 +38,7 @@ export abstract class ComponentRender<T> {
 	}
 
 	getPropertySource(viewProperty: string): PropertySource {
+		let expression = parseHtmlExpression(viewProperty);
 		let input = this.baiseView.getInputStartWith(viewProperty);
 		let dotIndex = viewProperty.indexOf('.');
 		let modelProperty = viewProperty;
@@ -50,19 +52,19 @@ export abstract class ComponentRender<T> {
 			parent = viewProperty.substring(0, dotIndex);
 		}
 		if (Reflect.has(this.baiseView, parent)) {
-			parent = Reflect.get(this.baiseView, parent);
-			/**
-			 * case of element refrence
-			 * <root-app>
-			 * 	<app-tag #element-name ></app-tag>
-			 * </root-app>
-			 */
-			if (parent instanceof HTMLElement) {
-				return { property: modelProperty.substring(dotIndex + 1), src: parent };
-			}
-			return { property: modelProperty, src: this.baiseView };
+			// parent = Reflect.get(this.baiseView, parent);
+			// /**
+			//  * case of element refrence
+			//  * <root-app>
+			//  * 	<app-tag #element-name ></app-tag>
+			//  * </root-app>
+			//  */
+			// if (parent instanceof HTMLElement) {
+			// 	return { property: modelProperty.substring(dotIndex + 1), src: parent, expression };
+			// }
+			return { property: modelProperty, src: this.baiseView, expression };
 		}
-		return { property: modelProperty, src: this.baiseView._model };
+		return { property: modelProperty, src: this.baiseView._model, expression };
 	}
 
 	initElementData(element: HTMLElement, elementAttr: string, viewProperty: string, isAttr: boolean) {
@@ -127,9 +129,41 @@ export abstract class ComponentRender<T> {
 		if (result.length === 0) {
 			return;
 		}
-		const propSrcs: { [match: string]: PropertySource } = {};
-		result.forEach(match => Reflect.set(propSrcs, match[0], this.getPropertySource(match[1])));
+		const propSrcs: {
+			[match: string]: PropertySource,
+		} = {};
+		result.forEach(match => propSrcs[match[0]] = this.getPropertySource(match[1]));
+
+		console.log(result);
+		console.log(propSrcs);
 		const handler = () => {
+			let renderText = viewProperty;
+			Object.keys(propSrcs).forEach(propTemplate => {
+				const prop = propSrcs[propTemplate];
+				let value = prop.expression.get(prop.src);
+				renderText = renderText.replace(propTemplate, value);
+				// let tempValue = getValueByPath(prop.src, prop.property);
+				// if (typeof tempValue === 'function') {
+				// 	// tempValue = tempValue.call(this.baiseView._model);
+				// 	tempValue = tempValue.call(prop.src);
+				// }
+				// renderText = renderText.replace(propTemplate, tempValue);
+			});
+			if (isAttr && element instanceof HTMLElement) {
+				element.setAttribute(elementAttr, renderText);
+			} else {
+				setValueByPath(element, elementAttr, renderText);
+			}
+		}
+
+		// const model = {};
+		// const proxy = new Proxy(propSrcs, {
+		// 	get(target: {}, p: string | number | symbol, receiver: any) {
+		// 		console.log(target, p, receiver);
+		// 		return Reflect.get(target, p, receiver);
+		// 	}
+		// });
+		const handler2 = () => {
 			let renderText = viewProperty;
 			Object.keys(propSrcs).forEach(propTemplate => {
 				const prop = propSrcs[propTemplate];
@@ -168,6 +202,52 @@ export abstract class ComponentRender<T> {
 		}
 	}
 
+	// attrTemplateHandler(element: HTMLElement | Text, elementAttr: string, viewProperty: string, isAttr?: boolean) {
+	// 	const result = [...viewProperty.matchAll(this.templateRegExp)];
+	// 	if (result.length === 0) {
+	// 		return;
+	// 	}
+	// 	const propSrcs: { [match: string]: PropertySource } = {};
+	// 	result.forEach(match => Reflect.set(propSrcs, match[0], this.getPropertySource(match[1])));
+	// 	const handler = () => {
+	// 		let renderText = viewProperty;
+	// 		Object.keys(propSrcs).forEach(propTemplate => {
+	// 			const prop = propSrcs[propTemplate];
+	// 			let tempValue = getValueByPath(prop.src, prop.property);
+	// 			if (typeof tempValue === 'function') {
+	// 				// tempValue = tempValue.call(this.baiseView._model);
+	// 				tempValue = tempValue.call(prop.src);
+	// 			}
+	// 			renderText = renderText.replace(propTemplate, tempValue);
+	// 		});
+	// 		if (isAttr && element instanceof HTMLElement) {
+	// 			element.setAttribute(elementAttr, renderText);
+	// 		} else {
+	// 			setValueByPath(element, elementAttr, renderText);
+	// 		}
+	// 	}
+	// 	let triggerTemplate: Function | undefined;
+	// 	Object.keys(propSrcs).forEach(propTemplate => {
+	// 		const prop = propSrcs[propTemplate];
+	// 		let subject1: any;
+	// 		if (isHTMLComponent(prop.src)) {
+	// 			subject1 = prop.src._model;
+	// 		} else {
+	// 			subject1 = prop.src;
+	// 		}
+	// 		defineModel(subject1);
+	// 		(subject1 as Model).subscribeModel(prop.property, handler);
+	// 		if (!triggerTemplate) {
+	// 			triggerTemplate = () => {
+	// 				(subject1 as Model).emitChangeModel(prop.property);
+	// 			};
+	// 		}
+	// 	});
+	// 	if (triggerTemplate) {
+	// 		triggerTemplate();
+	// 	}
+	// }
+
 	initView(): void {
 		if (this.componentRef.template) {
 			this.template = this.componentRef.template(this.baiseView._model);
@@ -180,16 +260,6 @@ export abstract class ComponentRender<T> {
 					Reflect.set(this.baiseView._model, view.modelName, viewChildMap[selctorName]);
 				}
 			});
-			// if (this.componentRef.isShadowDom) {
-			// 	if (this.baiseView.shadowRoot /* OPEN MODE */) {
-			// 		this.baiseView.shadowRoot.appendChild(this.createElement(this.template));
-			// 	} else /* CLOSED MODE*/ {
-			// 		const shadowRoot = Reflect.get(this.baiseView, '_shadowRoot');
-			// 		shadowRoot.appendChild(this.createElement(this.template));
-			// 	}
-			// } else {
-			// 	this.baiseView.appendChild(this.createElement(this.template));
-			// }
 			let rootRef: HTMLElement | ShadowRoot;
 			if (this.componentRef.isShadowDom) {
 				if (this.baiseView.shadowRoot /* OPEN MODE */) {
