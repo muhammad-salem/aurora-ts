@@ -4,7 +4,7 @@ import {
 import {
     ArithmeticOperators, ArrayCommaOperators, ArrayOperator,
     AssignmentNode, BitwiseOperators, ComparisonOperators,
-    FunctionNode, GroupingOperator, LogicalOperators,
+    FunctionNode, GroupingOperator, LogicalAssignmentNode, LogicalOperators,
     MemberNode, NavigationNode, ObjectOperator, parseAddSub, parseInfix, RelationalOperators, TernaryNode
 } from '../operators/infix.js';
 import { NodeExpression, PropertyNode, ValueNode } from '../expression.js';
@@ -31,6 +31,7 @@ const tokenParser = new RegExp([
         TernaryNode.Operators,
         FunctionNode.Operators,
         AssignmentNode.Operators,
+        LogicalAssignmentNode.Operators,
         ComparisonOperators.Operators,
         ArithmeticOperators.Operators,
         BitwiseOperators.Operators,
@@ -63,7 +64,6 @@ function oneTimeProcess(tokens: (NodeExpression | string)[]): (NodeExpression | 
     MemberNode.parseDotMember(tokens);
     NavigationNode.parseNavigation(tokens);
     ArrayOperator.parseBrackets(tokens);
-
     return tokens;
 }
 
@@ -83,9 +83,11 @@ function tokenAnlzise(tokens: (string | NodeExpression)[]): NodeExpression {
     // parseAddSub(tokens);
     // parseAddSub(tokens);
 
+
     parseInfix(ArithmeticOperators, tokens);
     parseInfix(ComparisonOperators, tokens);
     parseInfix(BitwiseOperators, tokens);
+    parseInfix(LogicalAssignmentNode, tokens);
     parseInfix(LogicalOperators, tokens);
     parseInfix(RelationalOperators, tokens);
     parseInfix(ArrayCommaOperators, tokens);

@@ -320,9 +320,10 @@ export abstract class InfixOperators implements NodeExpression {
     }
 }
 
-export class AssignmentNode extends InfixOperators {
+export class AssignmentNode implements NodeExpression {
 
     static Evaluations: Evaluate = {
+
         '=': (evalNode: EvaluateNode) => { return evalNode.left = evalNode.right; },
 
         '+=': (evalNode: EvaluateNode) => { return evalNode.left += evalNode.right; },
@@ -342,19 +343,14 @@ export class AssignmentNode extends InfixOperators {
         '^=': (evalNode: EvaluateNode) => { return evalNode.left ^= evalNode.right; },
         '|=': (evalNode: EvaluateNode) => { return evalNode.left |= evalNode.right; },
 
-
-        '&&=': (evalNode: EvaluateNode) => { return evalNode.left &&= evalNode.right; },
-        '||=': (evalNode: EvaluateNode) => { return evalNode.left ||= evalNode.right; },
-        '??=': (evalNode: EvaluateNode) => { return evalNode.left ??= evalNode.right; }
     };
 
     static Operators = Object.keys(AssignmentNode.Evaluations);
 
-    constructor(op: string, left: NodeExpression, right: NodeExpression) {
+    constructor(public op: string, public left: NodeExpression, public right: NodeExpression) {
         if (!(AssignmentNode.Operators.includes(op))) {
             throw new Error(`[${op}]: operation not implmented yet`);
         }
-        super(op, left, right, AssignmentNode.Evaluations[op]);
     }
     set(context: object, value: any) {
         return this.left.set(context, value);
@@ -367,6 +363,54 @@ export class AssignmentNode extends InfixOperators {
         const value = AssignmentNode.Evaluations[this.op](evalNode);
         this.set(context, value);
         return value;
+    }
+}
+
+export class LogicalAssignmentNode implements NodeExpression {
+
+    static Evaluations: { [key: string]: (exp: LogicalAssignmentNode, context: any) => any } = {
+
+        '&&=': (exp: LogicalAssignmentNode, context: any) => {
+            let value = exp.left.get(context);
+            if (value) {
+                value = exp.right.get(context);
+                exp.set(context, value);
+            }
+            return value;
+        },
+
+        '||=': (exp: LogicalAssignmentNode, context: any) => {
+            let value = exp.left.get(context);
+            if (!value) {
+                value = exp.right.get(context);
+                exp.set(context, value);
+            }
+            return value;
+        },
+
+        '??=': (exp: LogicalAssignmentNode, context: any) => {
+            let value = exp.left.get(context);
+            if (value === undefined || value === null) {
+                value = exp.right.get(context);
+                exp.set(context, value);
+            }
+            return value;
+        }
+
+    };
+
+    static Operators = ['&&=', '||=', '??='];
+
+    constructor(public op: string, public left: NodeExpression, public right: NodeExpression) {
+        if (!(LogicalAssignmentNode.Operators.includes(op))) {
+            throw new Error(`[${op}]: operation not implmented yet`);
+        }
+    }
+    set(context: object, value: any) {
+        return this.left.set(context, value);
+    }
+    get(context: object) {
+        return LogicalAssignmentNode.Evaluations[this.op](this, context);
     }
 }
 
