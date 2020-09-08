@@ -8,11 +8,9 @@ import { ToCamelCase } from '../core/utils.js';
 import { BaseComponent, HTMLComponent } from '../elements/component.js';
 import { ComponentRef, PropertyRef } from '../elements/elements.js';
 import { Tag } from '../elements/tags.js';
-import { HTMLComponentRender } from '../html/html-expression.js';
-import { JSXComponentRender } from '../jsx/jsx-expression.js';
-import { ComponentRender } from './render.js';
 import { Model, defineModel, isModel } from '../model/model-change-detection.js';
 import { Constructable } from '../providers/injector.js';
+import { ComponentRender } from './render.js';
 
 
 export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, componentRef: ComponentRef<T>): TypeOf<HTMLComponent<T>> {
@@ -45,9 +43,7 @@ export function initCustomElementView<T extends Object>(modelClass: TypeOf<T>, c
 				this._model = model;
 			}
 
-			this._render = componentRef.renderType === "html"
-				? new HTMLComponentRender(this)
-				: new JSXComponentRender(this);
+			this._render = new ComponentRender(this);
 
 			this._setAttributeNative = this.setAttribute;
 			this._getAttributeNative = this.getAttribute;

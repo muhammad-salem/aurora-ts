@@ -1,6 +1,14 @@
 import { JSXRender } from '../core/decorators.js';
 import { isEmptyElment } from '../elements/tags.js';
-import { JsxComponent, JsxFactory } from '../jsx/factory.js';
+import { JsxAttrComponent, JsxComponent, jsxAttrComponentBuilder, JsxFactory } from '../jsx/factory.js';
+
+export function toJsxAttrComponent(html: string): JsxAttrComponent {
+    // should render her all the variables and resolve binding
+    let renderComponent = parseHtmlToJsxComponent(html) as JsxComponent;
+    renderComponent = directiveAnalysis(renderComponent);
+    let attrComponent = jsxAttrComponentBuilder(renderComponent);
+    return attrComponent;
+}
 
 export function toJSXRender<T>(html: string): JSXRender<T> {
     // should render her all the variables and resolve binding

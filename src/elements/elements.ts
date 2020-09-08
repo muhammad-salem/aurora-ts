@@ -8,9 +8,10 @@ import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
 import { findByModelClassOrCreat, setBootstrapTagNameMatadata } from '../reflect/bootstrap-data.js';
 import { htmlTemplateToJSXRender } from '../html/html-template-parser.js';
-import { toJSXRender } from '../html/html-string-parser.js';
+import { toJsxAttrComponent, } from '../html/html-string-parser.js';
 import { initCustomElementView } from '../view/custom-element.js';
-import { StructuralDirective, AttributeDirective } from '../directives/directive.js';
+import { StructuralDirective } from '../directives/directive.js';
+import { JsxAttrComponent } from '../jsx/factory.js';
 
 export class PropertyRef {
 	constructor(public modelProperty: string, private _viewNanme?: string) { }
@@ -61,7 +62,8 @@ export interface DirectiveRef<T> {
 
 export interface ComponentRef<T> {
 	selector: string;
-	template: JSXRender<T>;
+	template: JSXRender<T> | JsxAttrComponent;
+	// attrTemplate: JsxAttrComponent;
 	styles: string;
 	extend: Tag;
 
@@ -76,7 +78,6 @@ export interface ComponentRef<T> {
 	hostBindings: HostBindingRef[];
 	hostListeners: ListenerRef[];
 
-	renderType: 'html' | 'jsx' | 'tsx';
 	encapsulation: 'custom' | 'shadow-dom' | 'template' | 'shadow-dom-template';
 	isShadowDom: boolean;
 	shadowDomMode: ShadowRootMode;
@@ -166,14 +167,10 @@ export class ComponentElement {
 		}
 		componentRef.extend = findByTagName(opts.extend);
 
-		if (!componentRef.template) {
-			componentRef.renderType = 'html';
-		} else if (typeof componentRef.template === 'string') {
-			componentRef.template = toJSXRender(componentRef.template);
+		if (typeof componentRef.template === 'string' && componentRef.template) {
+			componentRef.template = toJsxAttrComponent(componentRef.template);
+			// componentRef.template = toJSXRender(componentRef.template);
 			// componentRef.template = htmlTemplateToJSXRender(componentRef.template);
-			componentRef.renderType = 'html';
-		} else {
-			componentRef.renderType = 'jsx';
 		}
 
 		if (!componentRef.template && /template/g.test(componentRef.encapsulation)) {

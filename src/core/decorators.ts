@@ -2,7 +2,7 @@
 /// <reference path='../reflect/metadata.ts' />
 
 import { ComponentElement } from '../elements/elements.js';
-import { JsxComponent } from '../jsx/factory.js';
+import { JsxAttrComponent, JsxComponent } from '../jsx/factory.js';
 import { fetchHtml } from './path.js';
 
 export interface DirectiveOptions {
@@ -59,7 +59,7 @@ export interface ComponentOptions<T = Function> {
 	 * and may be inhert from an html element
 	 * 				
 	 */
-	template?: string | JSXRender<T>;
+	template?: string | JsxAttrComponent | JSXRender<T>;
 	/**
 	 * style for this element
 	 */
