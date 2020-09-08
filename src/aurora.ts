@@ -13,8 +13,6 @@ export * from './core/utils.js';
 
 export * from './jsx/factory.js';
 export * from './view/render.js';
-export * from './jsx/jsx-expression.js';
-export * from './html/html-expression.js';
 export * from './html/html-string-parser.js';
 export * from './html/html-template-parser.js';
 

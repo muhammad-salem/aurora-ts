@@ -1,9 +1,9 @@
 import { OnInit } from '../core/lifecycle.js';
 import { Directive } from '../core/decorators.js';
 import { StructuralDirective } from './directive.js';
-import { JsxComponent } from '../jsx/factory.js';
-import { ComponentRender } from '../view/render.js';
 import { subscribe1way } from '../model/model-change-detection.js';
+import { ComponentRender } from '../view/render.js';
+import { JsxAttrComponent } from '../jsx/factory.js';
 
 @Directive({
 	selector: '*if',
@@ -17,7 +17,7 @@ export class IfDirective<T> extends StructuralDirective<T> implements OnInit {
 		render: ComponentRender<T>,
 		comment: Comment,
 		statement: string,
-		component: JsxComponent) {
+		component: JsxAttrComponent) {
 		super(render, comment, statement, component);
 	}
 

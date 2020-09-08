@@ -1,5 +1,6 @@
-import { JsxComponent } from '../jsx/factory.js';
+import { JsxAttrComponent } from '../jsx/factory.js';
 import { ComponentRender } from '../view/render.js';
+// import { ComponentRender } from '../view/render.js';
 
 /**
  * A structural directive selector '*if',
@@ -20,7 +21,7 @@ export class StructuralDirective<T> {
         protected render: ComponentRender<T>,
         protected comment: Comment,
         protected statement: string,
-        protected component: JsxComponent
+        protected component: JsxAttrComponent
     ) { }
 }
 

@@ -1,8 +1,8 @@
 import { OnInit } from '../core/lifecycle.js';
 import { Component, Directive, Input } from '../core/decorators.js';
 import { StructuralDirective } from './directive.js';
-import { JsxComponent } from '../jsx/factory.js';
 import { ComponentRender } from '../view/render.js';
+import { JsxAttrComponent } from '../jsx/factory.js';
 
 interface ModelInfo {
     model: any,
@@ -44,7 +44,7 @@ export class ForDirective<T> extends StructuralDirective<T> implements OnInit {
         render: ComponentRender<T>,
         comment: Comment,
         value: string,
-        component: JsxComponent) {
+        component: JsxAttrComponent) {
         super(render, comment, value, component);
     }
 
