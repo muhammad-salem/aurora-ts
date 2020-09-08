@@ -1,14 +1,15 @@
 import { EventEmitter } from '../core/events.js';
 import { isOnInit } from '../core/lifecycle.js';
-import { getValueByPath, setValueByPath, updateAttribute, updateValue } from '../core/utils.js';
+import { setValueByPath, updateAttribute, updateValue } from '../core/utils.js';
 import { HTMLComponent, isHTMLComponent } from '../elements/component.js';
 import { ComponentRef, ListenerRef, PropertyRef } from '../elements/elements.js';
 import { defineModel, isModel, Model, subscribe1way, subscribe2way } from '../model/model-change-detection.js';
 import { dependencyInjector } from '../providers/injector.js';
 import { ClassRegistry } from '../providers/provider.js';
-import { JsxFactory, JsxComponent, isJsxComponentWithElement } from '../jsx/factory.js';
+import { JsxFactory, isJsxComponentWithElement, JsxAttrComponent, jsxComponentAttrHandler, AttrDiscription, jsxAttrComponentBuilder } from '../jsx/factory.js';
 import { ElementMutation } from './mutation.js';
 import { NodeExpression, parseHtmlExpression } from '../expressions/index.js';
+import { hasAttr } from '../elements/attributes.js';
 
 function getChangeEventName(element: HTMLElement, elementAttr: string): string {
 	if (elementAttr === 'value') {
@@ -26,11 +27,13 @@ interface PropertySource {
 	property: string, src: object, expression: NodeExpression
 }
 
-export abstract class ComponentRender<T> {
+export class ComponentRender<T> {
 	componentRef: ComponentRef<T>
-	template: JsxComponent;
+	template: JsxAttrComponent;
 	templateRegExp: RegExp;
 	nativeElementMutation: ElementMutation;
+
+	viewChildMap: { [name: string]: any } = {};
 
 	constructor(public baiseView: HTMLComponent<T>) {
 		this.componentRef = baiseView.getComponentRef();
@@ -125,17 +128,16 @@ export abstract class ComponentRender<T> {
 	}
 
 	attrTemplateHandler(element: HTMLElement | Text, elementAttr: string, viewProperty: string, isAttr?: boolean) {
+		// console.log('attrTemplateHandler', arguments, this);
 		const result = [...viewProperty.matchAll(this.templateRegExp)];
 		if (result.length === 0) {
 			return;
 		}
-		const propSrcs: {
-			[match: string]: PropertySource,
-		} = {};
+		const propSrcs: { [match: string]: PropertySource } = {};
 		result.forEach(match => propSrcs[match[0]] = this.getPropertySource(match[1]));
 
-		console.log(result);
-		console.log(propSrcs);
+		// console.log(result);
+		// console.log(propSrcs);
 		const handler = () => {
 			let renderText = viewProperty;
 			Object.keys(propSrcs).forEach(propTemplate => {
@@ -148,31 +150,6 @@ export abstract class ComponentRender<T> {
 				// 	tempValue = tempValue.call(prop.src);
 				// }
 				// renderText = renderText.replace(propTemplate, tempValue);
-			});
-			if (isAttr && element instanceof HTMLElement) {
-				element.setAttribute(elementAttr, renderText);
-			} else {
-				setValueByPath(element, elementAttr, renderText);
-			}
-		}
-
-		// const model = {};
-		// const proxy = new Proxy(propSrcs, {
-		// 	get(target: {}, p: string | number | symbol, receiver: any) {
-		// 		console.log(target, p, receiver);
-		// 		return Reflect.get(target, p, receiver);
-		// 	}
-		// });
-		const handler2 = () => {
-			let renderText = viewProperty;
-			Object.keys(propSrcs).forEach(propTemplate => {
-				const prop = propSrcs[propTemplate];
-				let tempValue = getValueByPath(prop.src, prop.property);
-				if (typeof tempValue === 'function') {
-					// tempValue = tempValue.call(this.baiseView._model);
-					tempValue = tempValue.call(prop.src);
-				}
-				renderText = renderText.replace(propTemplate, tempValue);
 			});
 			if (isAttr && element instanceof HTMLElement) {
 				element.setAttribute(elementAttr, renderText);
@@ -202,62 +179,21 @@ export abstract class ComponentRender<T> {
 		}
 	}
 
-	// attrTemplateHandler(element: HTMLElement | Text, elementAttr: string, viewProperty: string, isAttr?: boolean) {
-	// 	const result = [...viewProperty.matchAll(this.templateRegExp)];
-	// 	if (result.length === 0) {
-	// 		return;
-	// 	}
-	// 	const propSrcs: { [match: string]: PropertySource } = {};
-	// 	result.forEach(match => Reflect.set(propSrcs, match[0], this.getPropertySource(match[1])));
-	// 	const handler = () => {
-	// 		let renderText = viewProperty;
-	// 		Object.keys(propSrcs).forEach(propTemplate => {
-	// 			const prop = propSrcs[propTemplate];
-	// 			let tempValue = getValueByPath(prop.src, prop.property);
-	// 			if (typeof tempValue === 'function') {
-	// 				// tempValue = tempValue.call(this.baiseView._model);
-	// 				tempValue = tempValue.call(prop.src);
-	// 			}
-	// 			renderText = renderText.replace(propTemplate, tempValue);
-	// 		});
-	// 		if (isAttr && element instanceof HTMLElement) {
-	// 			element.setAttribute(elementAttr, renderText);
-	// 		} else {
-	// 			setValueByPath(element, elementAttr, renderText);
-	// 		}
-	// 	}
-	// 	let triggerTemplate: Function | undefined;
-	// 	Object.keys(propSrcs).forEach(propTemplate => {
-	// 		const prop = propSrcs[propTemplate];
-	// 		let subject1: any;
-	// 		if (isHTMLComponent(prop.src)) {
-	// 			subject1 = prop.src._model;
-	// 		} else {
-	// 			subject1 = prop.src;
-	// 		}
-	// 		defineModel(subject1);
-	// 		(subject1 as Model).subscribeModel(prop.property, handler);
-	// 		if (!triggerTemplate) {
-	// 			triggerTemplate = () => {
-	// 				(subject1 as Model).emitChangeModel(prop.property);
-	// 			};
-	// 		}
-	// 	});
-	// 	if (triggerTemplate) {
-	// 		triggerTemplate();
-	// 	}
-	// }
-
 	initView(): void {
 		if (this.componentRef.template) {
-			this.template = this.componentRef.template(this.baiseView._model);
-			const viewChildMap: { [name: string]: any } = {};
-			this.defineElementNameKey(this.template, viewChildMap);
+			if (this.componentRef.template instanceof JsxAttrComponent) {
+				this.template = this.componentRef.template;
+			} else {
+				this.template = jsxAttrComponentBuilder(this.componentRef.template(this.baiseView._model));
+			}
+
+			this.defineElementNameKey(this.template);
+
 			this.componentRef.viewChild.forEach(view => {
 				// support for string selector 
 				let selctorName: string = view.selector as string;
-				if (Reflect.has(viewChildMap, selctorName)) {
-					Reflect.set(this.baiseView._model, view.modelName, viewChildMap[selctorName]);
+				if (Reflect.has(this.viewChildMap, selctorName)) {
+					Reflect.set(this.baiseView._model, view.modelName, this.viewChildMap[selctorName]);
 				}
 			});
 			let rootRef: HTMLElement | ShadowRoot;
@@ -281,35 +217,31 @@ export abstract class ComponentRender<T> {
 		);
 	}
 
-	defineElementNameKey(component: JsxComponent | string, viewChildMap?: { [name: string]: any }) {
-		if (typeof component === 'string') {
-			return;
-		}
+	defineElementNameKey(component: JsxAttrComponent) {
 		if (component.tagName === JsxFactory.Directive) {
 			return;
 		}
-		if (!viewChildMap) {
-			viewChildMap = {};
-		}
-		if (component.attributes) {
-			let name = Object.keys(component.attributes)
-				.find(key => key.startsWith('#'));
-			if (name) {
-				name = name.substring(1);
-				const element = this.createElementByTagName(
-					component.tagName,
-					component.attributes?.is,
-					component.attributes?.comment
-				);
-				Reflect.set(this.baiseView, name, element);
-				viewChildMap[name] = element;
-			}
+		let elName = component.attributes?.elementName;
+		// console.log('viewChildMap', elName, component);
+		if (elName) {
+			const element = this.createElementByTagName(
+				component.tagName,
+				component.attributes?.attr.get('is'),
+				component.attributes?.attr.get('comment')
+			);
+			Reflect.set(this.baiseView, elName, element);
+			this.viewChildMap.elName = element;
 		}
 		if (component.children) {
 			component.children
-				.forEach(child =>
-					this.defineElementNameKey(child as JsxComponent, viewChildMap)
-				);
+				.forEach(child => {
+					if (typeof child === 'string') {
+						return child;
+					}
+					else {
+						return this.defineElementNameKey(child);
+					}
+				});
 		}
 	}
 
@@ -317,15 +249,15 @@ export abstract class ComponentRender<T> {
 		return Reflect.get(this.baiseView, name);
 	}
 
-	createElement(viewTemplate: JsxComponent): HTMLElement | DocumentFragment | Comment {
+	createElement(viewTemplate: JsxAttrComponent): HTMLElement | DocumentFragment | Comment {
 		let element: HTMLElement | DocumentFragment | Comment;
 		if (isJsxComponentWithElement(viewTemplate)) {
 			element = viewTemplate.element
 		}
-		else if (JsxFactory.Directive === viewTemplate.tagName.toLowerCase() && viewTemplate.attributes) {
-			let directiveName: string = viewTemplate.attributes.directiveName;
+		else if (JsxFactory.Directive === viewTemplate.tagName.toLowerCase() && viewTemplate.attributes?.directive) {
+			let directiveName: string = viewTemplate.attributes.directive;
 			let directiveValue = viewTemplate.attributes.directiveValue;
-			let component = viewTemplate.attributes.component;
+			let component = viewTemplate.attributes.attr.get('component');
 			element = document.createComment(`${directiveName}=${directiveValue}`);
 			const directiveRef = dependencyInjector
 				.getInstance(ClassRegistry)
@@ -344,6 +276,8 @@ export abstract class ComponentRender<T> {
 						directive.onInit();
 					}
 
+					Reflect.set(this.baiseView, viewTemplate.attributes.directiveName, directive);
+
 				} else {
 					// attributes directive selector as '[class]'
 				}
@@ -354,8 +288,8 @@ export abstract class ComponentRender<T> {
 		else {
 			element = this.createElementByTagName(
 				viewTemplate.tagName,
-				viewTemplate.attributes?.is,
-				viewTemplate.attributes?.comment
+				viewTemplate.attributes?.attr.get('is'),
+				viewTemplate.attributes?.attr.get('comment')
 			);
 		}
 
@@ -365,7 +299,7 @@ export abstract class ComponentRender<T> {
 
 		if (viewTemplate.attributes && viewTemplate.tagName !== JsxFactory.Fragment) {
 			for (const key in viewTemplate.attributes) {
-				this.initAttribute(<HTMLElement>element, key, viewTemplate.attributes[key]);
+				this.initAttribute(<HTMLElement>element, viewTemplate.attributes);
 			}
 		}
 		if (viewTemplate.children && viewTemplate.children.length > 0) {
@@ -376,7 +310,43 @@ export abstract class ComponentRender<T> {
 		return element;
 	}
 
-	abstract initAttribute(element: HTMLElement, propertyKey: string, propertyValue: any): void;
+	// abstract initAttribute(element: HTMLElement, propertyKey: string, propertyValue: any): void;
+	initAttribute(element: HTMLElement, attr: AttrDiscription): void {
+		attr.property.forEach((attrValue, attrName) => {
+			const isAttr = hasAttr(element, attrName);
+			this.initElementData(element, attrName, attrValue, isAttr);
+			this.bind2Way(element, attrName, attrValue);
+		});
+		attr.expression.forEach((attrValue, attrName) => {
+			const isAttr = hasAttr(element, attrName);
+			this.initElementData(element, attrName, attrValue, isAttr);
+			this.bind1Way(element, attrName, attrValue);
+			// console.log('expression', attrValue, attrName);
+
+			// this.attrTemplateHandler(element, attrName, `{{${attrValue}}}`, isAttr);
+		});
+		attr.objects.forEach((attrValue, attrName) => {
+			setValueByPath(element, attrName, attrValue);
+		});
+		attr.lessbinding.forEach((attrValue, attrName) => {
+			const isAttr = hasAttr(element, attrName);
+			this.initElementData(element, attrName, attrValue, isAttr);
+		});
+		attr.lessbinding.forEach((attrValue, attrName) => {
+			const isAttr = hasAttr(element, attrName);
+			this.initElementData(element, attrName, attrValue, isAttr);
+
+			if (typeof attrValue === 'boolean' && !attrValue) {
+				element.removeAttribute(attrName);
+			} else {
+				element.setAttribute(attrName, attrValue);
+			}
+		});
+		attr.template.forEach((attrValue, attrName) => {
+			// const isAttr = hasAttr(element, attrName);
+			// this.attrTemplateHandler(element, attrName, attrValue, isAttr);
+		});
+	}
 
 	createElementByTagName(tagName: string, is?: string, comment?: string): HTMLElement | DocumentFragment | Comment {
 		if (JsxFactory.Fragment === tagName.toLowerCase()) {
@@ -401,13 +371,14 @@ export abstract class ComponentRender<T> {
 					customElements.upgrade(element);
 					ViewClass = customElements.get(tagName);
 					if (!(element instanceof ViewClass)) {
-						const jsxComponent: JsxComponent = { tagName };
+						const attrComponent = new JsxAttrComponent(tagName);
 						const attributes = {};
 						[].slice.call(element.attributes).forEach((attr: Attr) => {
 							Reflect.set(attributes, attr.name, attr.value);
 						});
-						jsxComponent.attributes = attributes;
-						const newChild = this.createElement(jsxComponent);
+						attrComponent.attributes = jsxComponentAttrHandler(attributes);
+
+						const newChild = this.createElement(attrComponent);
 						// const newChild = new ViewClass();
 						// [].slice.call(element.attributes).forEach((attr: Attr) => {
 						// 	newChild.setAttribute(attr.name, attr.value);
@@ -441,31 +412,12 @@ export abstract class ComponentRender<T> {
 		return element;
 	}
 
-	appendChild(parent: Node, child: string | JsxComponent) {
-		if (typeof child === 'object' && Reflect.has(child, 'tagName')) {
+	appendChild(parent: Node, child: string | JsxAttrComponent) {
+		if (child instanceof JsxAttrComponent) {
 			parent.appendChild(this.createElement(child));
 		} else {
 			this.appendTextNode(parent, String(child));
 		}
-		// if (!child) {
-		// 	return;
-		// }
-		// if (typeof child === 'string') {
-		// 	this.appendTextNode(parent, child);
-		// } else if (Array.isArray(child)) {
-		// 	for (const value of child) {
-		// 		this.appendChild(parent, value);
-		// 	}
-		// } else if (child instanceof Node) {
-		// 	parent.appendChild(child);
-		// } else if (typeof child === 'boolean') {
-		// 	// <>{condition && <a>Display when condition is true</a>}</>
-		// 	// if condition is false, the child is a boolean, but we don't want to display anything
-		// } else if (typeof child === 'object' && Reflect.has(child, 'tagName')) {
-		// 	parent.appendChild(this.createElement(child));
-		// } else {
-		// 	this.appendTextNode(parent, String(child));
-		// }
 	}
 
 	appendTextNode(parent: Node, child: string) {
