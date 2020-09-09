@@ -1,6 +1,6 @@
 import { Constructable } from '../../providers/injector.js';
 import { NodeExpression, PropertyNode, ValueNode } from '../expression.js';
-import { ConditionalOperators, UnaryOperators } from './unary.js';
+import { ConditionalOperators, FunctionExpression, UnaryOperators } from './unary.js';
 
 export class MemberNode implements NodeExpression {
 
@@ -93,12 +93,47 @@ export class GroupingOperator implements NodeExpression {
     static parse(tokens: (NodeExpression | string)[], tokenAnlzise: TokenAnlzise) {
 
         for (var i, j; (i = tokens.lastIndexOf('(')) > -1 && (j = tokens.indexOf(')', i)) > -1;) {
-            let group = new GroupingOperator(tokenAnlzise(tokens.slice(i + 1, j)));
-            tokens.splice(i, j + 1 - i, group);
+            let groupTokens = tokens.slice(i + 1, j);
+            let funcName = tokens[i - 1];
+            if (/** groupTokens.includes(',') && */typeof funcName === 'object') {
+                // is function call
+
+                let last = 0;
+                let commaIndex = groupTokens.indexOf(',', last);
+                let args: NodeExpression[] = [];
+                while (commaIndex > last) {
+                    args.push(tokenAnlzise(groupTokens.slice(last, commaIndex)));
+                    last = commaIndex + 1;
+                    commaIndex = groupTokens.indexOf(',', last);
+                }
+                if (commaIndex === -1) {
+                    commaIndex = groupTokens.length;
+                    let param = tokenAnlzise(groupTokens.slice(last, commaIndex));
+                    if (param) {
+                        args.push(param);
+                    }
+                }
+                let func = new FunctionExpression(funcName, args);
+                tokens.splice(i - 1, j + 2 - i, func);
+            } else {
+                let group = new GroupingOperator(tokenAnlzise(groupTokens));
+                tokens.splice(i, j + 1 - i, group);
+            }
         }
 
         for (let i = 1; (i = tokens.indexOf('?.', i - 1)) > -1;) {
             tokens.splice(i - 1, 3, new NavigationNode(tokens[i - 1] as NodeExpression, tokens[i + 1] as NodeExpression));
+        }
+
+        for (let index = tokens.length - 1; index >= 0; index--) {
+            let current = tokens[index];
+            if (current instanceof GroupingOperator) {
+                let pre = tokens[index - 1];
+                if (typeof pre === 'object') {
+                    let func = new FunctionExpression(pre, [current.node]);
+                    tokens.splice(index - 1, 2, func);
+                }
+            }
         }
     }
 
@@ -210,16 +245,17 @@ export class ArrayOperator implements NodeExpression {
             const arr = new ArrayOperator(nodes);
             tokens.splice(i, j + 1 - i, arr);
         }
-        // for (let i = tokens.length - 1; i > 0; i--) {
-        //     const node = tokens[i];
-        //     if (node instanceof ArrayOperator && i > 0) {
-        //         const preNode = tokens[i - 1];
-        //         if (typeof preNode === 'object' ) {
-        //             const bracketMember = new MemberNode(preNode, node.nodes[0]);
-        //             tokens.splice(i, 2, bracketMember);
-        //         }
-        //     }
-        // }
+
+        for (let index = tokens.length - 1; index >= 0; index--) {
+            let current = tokens[index];
+            if (current instanceof ArrayOperator && current.nodes.length === 1) {
+                let pre = tokens[index - 1];
+                if (typeof pre === 'object') {
+                    let member = new MemberNode('[]', pre, current.nodes[0]);
+                    tokens.splice(index - 1, 2, member);
+                }
+            }
+        }
     }
 
     constructor(public nodes: NodeExpression[]) { }

@@ -146,7 +146,7 @@ export class ConditionalOperators implements NodeExpression {
 
     constructor(public condition: NodeExpression) { }
     set(context: object, value: any) {
-        throw new Error('ConditionalOperators#set() valid expression');
+        throw new Error('ConditionalOperators#set() not valid expression');
     }
     get(context: object) {
         return this.condition.get(context) || false;
@@ -171,7 +171,7 @@ export class DeleteOperators implements NodeExpression {
 
     constructor(public node: NodeExpression) { }
     set(context: object, value: any) {
-        throw new Error('DeleteOperators#set() valid expression');
+        throw new Error('DeleteOperators#set() not valid expression');
     }
     get(context: object) {
         return Reflect.deleteProperty(context, this.node.get(context));
@@ -180,3 +180,23 @@ export class DeleteOperators implements NodeExpression {
         return `(delete ${this.node.toString()})`;
     }
 }
+
+export class FunctionExpression implements NodeExpression {
+
+    constructor(public funcName: NodeExpression, public args: NodeExpression[]) { }
+
+    set(context: object, value: any) {
+        throw new Error('FunctionExpression#set() not valid expression');
+    }
+    get(context: object) {
+        let paramters = this.args.map(param => param.get(context));
+        let funCallBack = this.funcName.get(context) as Function;
+        let value = funCallBack(...paramters);
+        return value;
+    }
+    toString(): string {
+        const argsStr = this.args.map(param => param.toString()).join(', ');
+        return `${this.funcName.toString()}(${argsStr})`;
+    }
+}
+
