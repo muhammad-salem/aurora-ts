@@ -329,6 +329,33 @@ export class FunctionNode implements NodeExpression {
     }
 }
 
+export class StatementNode implements NodeExpression {
+
+    static Operators = [';', '\n'];
+
+    static parse(tokens: (NodeExpression | string)[]) {
+        if (tokens.includes(';') || tokens.includes('\n')) {
+            let statments = tokens
+                .filter(node => typeof node === 'object') as NodeExpression[];
+            let statementNode = new StatementNode(statments);
+            tokens.splice(0, tokens.length, statementNode);
+        }
+    }
+
+    constructor(public nodes: NodeExpression[]) { }
+    set(context: object, value: any) {
+        throw new Error(`StatementNode#set() not implemented.`);
+    }
+    get(context: object) {
+        let value;
+        this.nodes.forEach(node => value = node.get(context));
+        return value;
+    }
+    toString(): string {
+        return this.nodes.map(node => node.toString()).join('; ');
+    }
+}
+
 export interface EvaluateNode {
     left: any, right: any;
 }
@@ -400,6 +427,9 @@ export class AssignmentNode implements NodeExpression {
         this.set(context, value);
         return value;
     }
+    toString() {
+        return `${this.left.toString()} ${this.op} ${this.right.toString()}`;
+    }
 }
 
 export class LogicalAssignmentNode implements NodeExpression {
@@ -447,6 +477,9 @@ export class LogicalAssignmentNode implements NodeExpression {
     }
     get(context: object) {
         return LogicalAssignmentNode.Evaluations[this.op](this, context);
+    }
+    toString() {
+        return `${this.left.toString()} ${this.op} ${this.right.toString()}`;
     }
 }
 

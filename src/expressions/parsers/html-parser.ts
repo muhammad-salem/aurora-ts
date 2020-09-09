@@ -6,7 +6,7 @@ import {
     AssignmentNode, BitwiseOperators, ComparisonOperators,
     FunctionNode, GroupingOperator, LogicalAssignmentNode, LogicalOperators,
     MemberNode, NavigationNode, ObjectOperator, parseInfix,
-    RelationalOperators, TernaryNode
+    RelationalOperators, StatementNode, TernaryNode
 } from '../operators/infix.js';
 import { NodeExpression } from '../expression.js';
 import { escapeForRegex, generateTokens } from './parser.js';
@@ -42,6 +42,7 @@ const tokenParser = new RegExp([
         IncrementDecrementOperators.Operators,
         UnaryOperators.Operators,
         ConditionalOperators.Operators,
+        StatementNode.Operators
         // DeleteOperators.Operators
     ]
         .flatMap(item => item)
@@ -98,5 +99,6 @@ export function parseHtmlExpression(str: string) {
     GroupingOperator.parse(tokens, tokenAnlzise);
     ObjectOperator.parse(tokens, tokenAnlzise);
     tokenAnlzise(tokens);
+    StatementNode.parse(tokens);
     return tokens[0] as NodeExpression;
 }
