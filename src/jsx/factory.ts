@@ -98,7 +98,7 @@ export class AttrDiscription {
 	/**
 	 * init normal atrr, string, number, boolean, with no binding at all
 	 */
-	attr: Map<string, string>;
+	attr: Map<string, string|boolean>;
 	/**
 	 * handle events, 
 	 */

@@ -226,8 +226,8 @@ export class ComponentRender<T> {
 		if (elName) {
 			const element = this.createElementByTagName(
 				component.tagName,
-				component.attributes?.attr.get('is'),
-				component.attributes?.attr.get('comment')
+				component.attributes?.attr.get('is') as string,
+				component.attributes?.attr.get('comment') as string
 			);
 			Reflect.set(this.baiseView, elName, element);
 			this.viewChildMap.elName = element;
@@ -288,8 +288,8 @@ export class ComponentRender<T> {
 		else {
 			element = this.createElementByTagName(
 				viewTemplate.tagName,
-				viewTemplate.attributes?.attr.get('is'),
-				viewTemplate.attributes?.attr.get('comment')
+				viewTemplate.attributes?.attr.get('is') as string,
+				viewTemplate.attributes?.attr.get('comment') as string
 			);
 		}
 
@@ -332,12 +332,14 @@ export class ComponentRender<T> {
 			const isAttr = hasAttr(element, attrName);
 			this.initElementData(element, attrName, attrValue, isAttr);
 		});
-		attr.lessbinding.forEach((attrValue, attrName) => {
+		attr.attr.forEach((attrValue, attrName) => {
 			const isAttr = hasAttr(element, attrName);
-			this.initElementData(element, attrName, attrValue, isAttr);
+			this.initElementData(element, attrName, attrValue as string, isAttr);
 
-			if (typeof attrValue === 'boolean' && !attrValue) {
+			if (attrValue === false) {
 				element.removeAttribute(attrName);
+			} else if (attrValue === true) {
+				element.setAttribute(attrName, '');
 			} else {
 				element.setAttribute(attrName, attrValue);
 			}

@@ -15,6 +15,11 @@
 [license-url]: https://github.com/salemebo/aurora-ts/blob/master/LICENSE
 [npm-dep-url]: https://img.shields.io/david/salemebo/aurora-ts.svg?maxAge=2592000
 
+
+# Deprecated
+
+ - moved to [aurorats/aurora](https://github.com/aurorats/aurora) https://github.com/aurorats/aurora
+
 Aurora is a web framework, that can create and define a Web Component standards ('custom elements', 'Shadow DOM' and 'HTML Templates'), that compatible with other frameworks, using Typescript.
  - Template can be a JSX template or  HTML template.
 

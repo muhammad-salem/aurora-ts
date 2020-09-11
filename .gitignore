@@ -105,6 +105,7 @@ dist
 
 ## project 
 public
+types
 /src/**/*.js
 /src/**/*.d.ts
 /src/**/*.map
